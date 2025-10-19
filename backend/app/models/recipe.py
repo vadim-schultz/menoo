@@ -1,4 +1,5 @@
 """Recipe model."""
+
 from __future__ import annotations
 
 from enum import Enum
@@ -35,7 +36,7 @@ class Recipe(Base, IDMixin, TimestampMixin, SoftDeleteMixin):
     difficulty: Mapped[str | None] = mapped_column(String(20), nullable=True, index=True)
 
     # Relationships
-    ingredient_associations: Mapped[list["RecipeIngredient"]] = relationship(
+    ingredient_associations: Mapped[list[RecipeIngredient]] = relationship(
         "RecipeIngredient",
         back_populates="recipe",
         cascade="all, delete-orphan",

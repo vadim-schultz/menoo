@@ -1,4 +1,5 @@
 """Models package."""
+
 from app.models.base import Base, IDMixin, SoftDeleteMixin, TimestampMixin
 from app.models.ingredient import Ingredient, StorageLocation
 from app.models.recipe import DifficultyLevel, Recipe

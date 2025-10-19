@@ -337,24 +337,282 @@ frontend/
 
 ## Testing Strategy
 
-### Backend Testing
+### Backend Testing - Comprehensive Suite
 
-**Unit Tests** (pytest):
+**Complete testing infrastructure with unit tests, integration tests, property-based testing, and CI/CD automation.**
 
-- Services: Business logic, validation, AI fallback
-- Repositories: Query builders with in-memory SQLite
-- Utilities: Mappers, normalization
+#### Test Architecture
 
-**Integration Tests** (pytest + httpx.AsyncClient):
+**Test Organization**:
 
-- Full CRUD flows against test database
-- Contract tests for response models
-- Error handling and edge cases
+```
+tests/
+├── conftest.py                      # Shared fixtures (in-memory SQLite)
+├── unit/
+│   ├── test_services/               # Service layer business logic
+│   │   ├── test_ingredient_service.py
+│   │   └── test_recipe_service.py
+│   ├── test_repositories/           # Data access layer
+│   │   ├── test_ingredient_repository.py
+│   │   └── test_recipe_repository.py
+│   └── test_schemas/                # Pydantic validation
+│       └── test_ingredient_schemas.py
+├── integration/                     # Full stack endpoint tests
+│   └── test_ingredient_api.py
+└── fixtures/
+    └── factories.py                 # Test data generation with Faker
+```
 
-**Database Tests**:
+**Coverage Targets**:
 
-- Alembic migrations forward/backward
-- Data integrity constraints
+- Overall: ≥80%
+- Service Layer: ≥90% (business logic critical)
+- Repository Layer: ≥85% (data access patterns)
+- Controllers: ≥75% (covered by integration tests)
+- Schemas: ≥85% (input validation critical)
+
+#### Current Status (October 19, 2025)
+
+- Test suite contains 81 passing tests across 9 files (~2,200 LOC) covering services, repositories, schemas, and integration flows.
+- Local coverage sits at 80% overall, with service and repository layers meeting or exceeding their 90%/85% targets respectively.
+- Factories (`tests/fixtures/factories.py`) generate realistic payloads while keeping ORM objects usable, ensuring integration and unit tests share data builders.
+- In-memory SQLite fixtures and async clients in `tests/conftest.py` provide fast, isolated runs; transaction rollbacks keep the database clean between cases.
+- CI mirrors local execution via tox, so `tox -e test` and `pytest tests -q` both validate identical behaviour before pushes.
+
+#### Test Categories
+
+**Unit Tests (Service Layer)**:
+
+- CRUD operations with validation
+- Business logic: duplicate detection, pagination validation (1-1000), soft deletes
+- Error handling: not found, validation errors, conflicts
+- Edge cases: empty data, boundary conditions, combined filters
+
+**Unit Tests (Repository Layer)**:
+
+- Basic CRUD with in-memory SQLite
+- Query filters: storage_location, expiring_before, name_contains (case-insensitive)
+- Pagination: skip/limit with edge cases (empty results, partial pages)
+- Soft delete verification
+
+**Unit Tests (Schemas)**:
+
+- Pydantic validation: required fields, field types, enums
+- Constraints: string lengths, numeric ranges, date formats
+- Error messages for invalid data
+
+**Integration Tests**:
+
+- Full request/response cycle (Controller → Service → Repository → DB)
+- All HTTP methods: GET, POST, PUT, PATCH, DELETE
+- Status codes: 200, 201, 204, 404, 409, 422
+- Request validation and error responses
+- Data integrity after operations
+
+**Property-Based Tests (Hypothesis)** - Planned:
+
+- Pagination with random valid skip/limit values
+- String input validation with random lengths
+- Date range testing
+- Filter combinations
+
+#### Tools & Configuration
+
+**Testing Stack**:
+
+- `pytest` + `pytest-asyncio`: Async test support
+- `pytest-cov`: Coverage reporting
+- `pytest-xdist`: Parallel test execution
+- `httpx.AsyncClient`: Integration test HTTP client
+- `faker`: Realistic test data generation
+- `hypothesis`: Property-based testing (planned)
+- `respx`: HTTP mocking for AI services
+
+**Tox Configuration (`backend/tox.ini`)**:
+
+Available environments:
+
+- `format` / `format-check`: Code formatting with ruff
+- `lint` / `lint-fix`: Linting with ruff
+- `type`: Type checking with mypy (strict mode)
+- `test`: Run unit + integration tests (exclude slow)
+- `test-all`: Run all tests including slow tests
+- `test-unit`: Unit tests only
+- `test-integration`: Integration tests only
+- `test-parallel`: Parallel execution with pytest-xdist
+- `coverage`: Generate coverage reports (minimum 80%)
+- `security`: Security scanning with bandit
+- `deps-check`: Dependency vulnerability scanning with pip-audit
+- `clean`: Remove build artifacts and cache
+- `dev`: Setup development environment
+
+**Quick Reference**:
+
+```bash
+# Code quality checks
+tox -e format,lint,type
+
+# Fast test feedback loop
+tox -e test-unit
+
+# Full local validation
+tox -e format,lint,type,coverage
+
+# Run specific test file
+tox -e test -- tests/unit/test_services/test_ingredient_service.py
+
+# Run tests in parallel (faster)
+tox -e test-parallel
+
+# Security checks
+tox -e security
+
+# Check for vulnerable dependencies
+tox -e deps-check
+```
+
+#### CI/CD with GitHub Actions
+
+**Workflow Configuration** (`.github/workflows/backend-ci.yml`):
+
+**Triggers**:
+
+- Push to `main` or `develop` branches
+- Pull requests to `main` or `develop`
+- Only when `backend/**` files change
+
+**Jobs**:
+
+1. **quality-checks** (parallel execution):
+
+   - Format check (ruff format --check)
+   - Lint (ruff check)
+   - Type check (mypy with strict mode)
+   - Security scan (bandit)
+
+2. **test** (matrix strategy):
+
+   - Python 3.11, 3.12, 3.13
+   - Run full test suite on each version
+   - Upload test results as artifacts
+
+3. **coverage**:
+
+   - Generate coverage reports (term, HTML, XML)
+   - Upload to Codecov
+   - Comment on PRs with coverage info
+   - Enforce minimum thresholds (70% orange, 90% green)
+   - Fail if coverage < 80%
+
+4. **dependency-check**:
+
+   - Scan for vulnerable dependencies with pip-audit
+   - Continue on error (informational)
+
+5. **build**:
+   - Build Python package with `python -m build`
+   - Only runs if all previous jobs pass
+   - Upload dist artifacts
+
+**Caching**:
+
+- Pip packages cached based on `pyproject.toml` hash
+- Speeds up CI runs significantly
+
+**Status Badges** (add to README):
+
+```markdown
+![CI](https://github.com/vadim-schultz/menoo/workflows/Backend%20CI/badge.svg)
+![Coverage](https://codecov.io/gh/vadim-schultz/menoo/branch/main/graph/badge.svg)
+```
+
+#### Test Fixtures & Factories
+
+**Database Fixtures (`conftest.py`)**:
+
+- In-memory SQLite engine per test function
+- Automatic table creation/teardown
+- Transaction rollback for test isolation
+- Async session support
+
+**Test Data Factories (`tests/fixtures/factories.py`)**:
+
+- `ingredient_factory()`: Generate random ingredient data
+- `recipe_factory()`: Generate random recipe data
+- `expiring_ingredient_factory(days)`: Ingredient expiring in N days
+- `batch_ingredient_factory(count)`: Generate multiple ingredients
+- Specialized factories: `refrigerator_ingredient_factory()`, `easy_recipe_factory()`
+- All use Faker for realistic data
+
+**Example Usage**:
+
+```python
+from tests.fixtures.factories import ingredient_factory
+
+# In tests
+data = ingredient_factory(name="Custom", storage_location="freezer")
+ingredients = batch_ingredient_factory(10, storage_location="pantry")
+```
+
+#### Running Tests
+
+**Local Development Workflow**:
+
+```bash
+# Before committing
+tox -e format,lint,test-unit
+
+# Before pushing
+tox -e coverage
+
+# Full pre-merge check
+tox -e format,lint,type,coverage,security
+```
+
+**CI Pipeline Flow**:
+
+```
+Push/PR → quality-checks (parallel)
+       → test (Python 3.11, 3.12, 3.13 matrix)
+       → coverage (with Codecov upload)
+       → dependency-check
+       → build (if all pass)
+```
+
+#### Coverage Reports
+
+**Viewing Coverage**:
+
+```bash
+# Terminal output with missing lines
+tox -e coverage
+
+# Generate HTML report
+tox -e coverage-report
+# Open htmlcov/index.html in browser
+
+# CI uploads to Codecov automatically
+# View at: https://codecov.io/gh/vadim-schultz/menoo
+```
+
+#### Best Practices
+
+1. **Test Independence**: Each test runs in isolation with clean database
+2. **Fast Tests**: Unit tests complete in milliseconds
+3. **Clear Names**: Test names describe what they verify
+4. **Arrange-Act-Assert**: Consistent test structure
+5. **Realistic Data**: Use factories for realistic test scenarios
+6. **Mock External**: Mock AI services and external APIs
+7. **Edge Cases**: Test boundaries, empty data, error paths
+8. **CI First**: All tests pass in CI before merge
+
+**CI/CD**: GitHub Actions workflow ([`.github/workflows/backend-ci.yml`](.github/workflows/backend-ci.yml))
+
+- Quality checks: format, lint, type, security
+- Test matrix: Python 3.11, 3.12, 3.13
+- Coverage reporting to Codecov
+- Dependency vulnerability scanning
+- Automated PR comments with coverage
 
 ### Frontend Testing
 
@@ -573,13 +831,16 @@ Planned configuration:
 - Pre-commit: prettier, eslint, type-check
 - Pre-push: vitest, build
 
-### GitHub Actions - TODO
+### GitHub Actions
 
-Planned workflows:
+Workflow: `.github/workflows/backend-ci.yml`
 
-1. **CI** (on PR): lint, type-check, test
-2. **Build** (on main): full build + e2e tests
-3. **Deploy** (on tag): deploy to production
+- **quality-checks** job runs ruff format-check, ruff lint, mypy (strict), and bandit in parallel.
+- **test** job executes `tox -e test-all` across Python 3.11, 3.12, and 3.13, uploading `.pytest_cache` artifacts on completion.
+- **coverage** job runs `tox -e coverage`, uploads HTML/XML reports, pushes metrics to Codecov, and comments on PRs (90% green / 70% orange thresholds, hard fail below 80%).
+- **dependency-check** job invokes `tox -e deps-check`; it surfaces issues without blocking the pipeline.
+- **build** job packages the backend with `python -m build` once prior checks succeed and retains artifacts for download.
+- All jobs cache pip installs keyed by `backend/pyproject.toml` for faster reruns.
 
 ## Performance Considerations
 

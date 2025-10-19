@@ -1,11 +1,10 @@
 """Recipes controller."""
+
 from __future__ import annotations
 
 from litestar import Controller, delete, get, patch, post, put
-from litestar.di import Provide
 from litestar.params import Parameter
 
-from app.dependencies import provide_recipe_service
 from app.schemas import (
     RecipeCreate,
     RecipeDetail,

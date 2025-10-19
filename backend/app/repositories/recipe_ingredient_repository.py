@@ -1,7 +1,8 @@
 """Recipe-Ingredient repository for junction table operations."""
+
 from __future__ import annotations
 
-from typing import Sequence
+from collections.abc import Sequence
 
 from sqlalchemy import and_, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -81,7 +82,7 @@ class RecipeIngredientRepository:
     ) -> list[RecipeIngredient]:
         """
         Upsert recipe ingredients.
-        
+
         Removes existing associations and creates new ones based on provided data.
         """
         # Delete existing associations

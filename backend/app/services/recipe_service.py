@@ -1,4 +1,5 @@
 """Recipe service for business logic."""
+
 from __future__ import annotations
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -125,9 +126,7 @@ class RecipeService:
 
             # Upsert ingredients
             ingredient_data = [ing.model_dump() for ing in data.ingredients]
-            await self.recipe_ingredient_repo.upsert_recipe_ingredients(
-                recipe.id, ingredient_data
-            )
+            await self.recipe_ingredient_repo.upsert_recipe_ingredients(recipe.id, ingredient_data)
 
         # Reload with associations
         return await self.recipe_repo.get_by_id(recipe.id, load_ingredients=True) or recipe
@@ -164,9 +163,7 @@ class RecipeService:
         recipe = await self.get_recipe(recipe_id, load_ingredients=True)
 
         required_ids = {
-            assoc.ingredient_id
-            for assoc in recipe.ingredient_associations
-            if not assoc.is_optional
+            assoc.ingredient_id for assoc in recipe.ingredient_associations if not assoc.is_optional
         }
 
         available_set = set(available_ingredient_ids)

@@ -24,10 +24,17 @@ dev = [
     "pytest-asyncio",
     "pytest-cov",
     "pytest-benchmark",
+    "pytest-xdist",
+    "pytest-timeout",
     "httpx",
     "respx",
+    "hypothesis",
+    "faker",
     "ruff",
     "mypy",
+    "bandit[toml]",
+    "pip-audit",
+    "tox",
     "pre-commit",
     "pyupgrade",
 ]
@@ -37,9 +44,13 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["app"]
 package-dir = {"" = "."}
 include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+namespaces = false
 
 [tool.ruff]
 line-length = 100
@@ -111,3 +122,10 @@ exclude_lines = [
     "raise AssertionError",
     "raise NotImplementedError",
 ]
+
+[tool.bandit]
+exclude_dirs = ["tests", "migrations"]
+skips = ["B101", "B601"]  # B101: assert_used (OK in tests), B601: paramiko (not used)
+
+[tool.bandit.assert_used]
+exclude = ["*/tests/*"]

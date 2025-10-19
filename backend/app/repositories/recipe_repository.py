@@ -1,7 +1,8 @@
 """Recipe repository for data access."""
+
 from __future__ import annotations
 
-from typing import Sequence
+from collections.abc import Sequence
 
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,9 +27,7 @@ class RecipeRepository:
 
     async def get_by_id(self, recipe_id: int, load_ingredients: bool = False) -> Recipe | None:
         """Get recipe by ID, optionally loading ingredients."""
-        query = select(Recipe).where(
-            and_(Recipe.id == recipe_id, Recipe.is_deleted == False)
-        )
+        query = select(Recipe).where(and_(Recipe.id == recipe_id, Recipe.is_deleted.is_(False)))
 
         if load_ingredients:
             query = query.options(
@@ -52,7 +51,7 @@ class RecipeRepository:
     ) -> tuple[Sequence[Recipe], int]:
         """List recipes with optional filters and pagination."""
         # Build query conditions
-        conditions = [Recipe.is_deleted == False]
+        conditions = [Recipe.is_deleted.is_(False)]
 
         if difficulty:
             conditions.append(Recipe.difficulty == difficulty)
@@ -73,11 +72,7 @@ class RecipeRepository:
 
         # Get paginated results
         query = (
-            select(Recipe)
-            .where(and_(*conditions))
-            .order_by(Recipe.name)
-            .offset(skip)
-            .limit(limit)
+            select(Recipe).where(and_(*conditions)).order_by(Recipe.name).offset(skip).limit(limit)
         )
         result = await self.session.execute(query)
         recipes = result.scalars().all()
@@ -110,7 +105,7 @@ class RecipeRepository:
             .join(RecipeIngredient)
             .where(
                 and_(
-                    Recipe.is_deleted == False,
+                    Recipe.is_deleted.is_(False),
                     RecipeIngredient.ingredient_id.in_(ingredient_ids),
                 )
             )

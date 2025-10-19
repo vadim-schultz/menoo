@@ -1,4 +1,5 @@
 """Ingredient model."""
+
 from __future__ import annotations
 
 from datetime import date
@@ -34,7 +35,7 @@ class Ingredient(Base, IDMixin, TimestampMixin, SoftDeleteMixin):
     expiry_date: Mapped[date | None] = mapped_column(Date, nullable=True)
 
     # Relationships
-    recipe_associations: Mapped[list["RecipeIngredient"]] = relationship(
+    recipe_associations: Mapped[list[RecipeIngredient]] = relationship(
         "RecipeIngredient",
         back_populates="ingredient",
         cascade="all, delete-orphan",

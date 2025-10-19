@@ -1,10 +1,9 @@
 """Suggestion service for AI-powered recipe recommendations."""
+
 from __future__ import annotations
 
-import asyncio
 import hashlib
 import json
-from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -33,14 +32,13 @@ class SuggestionService:
             "dietary_restrictions": sorted(request.dietary_restrictions),
         }
         key_string = json.dumps(key_data, sort_keys=True)
-        return hashlib.md5(key_string.encode()).hexdigest()
+        # nosec B324 - MD5 used only for cache keys, not security
+        return hashlib.md5(key_string.encode(), usedforsecurity=False).hexdigest()
 
-    async def get_suggestions_heuristic(
-        self, request: SuggestionRequest
-    ) -> list[RecipeSuggestion]:
+    async def get_suggestions_heuristic(self, request: SuggestionRequest) -> list[RecipeSuggestion]:
         """
         Get recipe suggestions using heuristic matching.
-        
+
         This is the fallback when AI is unavailable.
         """
         # Get recipes that use any of the available ingredients
@@ -49,9 +47,7 @@ class SuggestionService:
         )
 
         # Get available ingredients
-        available_ingredients = await self.ingredient_repo.get_by_ids(
-            request.available_ingredients
-        )
+        available_ingredients = await self.ingredient_repo.get_by_ids(request.available_ingredients)
         available_names = {ing.name for ing in available_ingredients}
 
         suggestions = []
@@ -63,9 +59,7 @@ class SuggestionService:
             ]
 
             matched = sum(
-                1
-                for assoc in required_ingredients
-                if assoc.ingredient.name in available_names
+                1 for assoc in required_ingredients if assoc.ingredient.name in available_names
             )
 
             if total_ingredients == 0:
@@ -88,17 +82,22 @@ class SuggestionService:
             ]
 
             # Apply filters
-            if request.max_prep_time and recipe.prep_time:
-                if recipe.prep_time > request.max_prep_time:
-                    continue
+            if (
+                request.max_prep_time
+                and recipe.prep_time
+                and recipe.prep_time > request.max_prep_time
+            ):
+                continue
 
-            if request.max_cook_time and recipe.cook_time:
-                if recipe.cook_time > request.max_cook_time:
-                    continue
+            if (
+                request.max_cook_time
+                and recipe.cook_time
+                and recipe.cook_time > request.max_cook_time
+            ):
+                continue
 
-            if request.difficulty and recipe.difficulty:
-                if recipe.difficulty != request.difficulty:
-                    continue
+            if request.difficulty and recipe.difficulty and recipe.difficulty != request.difficulty:
+                continue
 
             suggestions.append(
                 RecipeSuggestion(
@@ -118,7 +117,7 @@ class SuggestionService:
     async def get_suggestions_ai(self, request: SuggestionRequest) -> list[RecipeSuggestion]:
         """
         Get recipe suggestions using Marvin/OpenAI.
-        
+
         TODO: Implement actual AI integration with Marvin.
         For now, falls back to heuristic method.
         """
@@ -132,7 +131,7 @@ class SuggestionService:
     ) -> tuple[list[RecipeSuggestion], str, bool]:
         """
         Get recipe suggestions with caching.
-        
+
         Returns: (suggestions, source, cache_hit)
         """
         # Check cache
