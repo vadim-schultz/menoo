@@ -1,11 +1,11 @@
 """Application lifecycle events."""
+
 from __future__ import annotations
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 from litestar import Litestar
-from litestar.datastructures import State
 
 from app.config import get_settings
 from app.database import get_db_manager

@@ -1,10 +1,9 @@
 """Suggestions controller."""
+
 from __future__ import annotations
 
 from litestar import Controller, post
-from litestar.di import Provide
 
-from app.dependencies import provide_suggestion_service
 from app.schemas import (
     ShoppingListRequest,
     ShoppingListResponse,
@@ -45,6 +44,8 @@ class SuggestionController(Controller):
         # TODO: Implement shopping list generation
         # This would calculate missing ingredients across multiple recipes
         # and group them by storage location
+        _ = suggestion_service  # TODO: Use for shopping list generation
+        _ = data  # TODO: Use recipe IDs to calculate shopping list
 
         return ShoppingListResponse(
             items_by_location={},

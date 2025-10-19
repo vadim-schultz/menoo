@@ -1,4 +1,5 @@
 """Controllers package."""
+
 from app.controllers import ingredients, recipes, suggestions
 
 __all__ = [

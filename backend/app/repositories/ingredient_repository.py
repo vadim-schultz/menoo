@@ -1,10 +1,11 @@
 """Ingredient repository for data access."""
+
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import date
-from typing import Sequence
 
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Ingredient
@@ -28,7 +29,7 @@ class IngredientRepository:
         """Get ingredient by ID."""
         result = await self.session.execute(
             select(Ingredient).where(
-                and_(Ingredient.id == ingredient_id, Ingredient.is_deleted == False)
+                and_(Ingredient.id == ingredient_id, Ingredient.is_deleted.is_(False))
             )
         )
         return result.scalar_one_or_none()
@@ -37,7 +38,10 @@ class IngredientRepository:
         """Get ingredient by name."""
         result = await self.session.execute(
             select(Ingredient).where(
-                and_(Ingredient.name == name, Ingredient.is_deleted == False)
+                and_(
+                    func.lower(Ingredient.name) == name.lower(),
+                    Ingredient.is_deleted.is_(False),
+                )
             )
         )
         return result.scalar_one_or_none()
@@ -53,7 +57,7 @@ class IngredientRepository:
     ) -> tuple[Sequence[Ingredient], int]:
         """List ingredients with optional filters and pagination."""
         # Build query conditions
-        conditions = [Ingredient.is_deleted == False]
+        conditions = [Ingredient.is_deleted.is_(False)]
 
         if storage_location:
             conditions.append(Ingredient.storage_location == storage_location)
@@ -104,7 +108,7 @@ class IngredientRepository:
             select(Ingredient).where(
                 and_(
                     Ingredient.id.in_(ingredient_ids),
-                    Ingredient.is_deleted == False,
+                    Ingredient.is_deleted.is_(False),
                 )
             )
         )

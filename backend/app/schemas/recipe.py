@@ -1,4 +1,5 @@
 """Pydantic schemas for recipes."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -42,7 +43,9 @@ class RecipeBase(BaseModel):
     prep_time: int | None = Field(None, gt=0, description="Preparation time in minutes")
     cook_time: int | None = Field(None, gt=0, description="Cooking time in minutes")
     servings: int = Field(default=1, gt=0, description="Number of servings")
-    difficulty: Literal["easy", "medium", "hard"] | None = Field(None, description="Difficulty level")
+    difficulty: Literal["easy", "medium", "hard"] | None = Field(
+        None, description="Difficulty level"
+    )
 
 
 class RecipeCreate(RecipeBase):

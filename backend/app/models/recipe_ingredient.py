@@ -1,4 +1,5 @@
 """Recipe-Ingredient junction model."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -34,8 +35,8 @@ class RecipeIngredient(Base, IDMixin):
     note: Mapped[str | None] = mapped_column(String(200), nullable=True)
 
     # Relationships
-    recipe: Mapped["Recipe"] = relationship("Recipe", back_populates="ingredient_associations")
-    ingredient: Mapped["Ingredient"] = relationship(
+    recipe: Mapped[Recipe] = relationship("Recipe", back_populates="ingredient_associations")
+    ingredient: Mapped[Ingredient] = relationship(
         "Ingredient", back_populates="recipe_associations"
     )
 

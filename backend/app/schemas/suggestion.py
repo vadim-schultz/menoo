@@ -1,4 +1,5 @@
 """Pydantic schemas for AI suggestions."""
+
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
@@ -7,9 +8,7 @@ from pydantic import BaseModel, Field
 class SuggestionRequest(BaseModel):
     """Request for recipe suggestions."""
 
-    available_ingredients: list[int] = Field(
-        ..., description="List of available ingredient IDs"
-    )
+    available_ingredients: list[int] = Field(..., description="List of available ingredient IDs")
     max_prep_time: int | None = Field(None, gt=0, description="Maximum prep time in minutes")
     max_cook_time: int | None = Field(None, gt=0, description="Maximum cook time in minutes")
     difficulty: str | None = Field(None, description="Preferred difficulty level")

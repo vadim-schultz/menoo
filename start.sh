@@ -24,8 +24,7 @@ fi
 
 source .venv/bin/activate
 echo "Installing backend dependencies..."
-# pip install -e . > /dev/null 2>&1
-pip install -e .
+pip install -e . > /dev/null 2>&1
 cd ..
 
 # Check frontend dependencies

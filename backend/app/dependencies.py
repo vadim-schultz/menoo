@@ -1,4 +1,5 @@
 """Dependency injection providers for Litestar."""
+
 from __future__ import annotations
 
 from collections.abc import AsyncGenerator

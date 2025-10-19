@@ -1,12 +1,16 @@
 """Main application entry point."""
+
 from __future__ import annotations
 
-from litestar import Litestar, get
+from litestar import Litestar, Request, get
 from litestar.config.cors import CORSConfig
 from litestar.contrib.pydantic import PydanticPlugin
 from litestar.di import Provide
+from litestar.exceptions import ValidationException
 from litestar.openapi import OpenAPIConfig
+from litestar.response import Response
 from litestar.static_files import create_static_files_router
+from litestar.status_codes import HTTP_422_UNPROCESSABLE_ENTITY
 
 from app.config import get_settings
 from app.controllers import ingredients, recipes, suggestions
@@ -17,6 +21,12 @@ from app.dependencies import (
     provide_suggestion_service,
 )
 from app.events import lifespan
+
+
+def validation_exception_handler(_: Request, exc: ValidationException) -> Response:
+    """Return a 422 response when request validation fails."""
+    detail = exc.extra if exc.extra is not None else exc.detail
+    return Response(status_code=HTTP_422_UNPROCESSABLE_ENTITY, content={"detail": detail})
 
 
 @get("/healthz", tags=["health"])
@@ -57,7 +67,7 @@ def create_app() -> Litestar:
     )
 
     # SPA router for serving index.html on all frontend routes
-    spa_router = create_static_files_router(
+    create_static_files_router(
         path="/",
         directories=["app/static"],
         html_mode=True,
@@ -86,6 +96,7 @@ def create_app() -> Litestar:
         openapi_config=openapi_config,
         lifespan=[lifespan],
         plugins=[PydanticPlugin()],
+        exception_handlers={ValidationException: validation_exception_handler},
         debug=settings.debug,
     )
 

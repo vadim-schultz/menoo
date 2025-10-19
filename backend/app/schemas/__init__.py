@@ -1,4 +1,5 @@
 """Schemas package."""
+
 from app.schemas.ingredient import (
     IngredientCreate,
     IngredientDetail,

@@ -1,4 +1,5 @@
 """Application configuration using pydantic-settings."""
+
 from __future__ import annotations
 
 from functools import lru_cache
@@ -25,7 +26,7 @@ class Settings(BaseSettings):
     environment: Literal["development", "production", "test"] = "development"
 
     # Server
-    host: str = "0.0.0.0"
+    host: str = "0.0.0.0"  # nosec B104 - Intentional bind to all interfaces for Docker/server
     port: int = 8000
 
     # Database

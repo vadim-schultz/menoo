@@ -1,4 +1,5 @@
 """Database configuration and session management."""
+
 from __future__ import annotations
 
 from collections.abc import AsyncGenerator
@@ -29,13 +30,13 @@ class DatabaseManager:
         """Get or create async engine with SQLite optimizations."""
         if self._engine is None:
             connect_args: dict[str, Any] = {}
-            
+
             if "sqlite" in self.settings.database_url:
                 # SQLite-specific optimizations
                 connect_args = {
                     "check_same_thread": False,
                 }
-            
+
             self._engine = create_async_engine(
                 self.settings.database_url,
                 echo=self.settings.database_echo,
@@ -57,9 +58,9 @@ class DatabaseManager:
     async def init_db(self) -> None:
         """Initialize database with WAL mode for SQLite and create tables."""
         from sqlalchemy import text
-        
+
         engine = self.get_engine()
-        
+
         # Enable WAL mode for SQLite
         if "sqlite" in self.settings.database_url:
             async with engine.begin() as conn:
@@ -67,7 +68,7 @@ class DatabaseManager:
                 await conn.execute(text("PRAGMA synchronous=NORMAL"))
                 await conn.execute(text("PRAGMA cache_size=-64000"))  # 64MB cache
                 await conn.execute(text("PRAGMA temp_store=MEMORY"))
-        
+
         # Create all tables
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)

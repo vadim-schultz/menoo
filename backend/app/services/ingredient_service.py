@@ -1,4 +1,5 @@
 """Ingredient service for business logic."""
+
 from __future__ import annotations
 
 from datetime import date
@@ -66,9 +67,7 @@ class IngredientService:
 
         return list(ingredients), total
 
-    async def update_ingredient(
-        self, ingredient_id: int, data: IngredientUpdate
-    ) -> Ingredient:
+    async def update_ingredient(self, ingredient_id: int, data: IngredientUpdate) -> Ingredient:
         """Update an ingredient."""
         ingredient = await self.get_ingredient(ingredient_id)
 

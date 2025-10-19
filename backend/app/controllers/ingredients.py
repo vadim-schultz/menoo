@@ -1,27 +1,47 @@
 """Ingredients controller."""
+
 from __future__ import annotations
 
 from datetime import date
 
 from litestar import Controller, delete, get, patch, post, put
-from litestar.di import Provide
+from litestar.exceptions import HTTPException
 from litestar.params import Parameter
-
-from app.dependencies import provide_ingredient_service
-from app.schemas import (
-    IngredientCreate,
-    IngredientDetail,
-    IngredientListResponse,
-    IngredientRead,
-    IngredientUpdate,
+from litestar.status_codes import (
+    HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
+    HTTP_409_CONFLICT,
 )
+
+from app.schemas import IngredientCreate, IngredientRead, IngredientUpdate
 from app.services import IngredientService
+
+
+def _map_error_status(exc: ValueError) -> int:
+    """Translate service-level errors into HTTP status codes."""
+    message = str(exc).lower()
+    if "not found" in message:
+        return HTTP_404_NOT_FOUND
+    if "already exists" in message:
+        return HTTP_409_CONFLICT
+    return HTTP_400_BAD_REQUEST
+
+
+def _serialize_ingredient(ingredient) -> dict:
+    """Convert an ingredient model into a JSON-serializable dictionary."""
+    data = IngredientRead.model_validate(ingredient).model_dump(mode="json")
+    quantity = data.get("quantity")
+    if quantity is not None:
+        data["quantity"] = float(quantity)
+    return data
 
 
 class IngredientController(Controller):
     """Controller for ingredient endpoints."""
 
-    path = "/api/v1/ingredients"
+    path = "/api/ingredients"
     tags = ["ingredients"]
 
     @get("/")
@@ -35,47 +55,52 @@ class IngredientController(Controller):
             default=None, query="expiring_before", description="Filter by expiry date"
         ),
         name_contains: str | None = Parameter(
-            default=None, query="name", description="Search by name"
+            default=None, query="name_contains", description="Search by name"
         ),
         page: int = Parameter(default=1, ge=1, query="page"),
         page_size: int = Parameter(default=100, ge=1, le=1000, query="page_size"),
-    ) -> IngredientListResponse:
+    ) -> list[dict]:
         """List all ingredients with optional filters."""
-        ingredients, total = await ingredient_service.list_ingredients(
-            storage_location=storage_location,
-            expiring_before=expiring_before,
-            name_contains=name_contains,
-            page=page,
-            page_size=page_size,
-        )
+        try:
+            ingredients, _ = await ingredient_service.list_ingredients(
+                storage_location=storage_location,
+                expiring_before=expiring_before,
+                name_contains=name_contains,
+                page=page,
+                page_size=page_size,
+            )
+        except ValueError as exc:  # pragma: no cover - defensive mapping
+            raise HTTPException(status_code=_map_error_status(exc), detail=str(exc)) from exc
 
-        return IngredientListResponse(
-            items=[IngredientRead.model_validate(ing) for ing in ingredients],
-            total=total,
-            page=page,
-            page_size=page_size,
-            has_next=(page * page_size) < total,
-        )
+        return [_serialize_ingredient(ing) for ing in ingredients]
 
-    @post("/")
+    @post("/", status_code=HTTP_201_CREATED)
     async def create_ingredient(
         self,
         ingredient_service: IngredientService,
         data: IngredientCreate,
-    ) -> IngredientRead:
+    ) -> dict:
         """Create a new ingredient."""
-        ingredient = await ingredient_service.create_ingredient(data)
-        return IngredientRead.model_validate(ingredient)
+        try:
+            ingredient = await ingredient_service.create_ingredient(data)
+        except ValueError as exc:
+            raise HTTPException(status_code=_map_error_status(exc), detail=str(exc)) from exc
+
+        return _serialize_ingredient(ingredient)
 
     @get("/{ingredient_id:int}")
     async def get_ingredient(
         self,
         ingredient_service: IngredientService,
         ingredient_id: int,
-    ) -> IngredientRead:
+    ) -> dict:
         """Get a specific ingredient by ID."""
-        ingredient = await ingredient_service.get_ingredient(ingredient_id)
-        return IngredientRead.model_validate(ingredient)
+        try:
+            ingredient = await ingredient_service.get_ingredient(ingredient_id)
+        except ValueError as exc:
+            raise HTTPException(status_code=_map_error_status(exc), detail=str(exc)) from exc
+
+        return _serialize_ingredient(ingredient)
 
     @put("/{ingredient_id:int}")
     async def replace_ingredient(
@@ -83,11 +108,15 @@ class IngredientController(Controller):
         ingredient_service: IngredientService,
         ingredient_id: int,
         data: IngredientCreate,
-    ) -> IngredientRead:
+    ) -> dict:
         """Replace an ingredient (full update)."""
         update_data = IngredientUpdate(**data.model_dump())
-        ingredient = await ingredient_service.update_ingredient(ingredient_id, update_data)
-        return IngredientRead.model_validate(ingredient)
+        try:
+            ingredient = await ingredient_service.update_ingredient(ingredient_id, update_data)
+        except ValueError as exc:
+            raise HTTPException(status_code=_map_error_status(exc), detail=str(exc)) from exc
+
+        return _serialize_ingredient(ingredient)
 
     @patch("/{ingredient_id:int}")
     async def update_ingredient(
@@ -95,17 +124,25 @@ class IngredientController(Controller):
         ingredient_service: IngredientService,
         ingredient_id: int,
         data: IngredientUpdate,
-    ) -> IngredientRead:
+    ) -> dict:
         """Partially update an ingredient."""
-        ingredient = await ingredient_service.update_ingredient(ingredient_id, data)
-        return IngredientRead.model_validate(ingredient)
+        try:
+            ingredient = await ingredient_service.update_ingredient(ingredient_id, data)
+        except ValueError as exc:
+            raise HTTPException(status_code=_map_error_status(exc), detail=str(exc)) from exc
 
-    @delete("/{ingredient_id:int}", status_code=200)
+        return _serialize_ingredient(ingredient)
+
+    @delete("/{ingredient_id:int}", status_code=HTTP_204_NO_CONTENT)
     async def delete_ingredient(
         self,
         ingredient_service: IngredientService,
         ingredient_id: int,
-    ) -> dict[str, str]:
+    ) -> None:
         """Delete an ingredient (soft delete)."""
-        await ingredient_service.delete_ingredient(ingredient_id)
-        return {"message": "Ingredient deleted successfully"}
+        try:
+            await ingredient_service.delete_ingredient(ingredient_id)
+        except ValueError as exc:
+            raise HTTPException(status_code=_map_error_status(exc), detail=str(exc)) from exc
+
+        return None
