@@ -6,7 +6,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 
 class IngredientBase(BaseModel):
@@ -46,6 +46,12 @@ class IngredientRead(IngredientBase):
     created_at: datetime
     updated_at: datetime
     is_deleted: bool
+
+    @field_serializer("quantity", when_used="json")
+    def serialize_quantity(self, value: Decimal | None) -> float | None:
+        if value is None:
+            return None
+        return float(value)
 
 
 class IngredientDetail(IngredientRead):
