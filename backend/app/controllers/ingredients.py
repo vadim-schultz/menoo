@@ -29,19 +29,10 @@ def _map_error_status(exc: ValueError) -> int:
     return HTTP_400_BAD_REQUEST
 
 
-def _serialize_ingredient(ingredient) -> dict:
-    """Convert an ingredient model into a JSON-serializable dictionary."""
-    data = IngredientRead.model_validate(ingredient).model_dump(mode="json")
-    quantity = data.get("quantity")
-    if quantity is not None:
-        data["quantity"] = float(quantity)
-    return data
-
-
 class IngredientController(Controller):
     """Controller for ingredient endpoints."""
 
-    path = "/api/ingredients"
+    path = "/api/v1/ingredients"
     tags = ["ingredients"]
 
     @get("/")
@@ -59,7 +50,7 @@ class IngredientController(Controller):
         ),
         page: int = Parameter(default=1, ge=1, query="page"),
         page_size: int = Parameter(default=100, ge=1, le=1000, query="page_size"),
-    ) -> list[dict]:
+    ) -> list[IngredientRead]:
         """List all ingredients with optional filters."""
         try:
             ingredients, _ = await ingredient_service.list_ingredients(
@@ -72,35 +63,33 @@ class IngredientController(Controller):
         except ValueError as exc:  # pragma: no cover - defensive mapping
             raise HTTPException(status_code=_map_error_status(exc), detail=str(exc)) from exc
 
-        return [_serialize_ingredient(ing) for ing in ingredients]
+        return [IngredientRead.model_validate(ing) for ing in ingredients]
 
     @post("/", status_code=HTTP_201_CREATED)
     async def create_ingredient(
         self,
         ingredient_service: IngredientService,
         data: IngredientCreate,
-    ) -> dict:
+    ) -> IngredientRead:
         """Create a new ingredient."""
         try:
             ingredient = await ingredient_service.create_ingredient(data)
         except ValueError as exc:
             raise HTTPException(status_code=_map_error_status(exc), detail=str(exc)) from exc
-
-        return _serialize_ingredient(ingredient)
+        return IngredientRead.model_validate(ingredient)
 
     @get("/{ingredient_id:int}")
     async def get_ingredient(
         self,
         ingredient_service: IngredientService,
         ingredient_id: int,
-    ) -> dict:
+    ) -> IngredientRead:
         """Get a specific ingredient by ID."""
         try:
             ingredient = await ingredient_service.get_ingredient(ingredient_id)
         except ValueError as exc:
             raise HTTPException(status_code=_map_error_status(exc), detail=str(exc)) from exc
-
-        return _serialize_ingredient(ingredient)
+        return IngredientRead.model_validate(ingredient)
 
     @put("/{ingredient_id:int}")
     async def replace_ingredient(
@@ -108,15 +97,14 @@ class IngredientController(Controller):
         ingredient_service: IngredientService,
         ingredient_id: int,
         data: IngredientCreate,
-    ) -> dict:
+    ) -> IngredientRead:
         """Replace an ingredient (full update)."""
         update_data = IngredientUpdate(**data.model_dump())
         try:
             ingredient = await ingredient_service.update_ingredient(ingredient_id, update_data)
         except ValueError as exc:
             raise HTTPException(status_code=_map_error_status(exc), detail=str(exc)) from exc
-
-        return _serialize_ingredient(ingredient)
+        return IngredientRead.model_validate(ingredient)
 
     @patch("/{ingredient_id:int}")
     async def update_ingredient(
@@ -124,14 +112,13 @@ class IngredientController(Controller):
         ingredient_service: IngredientService,
         ingredient_id: int,
         data: IngredientUpdate,
-    ) -> dict:
+    ) -> IngredientRead:
         """Partially update an ingredient."""
         try:
             ingredient = await ingredient_service.update_ingredient(ingredient_id, data)
         except ValueError as exc:
             raise HTTPException(status_code=_map_error_status(exc), detail=str(exc)) from exc
-
-        return _serialize_ingredient(ingredient)
+        return IngredientRead.model_validate(ingredient)
 
     @delete("/{ingredient_id:int}", status_code=HTTP_204_NO_CONTENT)
     async def delete_ingredient(

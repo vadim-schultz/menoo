@@ -6,7 +6,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 
 class RecipeIngredientBase(BaseModel):
@@ -32,6 +32,10 @@ class RecipeIngredientRead(RecipeIngredientBase):
 
     id: int
     ingredient_name: str = Field(..., description="Name of the ingredient")
+
+    @field_serializer("quantity", when_used="json")
+    def serialize_quantity(self, value: Decimal) -> float:
+        return float(value)
 
 
 class RecipeBase(BaseModel):
