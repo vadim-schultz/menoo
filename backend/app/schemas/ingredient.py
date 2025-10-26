@@ -13,8 +13,8 @@ class IngredientBase(BaseModel):
     """Base ingredient schema."""
 
     name: str = Field(..., min_length=1, max_length=100, description="Ingredient name")
-    storage_location: Literal["fridge", "cupboard", "pantry"] = Field(
-        ..., description="Storage location"
+    storage_location: Literal["fridge", "cupboard", "pantry"] | None = Field(
+        None, description="Storage location"
     )
     quantity: Decimal | None = Field(None, gt=0, description="Quantity amount")
     unit: str | None = Field(None, max_length=20, description="Unit of measurement")

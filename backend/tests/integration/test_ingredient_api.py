@@ -12,7 +12,6 @@ from litestar.status_codes import (
 
 from tests.fixtures.factories import ingredient_payload_factory
 
-
 INGREDIENTS_URL = "/api/v1/ingredients"
 
 

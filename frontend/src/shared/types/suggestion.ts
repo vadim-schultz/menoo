@@ -1,3 +1,27 @@
+export interface GeneratedRecipeIngredient {
+  ingredient_id: number;
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
+export interface GeneratedRecipe {
+  name: string;
+  description?: string | null;
+  ingredients: GeneratedRecipeIngredient[];
+  instructions: string;
+  prep_time_minutes?: number | null;
+  cook_time_minutes?: number | null;
+  servings?: number | null;
+  difficulty?: string | null;
+  cuisine_type?: string | null;
+  meal_type?: string | null;
+}
+
+export interface SuggestionAcceptRequest {
+  generated_recipe: GeneratedRecipe;
+}
+
 export interface SuggestionRequest {
   available_ingredients: number[];
   max_prep_time?: number | null;
@@ -8,12 +32,14 @@ export interface SuggestionRequest {
 }
 
 export interface RecipeSuggestion {
-  recipe_id: number;
+  recipe_id: number | null;
   recipe_name: string;
   match_score: number;
   missing_ingredients: string[];
   matched_ingredients: string[];
   reason?: string | null;
+  is_ai_generated: boolean;
+  generated_recipe?: GeneratedRecipe | null;
 }
 
 export interface SuggestionResponse {

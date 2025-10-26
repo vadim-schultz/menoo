@@ -20,11 +20,21 @@ class TestIngredientCreate:
         """Should accept minimal valid data."""
         data = {
             "name": "Tomato",
-            "storage_location": "fridge",
         }
         schema = IngredientCreate(**data)
 
         assert schema.name == "Tomato"
+        assert schema.storage_location is None
+
+    @pytest.mark.unit
+    def test_valid_with_storage_location(self):
+        """Should accept explicit storage location when provided."""
+        data = {
+            "name": "Tomato",
+            "storage_location": "fridge",
+        }
+        schema = IngredientCreate(**data)
+
         assert schema.storage_location == "fridge"
 
     @pytest.mark.unit
@@ -55,16 +65,15 @@ class TestIngredientCreate:
         assert "name" in str(exc_info.value)
 
     @pytest.mark.unit
-    def test_missing_required_storage_location(self):
-        """Should reject missing required storage_location field."""
+    def test_optional_storage_location_defaults_to_none(self):
+        """Should allow omitting storage_location and default to None."""
         data = {
             "name": "Tomato",
         }
 
-        with pytest.raises(ValidationError) as exc_info:
-            IngredientCreate(**data)
+        schema = IngredientCreate(**data)
 
-        assert "storage_location" in str(exc_info.value)
+        assert schema.storage_location is None
 
     @pytest.mark.unit
     def test_invalid_storage_location(self):
