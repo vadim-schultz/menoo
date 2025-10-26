@@ -5,6 +5,7 @@ import type {
   SuggestionRequest,
   SuggestionResponse,
   ShoppingListResponse,
+  RecipeSuggestion,
 } from '../../../shared/types';
 import { SuggestionForm, SuggestionList, ShoppingList } from '../components';
 
@@ -20,6 +21,8 @@ export function SuggestionsPage() {
   const { mutate: generateShoppingList, loading: loadingShoppingList } = useApiMutation(
     suggestionService.generateShoppingList
   );
+
+  const { mutate: acceptSuggestion } = useApiMutation(suggestionService.acceptSuggestion);
 
   const handleGetSuggestions = async (request: SuggestionRequest) => {
     try {
@@ -58,6 +61,30 @@ export function SuggestionsPage() {
     setShoppingList(null);
   };
 
+  const handleSaveAIRecipe = async (suggestion: RecipeSuggestion) => {
+    if (!suggestion.generated_recipe) {
+      alert('No recipe data to save');
+      return;
+    }
+
+    try {
+      const savedRecipe = await acceptSuggestion({
+        generated_recipe: suggestion.generated_recipe,
+      });
+
+      // Show success message
+      alert(
+        `Recipe "${savedRecipe.name}" saved successfully! You can find it in your recipe collection.`
+      );
+
+      // Refresh suggestions to remove the saved AI recipe
+      // Optionally navigate to the saved recipe
+    } catch (err) {
+      console.error('Failed to save AI recipe:', err);
+      alert('Failed to save recipe. Please try again.');
+    }
+  };
+
   return (
     <div>
       <h1 style={{ marginBottom: '1.5rem' }}>Cooking Suggestions</h1>
@@ -74,6 +101,7 @@ export function SuggestionsPage() {
               selectedRecipes={selectedRecipes}
               onToggleRecipe={handleToggleRecipe}
               onGenerateShoppingList={handleGenerateShoppingList}
+              onSaveAIRecipe={handleSaveAIRecipe}
               loading={loadingShoppingList}
             />
           )}

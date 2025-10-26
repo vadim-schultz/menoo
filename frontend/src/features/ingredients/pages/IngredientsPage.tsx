@@ -12,6 +12,12 @@ export function IngredientsPage() {
 
   const { data, loading, error, refetch } = useApi(() => ingredientService.list(), []);
 
+  const ingredients: IngredientRead[] = Array.isArray(data)
+    ? data
+    : Array.isArray(data?.items)
+      ? data.items
+      : [];
+
   const { mutate: createIngredient, loading: creating } = useApiMutation(ingredientService.create);
 
   const { mutate: updateIngredient, loading: updating } = useApiMutation(ingredientService.update);
@@ -21,21 +27,27 @@ export function IngredientsPage() {
   const handleCreate = async (data: IngredientCreate) => {
     try {
       await createIngredient(data);
-      setIsModalOpen(false);
       refetch();
     } catch (err) {
       console.error('Failed to create ingredient:', err);
+      // TODO: Show error message to user
+    } finally {
+      // Always close modal, even on error
+      setIsModalOpen(false);
     }
   };
 
   const handleUpdate = async (id: number, data: IngredientCreate) => {
     try {
       await updateIngredient(id, data);
-      setIsModalOpen(false);
-      setEditingIngredient(null);
       refetch();
     } catch (err) {
       console.error('Failed to update ingredient:', err);
+      // TODO: Show error message to user
+    } finally {
+      // Always close modal and clear editing state
+      setIsModalOpen(false);
+      setEditingIngredient(null);
     }
   };
 
@@ -82,7 +94,7 @@ export function IngredientsPage() {
         <Button onClick={() => setIsModalOpen(true)}>Add Ingredient</Button>
       </div>
 
-      <IngredientList ingredients={data?.items || []} onEdit={handleEdit} onDelete={handleDelete} />
+      <IngredientList ingredients={ingredients} onEdit={handleEdit} onDelete={handleDelete} />
 
       <Modal
         isOpen={isModalOpen}
@@ -91,8 +103,10 @@ export function IngredientsPage() {
       >
         <IngredientForm
           ingredient={editingIngredient}
-          onSubmit={(data) =>
-            editingIngredient ? handleUpdate(editingIngredient.id, data) : handleCreate(data)
+          onSubmit={(formData: IngredientCreate) =>
+            editingIngredient
+              ? handleUpdate(editingIngredient.id, formData)
+              : handleCreate(formData)
           }
           onCancel={handleCloseModal}
           loading={creating || updating}

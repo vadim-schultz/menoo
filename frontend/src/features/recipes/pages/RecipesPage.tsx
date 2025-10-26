@@ -31,21 +31,27 @@ export function RecipesPage() {
   const handleCreate = async (data: RecipeCreate) => {
     try {
       await createRecipe(data);
-      setIsModalOpen(false);
       refetch();
     } catch (err) {
       console.error('Failed to create recipe:', err);
+      // TODO: Show error message to user
+    } finally {
+      // Always close modal, even on error
+      setIsModalOpen(false);
     }
   };
 
   const handleUpdate = async (id: number, data: RecipeCreate) => {
     try {
       await updateRecipe(id, data);
-      setIsModalOpen(false);
-      setEditingRecipe(null);
       refetch();
     } catch (err) {
       console.error('Failed to update recipe:', err);
+      // TODO: Show error message to user
+    } finally {
+      // Always close modal and clear editing state
+      setIsModalOpen(false);
+      setEditingRecipe(null);
     }
   };
 

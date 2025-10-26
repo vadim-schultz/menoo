@@ -7,6 +7,7 @@ A lightweight, self-hosted recipe management system designed for resource-constr
 - **Ingredient Management**: Track ingredients with quantities, storage locations, and expiry dates
 - **Recipe Management**: Create and organize recipes with detailed instructions and ingredient lists
 - **AI Suggestions**: Get cooking suggestions based on available ingredients (heuristic fallback implemented)
+- **Marvin AI**: Generate creative AI-powered recipes using OpenAI and the Marvin framework
 - **Shopping Lists**: Generate shopping lists from recipes
 - **Lightweight**: Optimized to run efficiently on Raspberry Pi and similar hardware
 - **Modern Stack**: Built with Litestar (Python) backend and Preact (TypeScript) frontend
@@ -53,6 +54,86 @@ Access the application:
 - **Frontend**: http://localhost:5173
 - **Backend API**: http://localhost:8000
 - **API Docs**: http://localhost:8000/schema
+
+## 🤖 Marvin AI Configuration
+
+Menoo integrates with [Marvin](https://www.askmarvin.ai/) to provide AI-powered recipe generation using OpenAI's GPT models.
+
+### Setup
+
+1. **Obtain an OpenAI API Key**:
+
+   - Visit [OpenAI Platform](https://platform.openai.com/api-keys)
+   - Create a new API key with GPT-4 access
+   - Ensure billing is configured and limits are set to avoid unexpected costs
+
+2. **Configure Environment Variables**:
+
+   ```bash
+   cd backend
+   cp .env.example .env
+   ```
+
+   Edit `.env` and set:
+
+   ```bash
+   OPENAI_API_KEY=sk-your-actual-api-key-here
+   MARVIN_CACHE_ENABLED=true           # Enable caching to reduce API costs
+   MARVIN_CACHE_TTL_SECONDS=3600       # Cache for 1 hour
+   ```
+
+3. **Verify Installation**:
+
+   ```bash
+   cd backend
+   source .venv/bin/activate
+
+   # Test OpenAI connection
+   curl https://api.openai.com/v1/models \
+     -H "Authorization: Bearer $OPENAI_API_KEY"
+
+   # Verify Marvin module
+   python -c "from app.core.marvin_config import configure_marvin; print('✓ Marvin ready')"
+   ```
+
+### Features
+
+- **AI Recipe Generation**: Creates creative recipes based on your available ingredients
+- **Structured Output**: Recipes include ingredients with quantities, instructions, prep/cook times, and difficulty levels
+- **Smart Caching**: Reduces API costs by caching recipe suggestions
+- **Fallback Mode**: Automatically falls back to heuristic matching if AI is unavailable
+- **Cost Controls**: Configurable rate limiting and caching to manage OpenAI usage
+
+### Cost Management
+
+- **Enable Caching**: Set `MARVIN_CACHE_ENABLED=true` to avoid regenerating identical requests
+- **Monitor Usage**: Check your [OpenAI usage dashboard](https://platform.openai.com/usage) regularly
+- **Set Limits**: Configure spending limits in your OpenAI account settings
+- **Rate Limiting**: Adjust `SUGGESTION_RATE_LIMIT` and `SUGGESTION_RATE_PERIOD` in `.env` to control request frequency
+
+### Troubleshooting
+
+**No AI suggestions appearing:**
+
+- Verify `OPENAI_API_KEY` is set correctly in `.env`
+- Check backend logs for Marvin-related errors
+- Ensure you have GPT-4 API access enabled
+- Verify OpenAI account has available credits
+
+**Slow responses:**
+
+- AI generation can take 5-15 seconds
+- Consider implementing async job queue for production
+- Increase cache TTL to reduce regeneration
+
+**Unexpected costs:**
+
+- Review cache settings and ensure `MARVIN_CACHE_ENABLED=true`
+- Set conservative rate limits
+- Monitor the OpenAI usage dashboard
+- Consider using a feature flag to disable AI in `.env` if needed
+
+For testing without an API key, the system will automatically fall back to heuristic recipe matching.
 
 ### Manual Setup
 
@@ -171,8 +252,9 @@ npm run format                     # Prettier
 
 ### Suggestions
 
-- `POST   /api/suggestions/check` - Get recipe suggestions based on ingredients
-- `POST   /api/suggestions/shopping-list` - Generate shopping list
+- `POST   /api/v1/suggestions/recipes` - Get recipe suggestions based on ingredients (AI + heuristic)
+- `POST   /api/v1/suggestions/accept` - Accept and save an AI-generated recipe
+- `POST   /api/v1/suggestions/shopping-list` - Generate shopping list
 
 ## 🌐 Deployment
 

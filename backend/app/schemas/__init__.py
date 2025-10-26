@@ -17,10 +17,13 @@ from app.schemas.recipe import (
     RecipeUpdate,
 )
 from app.schemas.suggestion import (
+    GeneratedRecipe,
+    GeneratedRecipeIngredient,
     RecipeSuggestion,
     ShoppingListItem,
     ShoppingListRequest,
     ShoppingListResponse,
+    SuggestionAcceptRequest,
     SuggestionRequest,
     SuggestionResponse,
 )
@@ -40,7 +43,10 @@ __all__ = [
     "RecipeIngredientRead",
     "SuggestionRequest",
     "SuggestionResponse",
+    "SuggestionAcceptRequest",
     "RecipeSuggestion",
+    "GeneratedRecipe",
+    "GeneratedRecipeIngredient",
     "ShoppingListRequest",
     "ShoppingListResponse",
     "ShoppingListItem",

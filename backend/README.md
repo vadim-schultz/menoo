@@ -152,10 +152,100 @@ backend/
 
 ### Suggestions (`/api/v1/suggestions`)
 
-- `POST /recipes` - Get recipe suggestions based on ingredients
+- `POST /recipes` - Get recipe suggestions based on ingredients (AI + heuristic)
+- `POST /accept` - Accept and save an AI-generated recipe
 - `POST /shopping-list` - Generate shopping list
 
-## Environment Variables
+## Marvin AI Integration
+
+### Overview
+
+The backend uses [Marvin](https://www.askmarvin.ai/) to generate creative AI-powered recipes. Marvin provides structured AI interactions with OpenAI's GPT models, ensuring reliable and validated outputs.
+
+### Configuration
+
+Required environment variables in `.env`:
+
+```bash
+# Required for AI features
+OPENAI_API_KEY=sk-your-api-key-here
+
+# Optional - AI configuration
+MARVIN_CACHE_ENABLED=true           # Cache AI responses (recommended)
+MARVIN_CACHE_TTL_SECONDS=3600       # Cache time-to-live (1 hour)
+SUGGESTION_RATE_LIMIT=10            # Max requests per period
+SUGGESTION_RATE_PERIOD=60           # Rate limit period (seconds)
+```
+
+### Architecture
+
+- **Lazy Initialization**: Marvin is configured only when needed via `configure_marvin()`
+- **Service Layer**: `SuggestionService` handles AI generation with caching and fallbacks
+- **Validation**: All AI outputs are validated against Pydantic schemas
+- **Fallback**: Automatically falls back to heuristic matching if AI fails
+- **Caching**: In-memory cache with TTL to reduce API costs
+
+### Testing with Mocks
+
+Always mock Marvin calls in tests to avoid API costs:
+
+```python
+# Unit test example
+@pytest.fixture
+def mock_marvin(monkeypatch):
+    async def mock_generate(*args, **kwargs):
+        return GeneratedRecipe(
+            name="Test Recipe",
+            ingredients=[...],
+            instructions="Test instructions"
+        )
+
+    monkeypatch.setattr(
+        "app.services.suggestion_service.SuggestionService.generate_recipe_with_marvin",
+        mock_generate
+    )
+```
+
+### Cost Management
+
+**Best Practices:**
+
+1. **Enable Caching**: Set `MARVIN_CACHE_ENABLED=true` to cache identical requests
+2. **Rate Limiting**: Configure appropriate limits to prevent abuse
+3. **Monitor Usage**: Regularly check OpenAI usage dashboard
+4. **Set Alerts**: Configure billing alerts in OpenAI dashboard
+5. **Feature Flags**: Consider adding a `MARVIN_ENABLED` flag for easy toggle
+
+**Expected Costs:**
+
+- GPT-4 generation: ~$0.01-0.03 per recipe (varies by prompt complexity)
+- Caching can reduce costs by 80-90% for repeated ingredient combinations
+- Rate limiting prevents runaway costs from automated requests
+
+### Troubleshooting
+
+**Marvin not generating recipes:**
+
+1. Verify `OPENAI_API_KEY` is set and valid
+2. Check logs for specific error messages
+3. Ensure OpenAI account has available credits
+4. Verify GPT-4 API access is enabled
+
+**Slow response times:**
+
+- AI generation typically takes 5-15 seconds
+- Check OpenAI API status
+- Consider implementing async job queue for production
+- Increase cache TTL to reduce regeneration
+
+**Validation errors:**
+
+- Review Marvin output in logs
+- Ensure prompts are clear and specific
+- Check Pydantic schema matches expected output
+- Fallback will activate automatically
+
+### Environment Variables
 
 See `.env.example` for all available configuration options.
 
