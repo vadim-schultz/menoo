@@ -3,8 +3,9 @@
 from datetime import date, timedelta
 
 import pytest
+from pydantic import ValidationError
 
-from app.schemas.ingredient import IngredientCreate, IngredientUpdate
+from app.schemas.ingredient import IngredientCreate, IngredientFilter, IngredientPatch
 from app.services.ingredient_service import IngredientService
 from tests.fixtures.factories import ingredient_factory
 
@@ -68,7 +69,7 @@ class TestIngredientUpdate:
         await db_session.commit()
 
         # Update it
-        update_data = IngredientUpdate(name="Cherry Tomato")
+        update_data = IngredientPatch(name="Cherry Tomato")
         result = await service.update_ingredient(ingredient.id, update_data)
         await db_session.commit()
 
@@ -78,14 +79,16 @@ class TestIngredientUpdate:
     async def test_update_nonexistent_ingredient_fails(self, db_session):
         """Should fail when updating non-existent ingredient."""
         service = IngredientService(db_session)
-        data = IngredientUpdate(name="New Name")
+        data = IngredientPatch(name="New Name")
 
         with pytest.raises(ValueError, match="not found"):
             await service.update_ingredient(999, data)
 
     @pytest.mark.unit
     async def test_update_to_duplicate_name_fails(self, db_session):
-        """Should fail when updating name to existing name."""
+        """Should fail when updating name to existing name (database constraint)."""
+        from sqlalchemy.exc import IntegrityError
+        
         service = IngredientService(db_session)
 
         # Create two ingredients
@@ -96,10 +99,11 @@ class TestIngredientUpdate:
         await service.create_ingredient(data2)
         await db_session.commit()
 
-        # Try to update first to second's name
-        update_data = IngredientUpdate(name="Potato")
-        with pytest.raises(ValueError, match="already exists"):
+        # Try to update first to second's name - should raise IntegrityError from database
+        update_data = IngredientPatch(name="Potato")
+        with pytest.raises(IntegrityError, match="UNIQUE constraint failed"):
             await service.update_ingredient(ing1.id, update_data)
+            await db_session.flush()
 
 
 class TestIngredientListing:
@@ -116,10 +120,10 @@ class TestIngredientListing:
             await service.create_ingredient(data)
         await db_session.commit()
 
-        result, total = await service.list_ingredients()
+        filters = IngredientFilter()
+        result = await service.list_ingredients(filters)
 
         assert len(result) == 3
-        assert total == 3
 
     @pytest.mark.unit
     async def test_list_with_storage_filter(self, db_session):
@@ -133,10 +137,10 @@ class TestIngredientListing:
         await service.create_ingredient(data2)
         await db_session.commit()
 
-        result, total = await service.list_ingredients(storage_location="fridge")
+        filters = IngredientFilter(storage_location="fridge")
+        result = await service.list_ingredients(filters)
 
         assert len(result) == 1
-        assert total == 1
         assert result[0].storage_location == "fridge"
 
     @pytest.mark.unit
@@ -144,19 +148,19 @@ class TestIngredientListing:
         """Should reject invalid page number."""
         service = IngredientService(db_session)
 
-        with pytest.raises(ValueError, match="Page"):
-            await service.list_ingredients(page=0)
+        with pytest.raises(ValidationError, match="greater than or equal to 1"):
+            IngredientFilter(page=0)
 
     @pytest.mark.unit
     async def test_list_pagination_invalid_limit(self, db_session):
         """Should reject limit out of bounds (1-1000)."""
         service = IngredientService(db_session)
 
-        with pytest.raises(ValueError, match="Page size"):
-            await service.list_ingredients(page_size=0)
+        with pytest.raises(ValidationError, match="greater than or equal to 1"):
+            IngredientFilter(page_size=0)
 
-        with pytest.raises(ValueError, match="Page size"):
-            await service.list_ingredients(page_size=1001)
+        with pytest.raises(ValidationError, match="less than or equal to 1000"):
+            IngredientFilter(page_size=1001)
 
     @pytest.mark.unit
     async def test_list_with_expiry_filter(self, db_session):
@@ -173,10 +177,10 @@ class TestIngredientListing:
         await service.create_ingredient(data2)
         await db_session.commit()
 
-        result, total = await service.list_ingredients(expiring_before=tomorrow + timedelta(days=2))
+        filters = IngredientFilter(expiring_before=tomorrow + timedelta(days=2))
+        result = await service.list_ingredients(filters)
 
         assert len(result) == 1
-        assert total == 1
 
     @pytest.mark.unit
     async def test_list_with_name_filter(self, db_session):
@@ -189,10 +193,10 @@ class TestIngredientListing:
         await service.create_ingredient(data2)
         await db_session.commit()
 
-        result, total = await service.list_ingredients(name_contains="tomato")
+        filters = IngredientFilter(name_contains="tomato")
+        result = await service.list_ingredients(filters)
 
         assert len(result) == 1
-        assert total == 1
         assert "tomato" in result[0].name.lower()
 
 

@@ -9,6 +9,7 @@ from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Ingredient
+from app.models.ingredient import StorageLocation
 
 
 class IngredientRepository:
@@ -49,7 +50,7 @@ class IngredientRepository:
     async def list(
         self,
         *,
-        storage_location: str | None = None,
+        storage_location: StorageLocation | None = None,
         expiring_before: date | None = None,
         name_contains: str | None = None,
         skip: int = 0,
@@ -95,11 +96,6 @@ class IngredientRepository:
     async def soft_delete(self, ingredient: Ingredient) -> None:
         """Soft delete an ingredient."""
         ingredient.is_deleted = True
-        await self.session.flush()
-
-    async def hard_delete(self, ingredient: Ingredient) -> None:
-        """Permanently delete an ingredient."""
-        await self.session.delete(ingredient)
         await self.session.flush()
 
     async def get_by_ids(self, ingredient_ids: list[int]) -> Sequence[Ingredient]:

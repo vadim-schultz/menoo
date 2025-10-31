@@ -1,3 +1,4 @@
+export type UseFormReturn<T extends Record<string, any>> = ReturnType<typeof useForm<T>>;
 import { useState } from 'preact/hooks';
 
 export interface UseFormOptions<T> {

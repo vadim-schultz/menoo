@@ -21,6 +21,7 @@ class StorageLocation(str, Enum):
     FRIDGE = "fridge"
     CUPBOARD = "cupboard"
     PANTRY = "pantry"
+    COUNTER = "counter"
 
 
 class Ingredient(Base, IDMixin, TimestampMixin, SoftDeleteMixin):
@@ -31,7 +32,6 @@ class Ingredient(Base, IDMixin, TimestampMixin, SoftDeleteMixin):
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
     storage_location: Mapped[str | None] = mapped_column(String(20), nullable=True, index=True)
     quantity: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
-    unit: Mapped[str | None] = mapped_column(String(20), nullable=True)
     expiry_date: Mapped[date | None] = mapped_column(Date, nullable=True)
 
     # Relationships

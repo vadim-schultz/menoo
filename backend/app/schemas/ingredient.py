@@ -4,41 +4,55 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.models.ingredient import StorageLocation
+
 
 class IngredientBase(BaseModel):
-    """Base ingredient schema."""
+    """Base ingredient schema with common fields."""
 
     name: str = Field(..., min_length=1, max_length=100, description="Ingredient name")
-    storage_location: Literal["fridge", "cupboard", "pantry"] | None = Field(
+    storage_location: StorageLocation | None = Field(
         None, description="Storage location"
     )
-    quantity: Decimal | None = Field(None, gt=0, description="Quantity amount")
-    unit: str | None = Field(None, max_length=20, description="Unit of measurement")
+    quantity: Decimal = Field(default=Decimal("0"), ge=0, description="Quantity in grams")
     expiry_date: date | None = Field(None, description="Expiration date")
 
 
-class IngredientCreate(IngredientBase):
-    """Schema for creating an ingredient."""
+class IngredientWrite(IngredientBase):
+    """Schema for creating or updating an ingredient (upsert)."""
 
     pass
 
 
-class IngredientUpdate(BaseModel):
-    """Schema for updating an ingredient."""
+# Backward compatibility aliases
+IngredientCreate = IngredientWrite
+IngredientUpdate = IngredientWrite
+
+
+class IngredientPatch(BaseModel):
+    """Schema for partial updates (all fields optional)."""
 
     name: str | None = Field(None, min_length=1, max_length=100)
-    storage_location: Literal["fridge", "cupboard", "pantry"] | None = None
-    quantity: Decimal | None = Field(None, gt=0)
-    unit: str | None = Field(None, max_length=20)
+    storage_location: StorageLocation | None = None
+    quantity: Decimal | None = Field(None, ge=0, description="Quantity in grams")
     expiry_date: date | None = None
 
 
+class IngredientFilter(BaseModel):
+    """Schema for filtering ingredients in list queries."""
+
+    storage_location: StorageLocation | None = None
+    expiring_before: date | None = None
+    name_contains: str | None = None
+    page: int = Field(default=1, ge=1)
+    page_size: int = Field(default=100, ge=1, le=1000)
+
+
 class IngredientRead(IngredientBase):
-    """Schema for reading an ingredient."""
+    """Schema for reading an ingredient with system fields."""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -46,18 +60,6 @@ class IngredientRead(IngredientBase):
     created_at: datetime
     updated_at: datetime
     is_deleted: bool
-
-    @field_serializer("quantity", when_used="json")
-    def serialize_quantity(self, value: Decimal | None) -> float | None:
-        if value is None:
-            return None
-        return float(value)
-
-
-class IngredientDetail(IngredientRead):
-    """Detailed ingredient schema with related recipes."""
-
-    recipe_count: int = Field(default=0, description="Number of recipes using this ingredient")
 
 
 class IngredientListResponse(BaseModel):

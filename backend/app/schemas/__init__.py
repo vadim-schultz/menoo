@@ -1,11 +1,13 @@
 """Schemas package."""
 
 from app.schemas.ingredient import (
-    IngredientCreate,
-    IngredientDetail,
+    IngredientCreate,  # Backward compatibility alias
+    IngredientFilter,
     IngredientListResponse,
+    IngredientPatch,
     IngredientRead,
-    IngredientUpdate,
+    IngredientUpdate,  # Backward compatibility alias
+    IngredientWrite,
 )
 from app.schemas.recipe import (
     RecipeCreate,
@@ -29,10 +31,12 @@ from app.schemas.suggestion import (
 )
 
 __all__ = [
-    "IngredientCreate",
-    "IngredientUpdate",
+    "IngredientCreate",  # Backward compatibility
+    "IngredientUpdate",  # Backward compatibility
+    "IngredientWrite",
+    "IngredientPatch",
     "IngredientRead",
-    "IngredientDetail",
+    "IngredientFilter",
     "IngredientListResponse",
     "RecipeCreate",
     "RecipeUpdate",

@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-from datetime import date
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Ingredient
 from app.repositories import IngredientRepository
-from app.schemas import IngredientCreate, IngredientUpdate
+from app.schemas import IngredientCreate, IngredientFilter, IngredientPatch
 
 
 class IngredientService:
@@ -25,14 +23,8 @@ class IngredientService:
         if existing:
             raise ValueError(f"Ingredient with name '{data.name}' already exists")
 
-        ingredient = Ingredient(
-            name=data.name,
-            storage_location=data.storage_location,
-            quantity=data.quantity,
-            unit=data.unit,
-            expiry_date=data.expiry_date,
-        )
-
+        # Create ingredient from Pydantic model
+        ingredient = Ingredient(**data.model_dump())
         return await self.repository.create(ingredient)
 
     async def get_ingredient(self, ingredient_id: int) -> Ingredient:
@@ -44,50 +36,29 @@ class IngredientService:
 
     async def list_ingredients(
         self,
-        storage_location: str | None = None,
-        expiring_before: date | None = None,
-        name_contains: str | None = None,
-        page: int = 1,
-        page_size: int = 100,
-    ) -> tuple[list[Ingredient], int]:
+        filters: IngredientFilter,
+    ) -> list[Ingredient]:
         """List ingredients with filters and pagination."""
-        if page < 1:
-            raise ValueError("Page must be >= 1")
-        if page_size < 1 or page_size > 1000:
-            raise ValueError("Page size must be between 1 and 1000")
-
-        skip = (page - 1) * page_size
-        ingredients, total = await self.repository.list(
-            storage_location=storage_location,
-            expiring_before=expiring_before,
-            name_contains=name_contains,
+        skip = (filters.page - 1) * filters.page_size
+        
+        # Get filter data and convert pagination params
+        filter_data = filters.model_dump(exclude={"page", "page_size"})
+        
+        ingredients, _ = await self.repository.list(
+            **filter_data,
             skip=skip,
-            limit=page_size,
+            limit=filters.page_size,
         )
 
-        return list(ingredients), total
+        return list(ingredients)
 
-    async def update_ingredient(self, ingredient_id: int, data: IngredientUpdate) -> Ingredient:
-        """Update an ingredient."""
+    async def update_ingredient(self, ingredient_id: int, data: IngredientPatch) -> Ingredient:
+        """Update an ingredient with partial data."""
         ingredient = await self.get_ingredient(ingredient_id)
 
-        # Check name uniqueness if updating name
-        if data.name and data.name != ingredient.name:
-            existing = await self.repository.get_by_name(data.name)
-            if existing:
-                raise ValueError(f"Ingredient with name '{data.name}' already exists")
-
-        # Update fields
-        if data.name is not None:
-            ingredient.name = data.name
-        if data.storage_location is not None:
-            ingredient.storage_location = data.storage_location
-        if data.quantity is not None:
-            ingredient.quantity = data.quantity
-        if data.unit is not None:
-            ingredient.unit = data.unit
-        if data.expiry_date is not None:
-            ingredient.expiry_date = data.expiry_date
+        # Update fields with provided data
+        for field, value in data.model_dump(exclude_unset=True).items():
+            setattr(ingredient, field, value)
 
         return await self.repository.update(ingredient)
 
@@ -95,8 +66,3 @@ class IngredientService:
         """Soft delete an ingredient."""
         ingredient = await self.get_ingredient(ingredient_id)
         await self.repository.soft_delete(ingredient)
-
-    async def get_ingredients_by_ids(self, ingredient_ids: list[int]) -> list[Ingredient]:
-        """Get multiple ingredients by their IDs."""
-        ingredients = await self.repository.get_by_ids(ingredient_ids)
-        return list(ingredients)

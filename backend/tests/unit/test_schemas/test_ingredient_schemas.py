@@ -7,8 +7,8 @@ from pydantic import ValidationError
 
 from app.schemas.ingredient import (
     IngredientCreate,
+    IngredientPatch,
     IngredientRead,
-    IngredientUpdate,
 )
 
 
@@ -38,19 +38,28 @@ class TestIngredientCreate:
         assert schema.storage_location == "fridge"
 
     @pytest.mark.unit
+    def test_valid_with_counter_storage_location(self):
+        """Should accept counter as a valid storage location."""
+        data = {
+            "name": "Banana",
+            "storage_location": "counter",
+        }
+        schema = IngredientCreate(**data)
+
+        assert schema.storage_location == "counter"
+
+    @pytest.mark.unit
     def test_valid_complete_data(self):
         """Should accept all fields."""
         data = {
             "name": "Tomato",
             "storage_location": "fridge",
             "quantity": 500,
-            "unit": "g",
             "expiry_date": date.today(),
         }
         schema = IngredientCreate(**data)
 
         assert schema.quantity == 500
-        assert schema.unit == "g"
 
     @pytest.mark.unit
     def test_missing_required_name(self):
@@ -99,13 +108,13 @@ class TestIngredientCreate:
             IngredientCreate(**data)
 
 
-class TestIngredientUpdate:
-    """Test IngredientUpdate schema validation."""
+class TestIngredientPatch:
+    """Test IngredientPatch schema validation for partial updates."""
 
     @pytest.mark.unit
     def test_all_fields_optional(self):
         """Should allow empty update (all fields optional)."""
-        schema = IngredientUpdate()
+        schema = IngredientPatch()
 
         assert schema.name is None
         assert schema.storage_location is None
@@ -114,7 +123,7 @@ class TestIngredientUpdate:
     def test_partial_update(self):
         """Should allow updating only some fields."""
         data = {"name": "New Name"}
-        schema = IngredientUpdate(**data)
+        schema = IngredientPatch(**data)
 
         assert schema.name == "New Name"
         assert schema.storage_location is None
@@ -125,7 +134,7 @@ class TestIngredientUpdate:
         data = {"storage_location": "invalid"}
 
         with pytest.raises(ValidationError):
-            IngredientUpdate(**data)
+            IngredientPatch(**data)
 
 
 class TestIngredientRead:
@@ -139,7 +148,6 @@ class TestIngredientRead:
             "name": "Tomato",
             "storage_location": "fridge",
             "quantity": 500,
-            "unit": "g",
             "expiry_date": date.today(),
             "created_at": date.today(),
             "updated_at": date.today(),
