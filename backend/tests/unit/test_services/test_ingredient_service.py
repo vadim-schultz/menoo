@@ -27,32 +27,94 @@ class TestIngredientCreation:
         assert result.created_at is not None
 
     @pytest.mark.unit
-    async def test_create_duplicate_name_fails(self, db_session):
-        """Should reject ingredient with duplicate name."""
+    async def test_create_duplicate_name_adds_quantity(self, db_session):
+        """Should add quantity to existing ingredient with same name."""
+        service = IngredientService(db_session)
+
+        # Create first ingredient with quantity 100
+        data1 = IngredientCreate(**ingredient_factory(name="Tomato", quantity=100))
+        result1 = await service.create_ingredient(data1)
+        await db_session.commit()
+
+        # Create duplicate with quantity 50 - should add to existing
+        data2 = IngredientCreate(**ingredient_factory(name="Tomato", quantity=50))
+        result2 = await service.create_ingredient(data2)
+        await db_session.commit()
+
+        # Should return the same ingredient with updated quantity
+        assert result2.id == result1.id
+        assert float(result2.quantity) == 150.0
+
+    @pytest.mark.unit
+    async def test_create_case_insensitive_duplicate_adds_quantity(self, db_session):
+        """Should detect duplicate names case-insensitively and add quantity."""
+        service = IngredientService(db_session)
+
+        data1 = IngredientCreate(**ingredient_factory(name="Tomato", quantity=100))
+        result1 = await service.create_ingredient(data1)
+        await db_session.commit()
+
+        data2 = IngredientCreate(**ingredient_factory(name="TOMATO", quantity=25))
+        result2 = await service.create_ingredient(data2)
+        await db_session.commit()
+
+        # Should return the same ingredient with updated quantity
+        assert result2.id == result1.id
+        assert float(result2.quantity) == 125.0
+
+    @pytest.mark.unit
+    async def test_create_duplicate_updates_other_fields(self, db_session):
+        """Should update storage_location and expiry_date when creating duplicate."""
+        from datetime import date, timedelta
+        
         service = IngredientService(db_session)
 
         # Create first ingredient
-        data1 = IngredientCreate(**ingredient_factory(name="Tomato"))
-        await service.create_ingredient(data1)
+        data1 = IngredientCreate(**ingredient_factory(
+            name="Tomato",
+            quantity=100,
+            storage_location="fridge"
+        ))
+        result1 = await service.create_ingredient(data1)
         await db_session.commit()
 
-        # Try to create duplicate
-        data2 = IngredientCreate(**ingredient_factory(name="Tomato"))
-        with pytest.raises(ValueError, match="already exists"):
-            await service.create_ingredient(data2)
+        # Create duplicate with different fields
+        tomorrow = date.today() + timedelta(days=1)
+        data2 = IngredientCreate(**ingredient_factory(
+            name="Tomato",
+            quantity=50,
+            storage_location="counter",
+            expiry_date=tomorrow
+        ))
+        result2 = await service.create_ingredient(data2)
+        await db_session.commit()
+
+        # Should update fields and add quantity
+        assert result2.id == result1.id
+        assert float(result2.quantity) == 150.0
+        assert result2.storage_location == "counter"
+        assert result2.expiry_date == tomorrow
 
     @pytest.mark.unit
-    async def test_create_case_insensitive_duplicate(self, db_session):
-        """Should detect duplicate names case-insensitively."""
+    async def test_create_duplicate_with_none_quantity(self, db_session):
+        """Should handle None quantities correctly."""
         service = IngredientService(db_session)
 
-        data1 = IngredientCreate(**ingredient_factory(name="Tomato"))
-        await service.create_ingredient(data1)
+        # Create first ingredient with None quantity
+        data1 = IngredientCreate(**ingredient_factory(name="Tomato", quantity=None))
+        result1 = await service.create_ingredient(data1)
+        await db_session.commit()
+        # When quantity is None, it defaults to 0
+        initial_qty = float(result1.quantity) if result1.quantity is not None else 0.0
+
+        # Create duplicate with quantity 50
+        data2 = IngredientCreate(**ingredient_factory(name="Tomato", quantity=50))
+        result2 = await service.create_ingredient(data2)
         await db_session.commit()
 
-        data2 = IngredientCreate(**ingredient_factory(name="TOMATO"))
-        with pytest.raises(ValueError, match="already exists"):
-            await service.create_ingredient(data2)
+        # Should add quantity correctly (0 + 50 = 50)
+        assert result2.id == result1.id
+        assert float(result2.quantity) == initial_qty + 50.0
 
 
 class TestIngredientUpdate:

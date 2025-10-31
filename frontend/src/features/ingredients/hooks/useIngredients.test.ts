@@ -3,7 +3,7 @@ import { useIngredients } from './useIngredients';
 import { renderHook, act } from '@testing-library/preact-hooks';
 
 // Mock ingredientService
-vi.mock('../../../shared/services/ingredientService', () => ({
+vi.mock('../services/ingredientService', () => ({
   ingredientService: {
     list: vi.fn().mockResolvedValue([
       {

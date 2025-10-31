@@ -24,9 +24,11 @@ class IngredientController(Controller):
     async def list_ingredients(
         self,
         ingredient_service: IngredientService,
-        filters: IngredientFilter,
+        filters: IngredientFilter | None = None,
     ) -> list[IngredientRead]:
         """List all ingredients with optional filters."""
+        if filters is None:
+            filters = IngredientFilter()
         ingredients = await ingredient_service.list_ingredients(filters)
         return [IngredientRead.model_validate(ing) for ing in ingredients]
 
@@ -36,7 +38,7 @@ class IngredientController(Controller):
         ingredient_service: IngredientService,
         data: IngredientCreate,
     ) -> IngredientRead:
-        """Create a new ingredient."""
+        """Create a new ingredient or add quantity to existing one."""
         ingredient = await ingredient_service.create_ingredient(data)
         return IngredientRead.model_validate(ingredient)
 

@@ -29,7 +29,17 @@ export class ApiClient {
         throw error;
       }
 
-      return await response.json();
+      // Handle empty responses (e.g., 204 No Content)
+      if (response.status === 204) {
+        return undefined as unknown as T;
+      }
+
+      // Some endpoints may return empty body with 200
+      const text = await response.text();
+      if (!text) {
+        return undefined as unknown as T;
+      }
+      return JSON.parse(text) as T;
     } catch (error) {
       if (error && typeof error === 'object' && 'detail' in error) {
         throw error;

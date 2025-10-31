@@ -1,13 +1,18 @@
 import { useApi, useApiMutation } from '../../../shared/hooks';
-import { ingredientService } from '../../../shared/services/ingredientService';
+import { ingredientService } from '../services/ingredientService';
 import type {
   IngredientRead,
   IngredientCreate,
   IngredientPatch,
+  IngredientFilters,
 } from '../../../shared/types/ingredient';
 
-export const useIngredients = () => {
-  const { data: ingredients, loading, error, refetch } = useApi(() => ingredientService.list(), []);
+export const useIngredients = (filters?: IngredientFilters) => {
+  const stableKey = JSON.stringify(filters || {});
+  const { data: ingredients, loading, error, refetch } = useApi(
+    () => ingredientService.list(filters),
+    [stableKey]
+  );
 
   const { mutate: createMutation, loading: creating } = useApiMutation(ingredientService.create);
   const { mutate: updateMutation, loading: updating } = useApiMutation(
