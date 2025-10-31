@@ -1,19 +1,17 @@
-export type StorageLocation = 'fridge' | 'freezer' | 'pantry' | 'counter';
+export type StorageLocation = 'fridge' | 'cupboard' | 'pantry' | 'counter';
 
 export interface IngredientBase {
   name: string;
-  quantity: number;
-  unit: string;
+  quantity: number; // Always in GRAMS (no unit field)
   storage_location?: StorageLocation | null;
   expiry_date?: string | null;
 }
 
 export interface IngredientCreate extends IngredientBase {}
 
-export interface IngredientUpdate {
+export interface IngredientPatch {
   name?: string;
   quantity?: number;
-  unit?: string;
   storage_location?: StorageLocation | null;
   expiry_date?: string | null;
 }
@@ -26,22 +24,10 @@ export interface IngredientRead extends IngredientBase {
   is_deleted: boolean;
 }
 
-export interface IngredientDetail extends IngredientRead {
-  recipe_count?: number;
-}
-
-export interface IngredientListResponse {
-  items: IngredientRead[];
-  total: number;
-  page: number;
-  page_size: number;
-  has_next: boolean;
-}
-
 export interface IngredientFilters {
   storage_location?: StorageLocation;
   expiring_before?: string;
-  name?: string;
+  name_contains?: string;
   page?: number;
   page_size?: number;
 }

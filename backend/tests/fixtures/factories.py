@@ -29,9 +29,8 @@ def ingredient_factory(**overrides: Any) -> dict[str, Any]:
     """
     defaults = {
         "name": fake.word().capitalize(),
-        "storage_location": fake.random_element(["fridge", "cupboard", "pantry"]),
+        "storage_location": fake.random_element(["fridge", "cupboard", "pantry", "counter"]),
         "quantity": fake.random_int(min=1, max=1000),
-        "unit": fake.random_element(["g", "kg", "ml", "l", "piece", "cup"]),
         "expiry_date": fake.date_between(start_date="today", end_date="+30d"),
     }
     return {**defaults, **overrides}

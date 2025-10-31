@@ -26,6 +26,34 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# Node modules
+node_modules/
+frontend/node_modules/
+backend/menoo.egg-info/
+
+# Frontend build output
+frontend/dist/
+frontend/playwright-report/
+frontend/test-results/
+
+# Backend build output
+backend/build/
+backend/htmlcov/
+backend/__pycache__/
+
+# Coverage
+coverage/
+coverage.xml
+htmlcov/
+
+# Test results
+test-results/
+**/.last-run.json
+
+# IDE and OS files
+.vscode/
+.DS_Store
+
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
