@@ -149,6 +149,46 @@ export const handlers = [
       { status: 201 }
     );
   }),
+  // Relative URL handlers matching client
+  http.post(`/api/v1/suggestions/recipes`, async ({ request }) => {
+    const body = (await request.json()) as { available_ingredients: number[] };
+    if (!body.available_ingredients || body.available_ingredients.length === 0) {
+      return HttpResponse.json<SuggestionResponse>(
+        {
+          suggestions: [createMockAISuggestion()],
+          source: 'ai',
+          cache_hit: false,
+        },
+        { status: 201 }
+      );
+    }
+    return HttpResponse.json<SuggestionResponse>(
+      {
+        suggestions: [createMockAISuggestion(), createMockTraditionalSuggestion()],
+        source: 'ai',
+        cache_hit: false,
+      },
+      { status: 201 }
+    );
+  }),
+  http.post(`/api/v1/suggestions/accept`, async ({ request }) => {
+    const body = (await request.json()) as SuggestionAcceptRequest;
+    if (!body.generated_recipe) {
+      return HttpResponse.json({ detail: 'Missing generated_recipe' }, { status: 422 });
+    }
+    return HttpResponse.json<RecipeDetail>(
+      createMockRecipeDetail({
+        name: body.generated_recipe.name,
+        description: body.generated_recipe.description,
+        instructions: body.generated_recipe.instructions,
+        prep_time: body.generated_recipe.prep_time_minutes ?? undefined,
+        cook_time: body.generated_recipe.cook_time_minutes ?? undefined,
+        servings: body.generated_recipe.servings ?? undefined,
+        difficulty: (body.generated_recipe.difficulty ?? 'easy') as any,
+      }),
+      { status: 201 }
+    );
+  }),
 
   // GET /ingredients - List ingredients
   http.get(`${API_BASE}/ingredients`, () => {
@@ -157,6 +197,16 @@ export const handlers = [
         createMockIngredient({ id: 1, name: 'Pasta' }),
         createMockIngredient({ id: 2, name: 'Eggs' }),
         createMockIngredient({ id: 3, name: 'Bacon' }),
+      ],
+      { status: 200 }
+    );
+  }),
+  // Also handle relative URL used by client
+  http.get(`/api/v1/ingredients/`, () => {
+    return HttpResponse.json<IngredientRead[]>(
+      [
+        createMockIngredient({ id: 1, name: 'flour', quantity: 100 as any }),
+        createMockIngredient({ id: 2, name: 'sugar', quantity: 200 as any }),
       ],
       { status: 200 }
     );

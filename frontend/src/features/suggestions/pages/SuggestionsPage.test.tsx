@@ -14,16 +14,11 @@ describe('SuggestionsPage', () => {
 
     // Add default ingredients handler for the form
     server.use(
-      http.get('/api/v1/ingredients', () => {
-        return HttpResponse.json({
-          items: [
-            { id: 1, name: 'flour', storage_location: 'pantry', quantity: 100, unit: 'g' },
-            { id: 2, name: 'sugar', storage_location: 'pantry', quantity: 200, unit: 'g' },
-          ],
-          total: 2,
-          page: 1,
-          page_size: 1000,
-        });
+      http.get('/api/v1/ingredients/', () => {
+        return HttpResponse.json([
+          { id: 1, name: 'flour', storage_location: 'pantry', quantity: 100, expiry_date: null, created_at: '', updated_at: '', is_deleted: false },
+          { id: 2, name: 'sugar', storage_location: 'pantry', quantity: 200, expiry_date: null, created_at: '', updated_at: '', is_deleted: false },
+        ]);
       })
     );
   });
@@ -31,9 +26,9 @@ describe('SuggestionsPage', () => {
   // Helper to wait for ingredients to load and select one
   const selectIngredientAndSubmit = async () => {
     await waitFor(() => {
-      expect(screen.getByText('flour')).toBeInTheDocument();
+      expect(screen.getAllByRole('checkbox').length).toBeGreaterThan(0);
     });
-    // Get all checkboxes and click the first one (flour ingredient checkbox)
+    // Get all checkboxes and click the first one (first ingredient checkbox)
     const checkboxes = screen.getAllByRole('checkbox') as HTMLInputElement[];
     await user.click(checkboxes[0]);
     const submitButton = screen.getByRole('button', { name: /get recipe suggestions/i });

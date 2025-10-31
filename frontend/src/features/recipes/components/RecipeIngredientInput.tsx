@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import type { RecipeIngredientCreate, IngredientRead } from '../../../shared/types';
 import { Button, Input, Select } from '../../../shared/components';
-import { ingredientService } from '../../../shared/services';
+import { ingredientService } from '../../ingredients/services/ingredientService';
 
 interface RecipeIngredientInputProps {
   ingredients: RecipeIngredientCreate[];

@@ -34,7 +34,7 @@ describe('useIngredientForm', () => {
   });
 
   it('should validate required fields', async () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
     const { result } = renderHook(() => useIngredientForm(null, onSubmit));
     await act(async () => {
       if (result.current) {

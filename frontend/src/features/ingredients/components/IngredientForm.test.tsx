@@ -24,32 +24,32 @@ describe('IngredientForm', () => {
         loading={false}
       />
     );
-    expect(screen.getByLabelText('Name')).toHaveValue('Apple');
-    expect(screen.getByLabelText('Quantity')).toHaveValue(100);
-    expect(screen.getByLabelText('Storage Location')).toHaveValue('fridge');
+    expect(screen.getByLabelText(/Name/i)).toHaveValue('Apple');
+    expect(screen.getByLabelText(/Quantity/i)).toHaveValue(100);
+    expect(screen.getByLabelText(/Storage Location/i)).toHaveValue('fridge');
   });
 
   it('handles input changes and form submission', () => {
-  const onSubmit = vi.fn();
+    const onSubmit = vi.fn();
     render(
       <IngredientForm
         ingredient={ingredient}
         onSubmit={onSubmit}
-        onCancel={jest.fn()}
+        onCancel={vi.fn()}
         loading={false}
       />
     );
-    fireEvent.input(screen.getByLabelText('Name'), { target: { value: 'Banana' } });
+    fireEvent.input(screen.getByLabelText(/Name/i), { target: { value: 'Banana' } });
     fireEvent.submit(screen.getByRole('form'));
     expect(onSubmit).toHaveBeenCalled();
   });
 
   it('calls onCancel when cancel button is clicked', () => {
-  const onCancel = vi.fn();
+    const onCancel = vi.fn();
     render(
       <IngredientForm
         ingredient={ingredient}
-        onSubmit={jest.fn()}
+        onSubmit={vi.fn()}
         onCancel={onCancel}
         loading={false}
       />

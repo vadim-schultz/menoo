@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Ingredient
@@ -17,11 +19,34 @@ class IngredientService:
         self.repository = IngredientRepository(session)
 
     async def create_ingredient(self, data: IngredientCreate) -> Ingredient:
-        """Create a new ingredient after validation."""
+        """Create a new ingredient or add quantity to existing one."""
         # Check if ingredient with same name already exists
         existing = await self.repository.get_by_name(data.name)
         if existing:
-            raise ValueError(f"Ingredient with name '{data.name}' already exists")
+            # Dump both to dicts and merge
+            existing_dict = {
+                "name": existing.name,
+                "storage_location": existing.storage_location,
+                "quantity": Decimal(str(existing.quantity)) if existing.quantity is not None else Decimal("0"),
+                "expiry_date": existing.expiry_date,
+            }
+            new_dict = data.model_dump()
+            
+            # Extract quantities before merging
+            existing_quantity = existing_dict.pop("quantity")
+            new_quantity = new_dict.pop("quantity", Decimal("0"))
+            
+            # Merge: new data overrides existing fields
+            merged = {**existing_dict, **new_dict}
+            
+            # Add quantities back (sum them)
+            merged["quantity"] = existing_quantity + new_quantity
+            
+            # Update existing ingredient with merged data
+            for key, value in merged.items():
+                setattr(existing, key, value)
+            
+            return await self.repository.update(existing)
 
         # Create ingredient from Pydantic model
         ingredient = Ingredient(**data.model_dump())
@@ -36,9 +61,12 @@ class IngredientService:
 
     async def list_ingredients(
         self,
-        filters: IngredientFilter,
+        filters: IngredientFilter | None = None,
     ) -> list[Ingredient]:
         """List ingredients with filters and pagination."""
+        if filters is None:
+            filters = IngredientFilter()
+        
         skip = (filters.page - 1) * filters.page_size
         
         # Get filter data and convert pagination params

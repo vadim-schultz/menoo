@@ -59,17 +59,25 @@ class TestIngredientCreate:
         assert "id" in data
 
     @pytest.mark.integration
-    async def test_create_duplicate_name(self, test_client):
-        """Should reject duplicate ingredient name."""
-        payload = ingredient_payload_factory(name="Tomato")
+    async def test_create_duplicate_name_adds_quantity(self, test_client):
+        """Should add quantity to existing ingredient with same name."""
+        payload1 = ingredient_payload_factory(name="Tomato", quantity=100)
 
         # Create first ingredient
-        await test_client.post(INGREDIENTS_URL, json=payload)
+        response1 = await test_client.post(INGREDIENTS_URL, json=payload1)
+        assert response1.status_code == HTTP_201_CREATED
+        created1 = response1.json()
+        initial_quantity = created1["quantity"]
 
-        # Try to create duplicate
-        response = await test_client.post(INGREDIENTS_URL, json=payload)
+        # Try to create duplicate with different quantity
+        payload2 = ingredient_payload_factory(name="Tomato", quantity=50)
+        response2 = await test_client.post(INGREDIENTS_URL, json=payload2)
 
-        assert response.status_code == HTTP_409_CONFLICT
+        assert response2.status_code == HTTP_201_CREATED
+        updated = response2.json()
+        # Should return same ingredient ID with updated quantity
+        assert updated["id"] == created1["id"]
+        assert float(updated["quantity"]) == float(initial_quantity) + 50
 
     @pytest.mark.integration
     async def test_create_missing_required_field(self, test_client):

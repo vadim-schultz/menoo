@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import type { SuggestionRequest, IngredientRead } from '../../../shared/types';
 import { Button, Select, Input } from '../../../shared/components';
-import { ingredientService } from '../../../shared/services';
+import { ingredientService } from '../../ingredients/services/ingredientService';
 
 interface SuggestionFormProps {
   onSubmit: (request: SuggestionRequest) => void;
@@ -23,7 +23,7 @@ export function SuggestionForm({ onSubmit, loading }: SuggestionFormProps) {
       setLoadingIngredients(true);
       try {
         const response = await ingredientService.list({ page_size: 1000 });
-        setAvailableIngredients(response.items);
+        setAvailableIngredients(response);
       } catch (error) {
         console.error('Failed to load ingredients:', error);
       } finally {
@@ -148,7 +148,7 @@ export function SuggestionForm({ onSubmit, loading }: SuggestionFormProps) {
                 <span style={{ fontSize: '0.875rem' }}>
                   {ingredient.name}
                   <span style={{ color: 'var(--color-text-light)', marginLeft: '0.25rem' }}>
-                    ({ingredient.quantity} {ingredient.unit})
+                    ({ingredient.quantity})
                   </span>
                 </span>
               </label>
