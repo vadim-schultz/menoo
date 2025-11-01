@@ -30,14 +30,16 @@ export function Input({
     onChange(target.value);
   };
 
-  const classes = ['input', error && 'input--error', className].filter(Boolean).join(' ');
+  // Pico CSS uses native input styling, add error class if needed
+  const inputClasses = error ? ['[aria-invalid="true"]', className] : [className];
+  const inputClassString = inputClasses.filter(Boolean).join(' ');
 
   return (
-    <div className="input-wrapper">
+    <div>
       {label && (
-        <label htmlFor={name} className="input__label">
+        <label htmlFor={name}>
           {label}
-          {required && <span className="input__required">*</span>}
+          {required && <span style={{ color: 'var(--pico-del-color, #c62828)' }}> *</span>}
         </label>
       )}
       <input
@@ -50,9 +52,15 @@ export function Input({
         placeholder={placeholder}
         required={required}
         disabled={disabled}
-        className={classes}
+        className={inputClassString || undefined}
+        aria-invalid={error ? 'true' : undefined}
+        aria-describedby={error ? `${name}-error` : undefined}
       />
-      {error && <span className="input__error">{error}</span>}
+      {error && (
+        <small id={`${name}-error`} style={{ color: 'var(--pico-del-color, #c62828)' }}>
+          {error}
+        </small>
+      )}
     </div>
   );
 }
@@ -89,14 +97,16 @@ export function Textarea({
     onChange(target.value);
   };
 
-  const classes = ['textarea', error && 'textarea--error', className].filter(Boolean).join(' ');
+  // Pico CSS uses native textarea styling
+  const textareaClasses = error ? ['[aria-invalid="true"]', className] : [className];
+  const textareaClassString = textareaClasses.filter(Boolean).join(' ');
 
   return (
-    <div className="textarea-wrapper">
+    <div>
       {label && (
-        <label htmlFor={name} className="textarea__label">
+        <label htmlFor={name}>
           {label}
-          {required && <span className="textarea__required">*</span>}
+          {required && <span style={{ color: 'var(--pico-del-color, #c62828)' }}> *</span>}
         </label>
       )}
       <textarea
@@ -109,9 +119,15 @@ export function Textarea({
         required={required}
         disabled={disabled}
         rows={rows}
-        className={classes}
+        className={textareaClassString || undefined}
+        aria-invalid={error ? 'true' : undefined}
+        aria-describedby={error ? `${name}-error` : undefined}
       />
-      {error && <span className="textarea__error">{error}</span>}
+      {error && (
+        <small id={`${name}-error`} style={{ color: 'var(--pico-del-color, #c62828)' }}>
+          {error}
+        </small>
+      )}
     </div>
   );
 }
@@ -148,14 +164,16 @@ export function Select({
     onChange(target.value);
   };
 
-  const classes = ['select', error && 'select--error', className].filter(Boolean).join(' ');
+  // Pico CSS uses native select styling
+  const selectClasses = error ? ['[aria-invalid="true"]', className] : [className];
+  const selectClassString = selectClasses.filter(Boolean).join(' ');
 
   return (
-    <div className="select-wrapper">
+    <div>
       {label && (
-        <label htmlFor={name} className="select__label">
+        <label htmlFor={name}>
           {label}
-          {required && <span className="select__required">*</span>}
+          {required && <span style={{ color: 'var(--pico-del-color, #c62828)' }}> *</span>}
         </label>
       )}
       <select
@@ -166,7 +184,9 @@ export function Select({
         onBlur={onBlur}
         required={required}
         disabled={disabled}
-        className={classes}
+        className={selectClassString || undefined}
+        aria-invalid={error ? 'true' : undefined}
+        aria-describedby={error ? `${name}-error` : undefined}
       >
         {placeholder && <option value="">{placeholder}</option>}
         {options.map((option) => (
@@ -175,7 +195,11 @@ export function Select({
           </option>
         ))}
       </select>
-      {error && <span className="select__error">{error}</span>}
+      {error && (
+        <small id={`${name}-error`} style={{ color: 'var(--pico-del-color, #c62828)' }}>
+          {error}
+        </small>
+      )}
     </div>
   );
 }

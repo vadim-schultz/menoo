@@ -21,7 +21,7 @@ export const IngredientFilterPanel = ({
   onExpiringBeforeChange,
   onApply,
   onReset,
-}: IngredientFiltersProps) => {
+}: IngredientFilterPanelProps) => {
   return (
     <div className="card" style={{ marginBottom: '1rem' }}>
       <h3 style={{ marginBottom: '0.75rem' }}>Filters</h3>

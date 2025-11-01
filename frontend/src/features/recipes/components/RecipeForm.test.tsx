@@ -20,11 +20,6 @@ vi.mock('./RecipeIngredientInput', () => ({
   RecipeIngredientInput: () => <div data-testid="recipe-ingredient-input">Ingredients</div>,
 }));
 
-// Mock RecipeAIAssistant
-vi.mock('./RecipeAIAssistant', () => ({
-  RecipeAIAssistant: () => <div data-testid="recipe-ai-assistant">AI Assistant</div>,
-}));
-
 describe('RecipeForm', () => {
   const mockOnSubmit = vi.fn();
   const mockOnCancel = vi.fn();
@@ -70,14 +65,6 @@ describe('RecipeForm', () => {
       expect(screen.getByLabelText(/prep time/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/cook time/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/servings/i)).toBeInTheDocument();
-    });
-
-    it('should render AI Assistant component', () => {
-      render(
-        <RecipeForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} loading={false} />
-      );
-
-      expect(screen.getByTestId('recipe-ai-assistant')).toBeInTheDocument();
     });
 
     it('should render with initial data when provided', () => {

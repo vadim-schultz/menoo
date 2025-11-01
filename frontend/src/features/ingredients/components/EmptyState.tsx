@@ -1,7 +1,5 @@
 export const EmptyState = () => (
-  <div className="card">
-    <p style={{ textAlign: 'center', color: 'var(--color-text-light)' }}>
-      No ingredients yet. Add your first ingredient to get started!
-    </p>
-  </div>
+  <article style={{ textAlign: 'center', padding: 'var(--pico-spacing)' }}>
+    <p>No ingredients yet. Add your first ingredient to get started!</p>
+  </article>
 );

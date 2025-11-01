@@ -4,17 +4,17 @@ import { Navigation } from './shared/components/Navigation';
 
 // Feature pages
 import { IngredientsContainer } from './features/ingredients/containers/IngredientsContainer';
-import { RecipesPage } from './features/recipes/pages/RecipesPage';
-import { HomePage } from './features/home/HomePage';
+import { RecipesContainer } from './features/recipes/containers/RecipesContainer';
+import { StorageContainer } from './features/storage/containers/StorageContainer';
 
 export function App() {
   return (
     <Layout>
       <Navigation />
       <Router>
-        <Route path="/" component={HomePage} />
+        <Route path="/" component={StorageContainer} />
         <Route path="/ingredients" component={IngredientsContainer} />
-        <Route path="/recipes" component={RecipesPage} />
+        <Route path="/recipes" component={RecipesContainer} />
       </Router>
     </Layout>
   );

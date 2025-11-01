@@ -6,8 +6,10 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   return (
-    <div className="layout">
-      <main className="layout__main">{children}</main>
+    <div>
+      <main style={{ maxWidth: '1200px', width: '100%', margin: '0 auto', padding: 'var(--pico-spacing)' }}>
+        {children}
+      </main>
     </div>
   );
 }
