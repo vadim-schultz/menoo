@@ -112,3 +112,27 @@ class RecipeListResponse(BaseModel):
     page: int
     page_size: int
     has_next: bool
+
+
+class RecipeGenerationRequest(BaseModel):
+    """Request for AI-powered recipe generation."""
+
+    name: str | None = Field(
+        None, min_length=1, max_length=200, description="Recipe name (optional, AI can suggest)"
+    )
+    description: str | None = Field(None, description="Recipe description (optional)")
+    ingredients: list[int] = Field(
+        ..., min_length=1, description="List of available ingredient IDs"
+    )
+    max_prep_time: int | None = Field(None, gt=0, description="Maximum prep time in minutes")
+    max_cook_time: int | None = Field(None, gt=0, description="Maximum cook time in minutes")
+    difficulty: Literal["easy", "medium", "hard"] | None = Field(
+        None, description="Preferred difficulty level"
+    )
+    dietary_restrictions: list[str] = Field(
+        default_factory=list, description="Dietary restrictions or preferences"
+    )
+    enhance_existing: bool = Field(
+        default=False,
+        description="If True, fill missing fields in partial recipe. If False, generate from scratch.",
+    )

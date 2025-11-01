@@ -230,8 +230,9 @@ export function SuggestionList({
                       </div>
                     </details>
                     {onSaveAIRecipe && (
-                      <div style={{ marginTop: '1rem' }}>
+                      <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
                         <Button
+                          variant="secondary"
                           onClick={async () => {
                             setSavingRecipeKey(String(recipeKey));
                             await onSaveAIRecipe(suggestion);
@@ -239,7 +240,9 @@ export function SuggestionList({
                           }}
                           disabled={savingRecipeKey === String(recipeKey)}
                         >
-                          {savingRecipeKey === String(recipeKey) ? 'Saving...' : '💾 Save Recipe'}
+                          {savingRecipeKey === String(recipeKey)
+                            ? 'Opening...'
+                            : '📝 Edit & Save'}
                         </Button>
                       </div>
                     )}

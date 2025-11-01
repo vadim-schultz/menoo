@@ -18,7 +18,7 @@ export function RecipeIngredientInput({ ingredients, onChange }: RecipeIngredien
       setLoading(true);
       try {
         const response = await ingredientService.list({ page_size: 1000 });
-        setAvailableIngredients(response.items);
+        setAvailableIngredients(response);
       } catch (error) {
         console.error('Failed to load ingredients:', error);
       } finally {
@@ -55,7 +55,7 @@ export function RecipeIngredientInput({ ingredients, onChange }: RecipeIngredien
 
   const ingredientOptions = availableIngredients.map((ing) => ({
     value: String(ing.id),
-    label: `${ing.name} (${ing.quantity} ${ing.unit})`,
+    label: `${ing.name} (${ing.quantity || 0})`,
   }));
 
   return (

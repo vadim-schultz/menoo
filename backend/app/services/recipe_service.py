@@ -10,7 +10,14 @@ from app.repositories import (
     RecipeIngredientRepository,
     RecipeRepository,
 )
-from app.schemas import RecipeCreate, RecipeIngredientRead, RecipeUpdate
+from app.services.suggestion_service import SuggestionService
+from app.schemas import (
+    GeneratedRecipe,
+    RecipeCreate,
+    RecipeGenerationRequest,
+    RecipeIngredientRead,
+    RecipeUpdate,
+)
 
 
 class RecipeService:
@@ -21,6 +28,15 @@ class RecipeService:
         self.recipe_repo = RecipeRepository(session)
         self.recipe_ingredient_repo = RecipeIngredientRepository(session)
         self.ingredient_repo = IngredientRepository(session)
+        self._session = session
+        self._suggestion_service: SuggestionService | None = None
+
+    @property
+    def suggestion_service(self) -> SuggestionService:
+        """Lazily initialize suggestion service."""
+        if self._suggestion_service is None:
+            self._suggestion_service = SuggestionService(self._session)
+        return self._suggestion_service
 
     async def create_recipe(self, data: RecipeCreate) -> Recipe:
         """Create a new recipe with ingredients."""
@@ -174,3 +190,59 @@ class RecipeService:
 
         missing_ingredients = await self.ingredient_repo.get_by_ids(list(missing_ids))
         return [ing.name for ing in missing_ingredients]
+
+    async def generate_recipe_from_partial(
+        self, request: RecipeGenerationRequest
+    ) -> GeneratedRecipe:
+        """
+        Generate a complete recipe using AI from partial information.
+
+        This method uses SuggestionService internally to generate recipes via AI.
+
+        Args:
+            request: RecipeGenerationRequest with partial recipe data
+
+        Returns:
+            GeneratedRecipe with complete recipe data
+
+        Raises:
+            ValueError: If generation fails or invalid input
+        """
+        return await self.suggestion_service.generate_recipe_from_partial(request)
+
+    def _convert_generated_to_create(
+        self, generated: GeneratedRecipe
+    ) -> RecipeCreate:
+        """
+        Convert GeneratedRecipe to RecipeCreate format.
+
+        Args:
+            generated: AI-generated recipe
+
+        Returns:
+            RecipeCreate suitable for create_recipe method
+        """
+        from decimal import Decimal
+
+        recipe_ingredients = [
+            RecipeIngredientCreate(
+                ingredient_id=ing.ingredient_id,
+                quantity=Decimal(str(ing.quantity)),
+                unit=ing.unit,
+                is_optional=False,
+                note=None,
+            )
+            for ing in generated.ingredients
+            if ing.ingredient_id > 0  # Only include ingredients from our database
+        ]
+
+        return RecipeCreate(
+            name=generated.name,
+            description=generated.description,
+            instructions=generated.instructions,
+            prep_time=generated.prep_time_minutes,
+            cook_time=generated.cook_time_minutes,
+            servings=generated.servings or 1,
+            difficulty=generated.difficulty,
+            ingredients=recipe_ingredients,
+        )

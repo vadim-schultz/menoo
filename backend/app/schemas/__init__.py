@@ -12,6 +12,7 @@ from app.schemas.ingredient import (
 from app.schemas.recipe import (
     RecipeCreate,
     RecipeDetail,
+    RecipeGenerationRequest,
     RecipeIngredientCreate,
     RecipeIngredientRead,
     RecipeListResponse,
@@ -43,6 +44,7 @@ __all__ = [
     "RecipeRead",
     "RecipeDetail",
     "RecipeListResponse",
+    "RecipeGenerationRequest",
     "RecipeIngredientCreate",
     "RecipeIngredientRead",
     "SuggestionRequest",

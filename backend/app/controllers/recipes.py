@@ -6,8 +6,10 @@ from litestar import Controller, delete, get, patch, post, put
 from litestar.params import Parameter
 
 from app.schemas import (
+    GeneratedRecipe,
     RecipeCreate,
     RecipeDetail,
+    RecipeGenerationRequest,
     RecipeIngredientCreate,
     RecipeIngredientRead,
     RecipeListResponse,
@@ -160,3 +162,33 @@ class RecipeController(Controller):
         update_data = RecipeUpdate(ingredients=data)
         await recipe_service.update_recipe(recipe_id, update_data)
         return await recipe_service.get_recipe_ingredients(recipe_id)
+
+    @post("/generate")
+    async def generate_recipe(
+        self,
+        recipe_service: RecipeService,
+        data: RecipeGenerationRequest,
+    ) -> GeneratedRecipe:
+        """
+        Generate a complete recipe using AI from minimal input.
+
+        Accepts partial recipe information (name, ingredients, preferences) and
+        returns a complete AI-generated recipe. The result can be used with
+        POST /recipes to create the recipe.
+        """
+        return await recipe_service.generate_recipe_from_partial(data)
+
+    @post("/suggest")
+    async def suggest_recipe(
+        self,
+        recipe_service: RecipeService,
+        data: RecipeGenerationRequest,
+    ) -> GeneratedRecipe:
+        """
+        Suggest a recipe based on partial information.
+
+        Alias for /generate endpoint. Generates recipe suggestions that can be
+        used to create recipes. This endpoint is intended for generating
+        suggestions during recipe creation workflow.
+        """
+        return await recipe_service.generate_recipe_from_partial(data)

@@ -17,5 +17,10 @@ module.exports = {
     'prettier/prettier': 'error',
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    // Prevent duplicate variable/function declarations in the same scope
+    'no-redeclare': 'error',
+    '@typescript-eslint/no-redeclare': 'error',
+    // Prevent duplicate variable declarations
+    'no-duplicate-imports': 'error',
   },
 };

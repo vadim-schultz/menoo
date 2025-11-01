@@ -67,21 +67,36 @@ export function SuggestionsPage() {
       return;
     }
 
-    try {
-      const savedRecipe = await acceptSuggestion({
-        generated_recipe: suggestion.generated_recipe,
-      });
+    // Instead of immediately saving, navigate to recipe form for editing
+    // Extract ingredient IDs from generated recipe
+    const ingredientIds = suggestion.generated_recipe.ingredients
+      .filter((ing) => ing.ingredient_id > 0)
+      .map((ing) => ing.ingredient_id);
 
-      // Show success message
-      alert(
-        `Recipe "${savedRecipe.name}" saved successfully! You can find it in your recipe collection.`
-      );
+    // Use sessionStorage to pass data, then navigate to recipes page
+    if (typeof window !== 'undefined') {
+      const formData = {
+        ingredientIds,
+        name: suggestion.generated_recipe.name,
+        description: suggestion.generated_recipe.description || undefined,
+      };
+      sessionStorage.setItem('recipeFormInitialData', JSON.stringify(formData));
+      // Navigate to recipes page - it will detect the stored data and open modal
+      window.location.href = '/recipes';
+    } else {
+      // Fallback: save directly if navigation not available
+      try {
+        const savedRecipe = await acceptSuggestion({
+          generated_recipe: suggestion.generated_recipe,
+        });
 
-      // Refresh suggestions to remove the saved AI recipe
-      // Optionally navigate to the saved recipe
-    } catch (err) {
-      console.error('Failed to save AI recipe:', err);
-      alert('Failed to save recipe. Please try again.');
+        alert(
+          `Recipe "${savedRecipe.name}" saved successfully! You can find it in your recipe collection.`
+        );
+      } catch (err) {
+        console.error('Failed to save AI recipe:', err);
+        alert('Failed to save recipe. Please try again.');
+      }
     }
   };
 

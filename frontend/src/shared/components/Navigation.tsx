@@ -13,9 +13,6 @@ export function Navigation() {
         <li>
           <a href="/recipes">Recipes</a>
         </li>
-        <li>
-          <a href="/suggestions">Suggestions</a>
-        </li>
       </ul>
     </nav>
   );
