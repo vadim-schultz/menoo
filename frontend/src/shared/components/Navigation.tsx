@@ -1,17 +1,27 @@
+import { Utensils, Package } from 'lucide-preact';
+
 export function Navigation() {
   return (
-    <nav className="navigation">
-      <div className="navigation__brand">
-        <a href="/" className="navigation__logo">
-          Menoo
-        </a>
-      </div>
-      <ul className="navigation__menu">
+    <nav>
+      <ul style={{ display: 'flex', listStyle: 'none', margin: 0, padding: 'var(--pico-spacing)', gap: 'var(--pico-spacing)', borderBottom: '1px solid var(--pico-border-color)' }}>
         <li>
-          <a href="/ingredients">Ingredients</a>
+          <strong>
+            <a href="/" style={{ textDecoration: 'none', color: 'var(--pico-primary)' }}>
+              Menoo
+            </a>
+          </strong>
+        </li>
+        <li style={{ marginLeft: 'auto' }}>
+          <a href="/ingredients" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+            <Package size={16} />
+            Ingredients
+          </a>
         </li>
         <li>
-          <a href="/recipes">Recipes</a>
+          <a href="/recipes" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+            <Utensils size={16} />
+            Recipes
+          </a>
         </li>
       </ul>
     </nav>

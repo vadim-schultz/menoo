@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'preact/hooks';
-import type { RecipeIngredientCreate, IngredientRead } from '../../../shared/types';
+import type { RecipeIngredientCreate } from '../../../shared/types';
 import { Button, Input, Select } from '../../../shared/components';
-import { ingredientService } from '../../ingredients/services/ingredientService';
+import { Check } from 'lucide-preact';
+import { useRecipeIngredientInput } from '../hooks/useRecipeIngredientInput';
+import { RecipeIngredientListEmpty } from './RecipeIngredientListEmpty';
+import { RecipeIngredientListContent } from './RecipeIngredientListContent';
 
 interface RecipeIngredientInputProps {
   ingredients: RecipeIngredientCreate[];
@@ -9,182 +11,70 @@ interface RecipeIngredientInputProps {
 }
 
 export function RecipeIngredientInput({ ingredients, onChange }: RecipeIngredientInputProps) {
-  const [availableIngredients, setAvailableIngredients] = useState<IngredientRead[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  // Load available ingredients on mount
-  useEffect(() => {
-    const loadIngredients = async () => {
-      setLoading(true);
-      try {
-        const response = await ingredientService.list({ page_size: 1000 });
-        setAvailableIngredients(response);
-      } catch (error) {
-        console.error('Failed to load ingredients:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadIngredients();
-  }, []);
-
-  const addIngredient = () => {
-    const newIngredient: RecipeIngredientCreate = {
-      ingredient_id: 0,
-      quantity: 0,
-      unit: '',
-      is_optional: false,
-      note: null,
-    };
-    onChange([...ingredients, newIngredient]);
-  };
-
-  const removeIngredient = (index: number) => {
-    onChange(ingredients.filter((_, i) => i !== index));
-  };
-
-  const updateIngredient = (index: number, field: keyof RecipeIngredientCreate, value: any) => {
-    const updated = ingredients.map((ing, i) => {
-      if (i === index) {
-        return { ...ing, [field]: value };
-      }
-      return ing;
-    });
-    onChange(updated);
-  };
-
-  const ingredientOptions = availableIngredients.map((ing) => ({
-    value: String(ing.id),
-    label: `${ing.name} (${ing.quantity || 0})`,
-  }));
+  const {
+    ingredientOptions,
+    loading,
+    entryIngredientId,
+    setEntryIngredientId,
+    entryQuantity,
+    setEntryQuantity,
+    confirmEntryAdd,
+    removeIngredient,
+    updateIngredient,
+  } = useRecipeIngredientInput();
 
   return (
     <div>
+      <div style={{ marginBottom: '0.75rem' }}>
+        <label style={{ fontWeight: 500 }}>Ingredients</label>
+      </div>
+
+      {/* Entry form row */}
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: 'grid',
+          gridTemplateColumns: '2fr 1fr auto',
+          gap: '0.5rem',
+          alignItems: 'end',
           marginBottom: '1rem',
         }}
       >
-        <label style={{ fontWeight: 500 }}>Ingredients</label>
-        <Button variant="secondary" onClick={addIngredient} disabled={loading} type="button">
-          + Add Ingredient
-        </Button>
+        <Select
+          name={`entry-ingredient`}
+          value={String(entryIngredientId || '')}
+          onChange={(value) => setEntryIngredientId(parseInt(value) || 0)}
+          options={ingredientOptions}
+          placeholder="Select ingredient"
+        />
+
+        <Input
+          name={`entry-quantity`}
+          type="number"
+          value={entryQuantity}
+          onChange={(value) => setEntryQuantity(parseFloat(value) || 0)}
+          placeholder="Qty"
+        />
+
+        <div>
+          <Button
+            icon={Check}
+            type="button"
+            onClick={() => confirmEntryAdd(ingredients, onChange)}
+            aria-label="Add ingredient"
+            disabled={loading}
+          />
+        </div>
       </div>
 
       {ingredients.length === 0 ? (
-        <p style={{ color: 'var(--color-text-light)', fontSize: '0.875rem', fontStyle: 'italic' }}>
-          No ingredients added yet. Click "Add Ingredient" to get started.
-        </p>
+        <RecipeIngredientListEmpty />
       ) : (
-        <div style={{ display: 'grid', gap: '1rem' }}>
-          {ingredients.map((ingredient, index) => {
-            const selectedIngredient = availableIngredients.find(
-              (ing) => ing.id === ingredient.ingredient_id
-            );
-
-            return (
-              <div
-                key={index}
-                style={{
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius)',
-                  padding: '1rem',
-                  backgroundColor: 'var(--color-bg-secondary)',
-                }}
-              >
-                <div style={{ display: 'grid', gap: '0.75rem' }}>
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: '2fr 1fr 1fr auto',
-                      gap: '0.5rem',
-                      alignItems: 'start',
-                    }}
-                  >
-                    <Select
-                      label="Ingredient"
-                      name={`ingredient-${index}`}
-                      value={String(ingredient.ingredient_id || '')}
-                      onChange={(value) =>
-                        updateIngredient(index, 'ingredient_id', parseInt(value) || 0)
-                      }
-                      options={ingredientOptions}
-                      placeholder="Select ingredient"
-                      required
-                    />
-
-                    <Input
-                      label="Quantity"
-                      name={`quantity-${index}`}
-                      type="number"
-                      value={ingredient.quantity}
-                      onChange={(value) =>
-                        updateIngredient(index, 'quantity', parseFloat(value) || 0)
-                      }
-                      required
-                    />
-
-                    <Input
-                      label="Unit"
-                      name={`unit-${index}`}
-                      value={ingredient.unit}
-                      onChange={(value) => updateIngredient(index, 'unit', value)}
-                      placeholder={selectedIngredient?.unit || 'e.g., g, ml'}
-                      required
-                    />
-
-                    <div style={{ paddingTop: '1.75rem' }}>
-                      <Button
-                        variant="danger"
-                        onClick={() => removeIngredient(index)}
-                        type="button"
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '0.5rem' }}>
-                    <Input
-                      label="Note (optional)"
-                      name={`note-${index}`}
-                      value={ingredient.note || ''}
-                      onChange={(value) => updateIngredient(index, 'note', value || null)}
-                      placeholder="e.g., finely chopped"
-                    />
-
-                    <div style={{ paddingTop: '1.75rem' }}>
-                      <label
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          fontSize: '0.875rem',
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={ingredient.is_optional || false}
-                          onChange={(e) =>
-                            updateIngredient(
-                              index,
-                              'is_optional',
-                              (e.target as HTMLInputElement).checked
-                            )
-                          }
-                        />
-                        Optional
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <RecipeIngredientListContent
+          ingredients={ingredients}
+          ingredientOptions={ingredientOptions}
+          onUpdate={(idx, field, value) => updateIngredient(ingredients, idx, field, value, onChange)}
+          onRemove={(idx) => removeIngredient(ingredients, idx, onChange)}
+        />
       )}
     </div>
   );

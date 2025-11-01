@@ -4,9 +4,10 @@ import type { RecipeCreate, RecipeDetail, RecipeIngredientCreate } from '../../.
 import { Button, Input, Select } from '../../../shared/components';
 import { Textarea } from '../../../shared/components/Input';
 import { RecipeIngredientInput } from './RecipeIngredientInput';
-import { RecipeAIAssistant } from './RecipeAIAssistant';
-import { useRecipeAI } from '../hooks/useRecipeAI';
-import type { RecipeGenerationRequest } from '../../../shared/types';
+// Removed RecipeAIAssistant; field-level generation triggers are used instead
+import { useRecipeFormAI } from '../hooks/useRecipeFormAI';
+import { difficultyOptions } from '../services/recipeOptions';
+import { validateRecipe } from '../services/recipeValidation';
 
 interface RecipeFormInitialData {
   ingredientIds?: number[];
@@ -22,11 +23,7 @@ interface RecipeFormProps {
   initialData?: RecipeFormInitialData | null;
 }
 
-const difficultyOptions = [
-  { value: 'easy', label: 'Easy' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'hard', label: 'Hard' },
-];
+// options moved to services/recipeOptions
 
 export function RecipeForm({
   recipe,
@@ -53,33 +50,7 @@ export function RecipeForm({
       []
   );
 
-  const { generateRecipe, generating, generationError, convertGeneratedToCreate } = useRecipeAI();
-
-  const validate = (values: RecipeCreate) => {
-    const errors: Record<string, string> = {};
-
-    if (!values.name || values.name.trim() === '') {
-      errors.name = 'Name is required';
-    }
-
-    if (!values.instructions || values.instructions.trim() === '') {
-      errors.instructions = 'Instructions are required';
-    }
-
-    if (values.prep_time && values.prep_time < 0) {
-      errors.prep_time = 'Prep time must be positive';
-    }
-
-    if (values.cook_time && values.cook_time < 0) {
-      errors.cook_time = 'Cook time must be positive';
-    }
-
-    if (values.servings && values.servings < 1) {
-      errors.servings = 'Servings must be at least 1';
-    }
-
-    return errors;
-  };
+  // AI handlers moved to hook that uses useRecipeAI internally
 
   const handleSubmit = (values: RecipeCreate) => {
     // Include ingredients in the submission
@@ -111,123 +82,26 @@ export function RecipeForm({
           difficulty: null,
         },
     onSubmit: handleSubmit,
-    validate,
+    validate: validateRecipe,
   });
 
-  const handleGenerateRecipe = async () => {
-    const ingredientIds = ingredients
-      .filter((ing) => ing.ingredient_id > 0)
-      .map((ing) => ing.ingredient_id);
-
-    if (ingredientIds.length === 0) {
-      alert('Please add at least one ingredient before generating a recipe');
-      return;
-    }
-
-    try {
-      const request: RecipeGenerationRequest = {
-        name: form.values.name || null,
-        description: form.values.description,
-        ingredients: ingredientIds,
-        max_prep_time: form.values.prep_time || null,
-        max_cook_time: form.values.cook_time || null,
-        difficulty: form.values.difficulty || null,
-        enhance_existing: false,
-      };
-
-      const generated = await generateRecipe(request);
-      const recipeCreate = convertGeneratedToCreate(generated);
-
-      // Apply generated recipe to form
-      form.setValues({
-        name: recipeCreate.name,
-        description: recipeCreate.description || null,
-        instructions: recipeCreate.instructions,
-        prep_time: recipeCreate.prep_time,
-        cook_time: recipeCreate.cook_time,
-        servings: recipeCreate.servings,
-        difficulty: recipeCreate.difficulty,
-      });
-
-      setIngredients(recipeCreate.ingredients || []);
-    } catch (error) {
-      console.error('Failed to generate recipe:', error);
-      alert('Failed to generate recipe. Please try again.');
-    }
-  };
-
-  const handleEnhanceRecipe = async () => {
-    const ingredientIds = ingredients
-      .filter((ing) => ing.ingredient_id > 0)
-      .map((ing) => ing.ingredient_id);
-
-    if (ingredientIds.length === 0) {
-      alert('Please add at least one ingredient before enhancing a recipe');
-      return;
-    }
-
-    if (!form.values.name && !form.values.description) {
-      alert('Please provide at least a recipe name or description to enhance');
-      return;
-    }
-
-    try {
-      const request: RecipeGenerationRequest = {
-        name: form.values.name || null,
-        description: form.values.description,
-        ingredients: ingredientIds,
-        max_prep_time: form.values.prep_time || null,
-        max_cook_time: form.values.cook_time || null,
-        difficulty: form.values.difficulty || null,
-        enhance_existing: true,
-      };
-
-      const generated = await generateRecipe(request);
-      const recipeCreate = convertGeneratedToCreate(generated);
-
-      // Fill missing fields only
-      if (!form.values.name && recipeCreate.name) {
-        form.handleChange('name', recipeCreate.name);
-      }
-      if (!form.values.description && recipeCreate.description) {
-        form.handleChange('description', recipeCreate.description);
-      }
-      if (!form.values.instructions && recipeCreate.instructions) {
-        form.handleChange('instructions', recipeCreate.instructions);
-      }
-      if (!form.values.prep_time && recipeCreate.prep_time) {
-        form.handleChange('prep_time', recipeCreate.prep_time);
-      }
-      if (!form.values.cook_time && recipeCreate.cook_time) {
-        form.handleChange('cook_time', recipeCreate.cook_time);
-      }
-      if (!form.values.servings && recipeCreate.servings) {
-        form.handleChange('servings', recipeCreate.servings);
-      }
-      if (!form.values.difficulty && recipeCreate.difficulty) {
-        form.handleChange('difficulty', recipeCreate.difficulty);
-      }
-
-      // Update ingredients if generated ones exist
-      if (recipeCreate.ingredients && recipeCreate.ingredients.length > 0) {
-        setIngredients(recipeCreate.ingredients);
-      }
-    } catch (error) {
-      console.error('Failed to enhance recipe:', error);
-      alert('Failed to enhance recipe. Please try again.');
-    }
-  };
-
-  const hasIngredients = ingredients.some((ing) => ing.ingredient_id > 0);
-  const hasPartialRecipe = !!(form.values.name || form.values.description);
-  const canGenerate = hasIngredients;
-  const canEnhance = hasIngredients && hasPartialRecipe;
+  const { handleEnhanceRecipe } = useRecipeFormAI(form, ingredients, setIngredients);
 
   return (
     <form onSubmit={form.handleSubmit}>
+      {/* Ingredient selection moved to top */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        <RecipeIngredientInput ingredients={ingredients} onChange={setIngredients} />
+      </div>
+
       <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <label style={{ fontWeight: 500 }}>Recipe Name</label>
+          <button type="button" onClick={handleEnhanceRecipe} aria-label="Generate recipe with AI" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+            ✨
+          </button>
+        </div>
         <Input
-          label="Recipe Name"
           name="name"
           value={form.values.name}
           onChange={(value) => form.handleChange('name', value)}
@@ -236,26 +110,33 @@ export function RecipeForm({
           placeholder="e.g., Spaghetti Carbonara"
           required
         />
-        {!form.values.name && (
-          <p style={{ fontSize: '0.75rem', color: 'var(--color-text-light)', marginTop: '0.25rem' }}>
-            💡 Tip: Leave blank to let AI suggest a recipe name based on your ingredients
-          </p>
-        )}
       </div>
 
-      <Textarea
-        label="Description"
-        name="description"
-        value={form.values.description || ''}
-        onChange={(value) => form.handleChange('description', value || null)}
-        onBlur={() => form.handleBlur('description')}
-        placeholder="Brief description of the recipe (optional)"
-        rows={2}
-      />
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <label style={{ fontWeight: 500 }}>Description</label>
+          <button type="button" onClick={handleEnhanceRecipe} aria-label="Generate description with AI" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+            ✨
+          </button>
+        </div>
+        <Textarea
+          name="description"
+          value={form.values.description || ''}
+          onChange={(value) => form.handleChange('description', value || null)}
+          onBlur={() => form.handleBlur('description')}
+          placeholder="Brief description of the recipe (optional)"
+          rows={2}
+        />
+      </div>
 
       <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <label style={{ fontWeight: 500 }}>Instructions</label>
+          <button type="button" onClick={handleEnhanceRecipe} aria-label="Generate instructions with AI" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+            ✨
+          </button>
+        </div>
         <Textarea
-          label="Instructions"
           name="instructions"
           value={form.values.instructions}
           onChange={(value) => form.handleChange('instructions', value)}
@@ -265,11 +146,6 @@ export function RecipeForm({
           rows={6}
           required
         />
-        {!form.values.instructions && hasIngredients && (
-          <p style={{ fontSize: '0.75rem', color: 'var(--color-text-light)', marginTop: '0.25rem' }}>
-            💡 Tip: Click "Fill with AI" below to generate instructions automatically
-          </p>
-        )}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -318,18 +194,7 @@ export function RecipeForm({
         />
       </div>
 
-      <div style={{ marginTop: '1.5rem', marginBottom: '1rem' }}>
-        <RecipeIngredientInput ingredients={ingredients} onChange={setIngredients} />
-      </div>
-
-      <RecipeAIAssistant
-        canGenerate={canGenerate}
-        canEnhance={canEnhance}
-        generating={generating}
-        onGenerate={handleGenerateRecipe}
-        onEnhance={handleEnhanceRecipe}
-        generationError={generationError}
-      />
+      {/* Removed RecipeAIAssistant; generation is triggered via ✨ buttons above */}
 
       <div
         style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}

@@ -1,8 +1,10 @@
-export * from './IngredientCard';
-export * from './IngredientGrid';
+export * from './IngredientTable';
 export * from './EmptyState';
 export * from './IngredientFormFields';
 export * from './IngredientModal';
 export * from './IngredientFilters';
 export { IngredientFilterPanel } from './IngredientFilters';
 export * from './IngredientPagination';
+export * from './IngredientsLoading';
+export * from './IngredientsError';
+export * from './IngredientsContent';
