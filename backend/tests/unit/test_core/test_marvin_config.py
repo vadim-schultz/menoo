@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+import os
 
 import pytest
 
@@ -18,15 +19,16 @@ class TestConfigureMarvin:
             mock_settings = type("Settings", (), {"openai_api_key": "sk-test-key-123"})()
             mock_get_settings.return_value = mock_settings
 
-            # Mock the marvin module to avoid actually setting API keys
-            with patch("app.core.marvin_config.marvin"):
-                # Should not raise an exception
-                try:
+            with patch.dict(os.environ, {}, clear=False):
+                # Mock marvin.settings structure
+                with patch("app.core.marvin_config.marvin") as mock_marvin:
+                    mock_marvin.settings = MagicMock()
+                    mock_marvin.settings.openai = MagicMock()
+                    
+                    # Should not raise an exception
                     configure_marvin()
-                    # If we get here, configuration succeeded
-                    assert True
-                except ValueError:
-                    pytest.fail("configure_marvin raised ValueError unexpectedly")
+                    # Verify environment variable was set
+                    assert os.environ.get('OPENAI_API_KEY') == "sk-test-key-123"
 
     def test_configure_with_missing_api_key(self):
         """Should raise error when API key is missing."""
@@ -65,13 +67,51 @@ class TestConfigureMarvin:
             mock_settings = type("Settings", (), {"openai_api_key": "sk-test-key-123"})()
             mock_get_settings.return_value = mock_settings
 
-            # Mock the marvin module to avoid actually setting API keys
-            with patch("app.core.marvin_config.marvin"):
-                # Call multiple times - should not raise exceptions
-                try:
+            with patch.dict(os.environ, {}, clear=False):
+                # Mock marvin.settings structure
+                with patch("app.core.marvin_config.marvin") as mock_marvin:
+                    mock_marvin.settings = MagicMock()
+                    mock_marvin.settings.openai = MagicMock()
+
+                    # Call multiple times - should not raise exceptions
                     configure_marvin()
                     configure_marvin()
                     configure_marvin()
-                    assert True
-                except Exception as e:
-                    pytest.fail(f"Multiple calls to configure_marvin failed: {e}")
+                    assert os.environ.get('OPENAI_API_KEY') == "sk-test-key-123"
+
+    def test_configure_sets_environment_variable(self):
+        """Should set OPENAI_API_KEY environment variable."""
+        with patch("app.core.marvin_config.get_settings") as mock_get_settings:
+            api_key = "sk-test-key-456"
+            mock_settings = type("Settings", (), {"openai_api_key": api_key})()
+            mock_get_settings.return_value = mock_settings
+
+            with patch.dict(os.environ, {}, clear=False):
+                with patch("app.core.marvin_config.marvin") as mock_marvin:
+                    mock_marvin.settings = MagicMock()
+                    # Simulate marvin.settings.openai not existing
+                    del mock_marvin.settings.openai
+                    
+                    configure_marvin()
+                    
+                    # Verify environment variable was set
+                    assert os.environ.get('OPENAI_API_KEY') == api_key
+
+    def test_configure_with_attribute_error_fallback(self):
+        """Should fall back to environment variable when settings structure differs."""
+        with patch("app.core.marvin_config.get_settings") as mock_get_settings:
+            api_key = "sk-test-key-789"
+            mock_settings = type("Settings", (), {"openai_api_key": api_key})()
+            mock_get_settings.return_value = mock_settings
+
+            with patch.dict(os.environ, {}, clear=False):
+                with patch("app.core.marvin_config.marvin") as mock_marvin:
+                    # Simulate marvin.settings not having openai attribute
+                    mock_marvin.settings = MagicMock()
+                    # Remove openai attribute to trigger fallback
+                    if hasattr(mock_marvin.settings, 'openai'):
+                        delattr(mock_marvin.settings, 'openai')
+                    
+                    # Should not raise exception, should set environment variable
+                    configure_marvin()
+                    assert os.environ.get('OPENAI_API_KEY') == api_key

@@ -33,6 +33,7 @@ class GeneratedRecipe(BaseModel):
     meal_type: str | None = Field(None, description="Meal type: breakfast, lunch, dinner, etc.")
 
 
+
 class SuggestionAcceptRequest(BaseModel):
     """Request to accept and persist an AI-generated recipe."""
 
@@ -96,3 +97,19 @@ class ShoppingListResponse(BaseModel):
 
     items_by_location: dict[str, list[ShoppingListItem]]
     total_items: int
+
+
+# Rebuild models to ensure forward references are resolved
+# This helps with Pydantic validation in async contexts like Marvin
+# Must rebuild in order: nested models first, then parent models
+# Rebuild models to resolve forward references from __future__ annotations
+# This ensures Marvin can properly validate the models
+try:
+    GeneratedRecipeIngredient.model_rebuild()
+    GeneratedRecipe.model_rebuild()
+    # Rebuild other models that reference GeneratedRecipe
+    RecipeSuggestion.model_rebuild()
+    SuggestionAcceptRequest.model_rebuild()
+except Exception:
+    # If rebuild fails (e.g., during import), models will be rebuilt lazily
+    pass

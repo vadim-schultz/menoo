@@ -10,7 +10,7 @@ export function HomePage() {
         <ul style={{ marginLeft: '1.5rem' }}>
           <li>Add your ingredients to the inventory</li>
           <li>Create recipes with those ingredients</li>
-          <li>Get suggestions for what you can cook</li>
+          <li>Use AI to generate recipes from your ingredients</li>
         </ul>
       </div>
     </div>

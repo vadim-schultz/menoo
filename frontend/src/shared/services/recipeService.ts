@@ -5,9 +5,11 @@ import type {
   RecipeDetail,
   RecipeListResponse,
   RecipeFilters,
+  RecipeGenerationRequest,
   RecipeIngredientCreate,
   RecipeIngredientRead,
 } from '../types';
+import type { GeneratedRecipe } from '../types/suggestion';
 
 export const recipeService = {
   async list(filters?: RecipeFilters): Promise<RecipeListResponse> {
@@ -39,5 +41,13 @@ export const recipeService = {
     ingredients: RecipeIngredientCreate[]
   ): Promise<RecipeIngredientRead[]> {
     return apiClient.post<RecipeIngredientRead[]>(`/recipes/${id}/ingredients`, ingredients);
+  },
+
+  async generateRecipe(request: RecipeGenerationRequest): Promise<GeneratedRecipe> {
+    return apiClient.post<GeneratedRecipe>('/recipes/generate', request);
+  },
+
+  async suggestRecipe(request: RecipeGenerationRequest): Promise<GeneratedRecipe> {
+    return apiClient.post<GeneratedRecipe>('/recipes/suggest', request);
   },
 };

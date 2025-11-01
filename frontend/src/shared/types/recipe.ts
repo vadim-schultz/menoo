@@ -69,3 +69,14 @@ export interface RecipeFilters {
   page?: number;
   page_size?: number;
 }
+
+export interface RecipeGenerationRequest {
+  name?: string | null;
+  description?: string | null;
+  ingredients: number[];
+  max_prep_time?: number | null;
+  max_cook_time?: number | null;
+  difficulty?: DifficultyLevel | null;
+  dietary_restrictions?: string[];
+  enhance_existing?: boolean;
+}

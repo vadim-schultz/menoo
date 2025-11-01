@@ -5,9 +5,16 @@ import type { RecipeDetail, RecipeCreate } from '../../../shared/types';
 import { Button, Modal } from '../../../shared/components';
 import { RecipeForm, RecipeList } from '../components';
 
+interface RecipeFormInitialData {
+  ingredientIds?: number[];
+  name?: string;
+  description?: string;
+}
+
 export function RecipesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<RecipeDetail | null>(null);
+  const [initialData, setInitialData] = useState<RecipeFormInitialData | null>(null);
 
   const { data, loading, error, refetch } = useApi(() => recipeService.list(), []);
 
@@ -73,7 +80,30 @@ export function RecipesPage() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingRecipe(null);
+    setInitialData(null);
   };
+
+  // Handle initial data passed via sessionStorage (e.g., from external integrations)
+  if (typeof window !== 'undefined') {
+    // Check for initial data passed from other pages/features
+    const storedData = sessionStorage.getItem('recipeFormInitialData');
+    if (storedData && !initialData) {
+      try {
+        const parsed = JSON.parse(storedData) as RecipeFormInitialData;
+        setInitialData(parsed);
+        setIsModalOpen(true);
+        sessionStorage.removeItem('recipeFormInitialData');
+      } catch (e) {
+        console.error('Failed to parse initial data:', e);
+      }
+    }
+
+    // Export function to set initial data from external sources
+    (window as any).createRecipeFromSuggestion = (data: RecipeFormInitialData) => {
+      setInitialData(data);
+      setIsModalOpen(true);
+    };
+  }
 
   if (loading) {
     return <div className="loading">Loading recipes...</div>;
@@ -99,7 +129,19 @@ export function RecipesPage() {
         }}
       >
         <h1>Recipes</h1>
-        <Button onClick={() => setIsModalOpen(true)}>Add Recipe</Button>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <Button variant="secondary" onClick={() => setIsModalOpen(true)}>
+            Add Recipe
+          </Button>
+          <Button
+            onClick={() => {
+              setInitialData(null);
+              setIsModalOpen(true);
+            }}
+          >
+            Create with AI
+          </Button>
+        </div>
       </div>
 
       <RecipeList recipes={recipes} onEdit={handleEdit} onDelete={handleDelete} />
@@ -116,6 +158,7 @@ export function RecipesPage() {
           }
           onCancel={handleCloseModal}
           loading={creating || updating}
+          initialData={initialData}
         />
       </Modal>
     </div>
