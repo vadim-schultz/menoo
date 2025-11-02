@@ -1,0 +1,49 @@
+services:
+  - type: web
+    name: menoo
+    runtime: python
+    plan: free
+    autoDeploy: true
+    branch: main
+    buildCommand: |
+      pip install --upgrade pip setuptools wheel
+      pip install -e backend/.
+      cd frontend && npm install && npm run build
+      cp -r frontend/dist/* backend/app/static/
+    startCommand: |
+      cd backend
+      # Convert postgresql:// to postgresql+asyncpg:// for async SQLAlchemy
+      export DATABASE_URL=$(echo $DATABASE_URL | sed 's|postgresql://|postgresql+asyncpg://|')
+      litestar --app app.main:app run --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: menoo-db
+          property: connectionString
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: LOG_JSON
+        value: "true"
+      - key: LOG_LEVEL
+        value: INFO
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: MARVIN_CACHE_ENABLED
+        value: "true"
+      - key: MARVIN_CACHE_TTL_SECONDS
+        value: "3600"
+      - key: SUGGESTION_RATE_LIMIT
+        value: "10"
+      - key: SUGGESTION_RATE_PERIOD
+        value: "60"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "*"
+
+databases:
+  - name: menoo-db
+    databaseName: menoo
+    user: menoo
+    plan: free
+
