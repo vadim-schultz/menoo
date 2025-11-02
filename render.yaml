@@ -8,7 +8,7 @@ services:
     buildCommand: |
       pip install --upgrade pip setuptools wheel
       pip install -e backend/.
-      cd frontend && npm install && npm run build
+      cd frontend && npm install --legacy-peer-deps && npm run build
       cp -r frontend/dist/* backend/app/static/
     startCommand: |
       cd backend
