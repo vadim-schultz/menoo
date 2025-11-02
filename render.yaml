@@ -5,16 +5,8 @@ services:
     plan: free
     autoDeploy: true
     branch: main
-    buildCommand: |
-      pip install --upgrade pip setuptools wheel
-      pip install -e backend/.
-      cd frontend && npm install --legacy-peer-deps && npm run build
-      cp -r frontend/dist/* backend/app/static/
-    startCommand: |
-      cd backend
-      # Convert postgresql:// to postgresql+asyncpg:// for async SQLAlchemy
-      export DATABASE_URL=$(echo $DATABASE_URL | sed 's|postgresql://|postgresql+asyncpg://|')
-      litestar --app app.main:app run --host 0.0.0.0 --port $PORT
+    buildCommand: ./render-build.sh
+    startCommand: ./render-start.sh
     envVars:
       - key: DATABASE_URL
         fromDatabase:
