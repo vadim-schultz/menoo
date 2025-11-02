@@ -67,7 +67,7 @@ def create_app() -> Litestar:
     )
 
     # SPA router for serving index.html on all frontend routes
-    create_static_files_router(
+    spa_router = create_static_files_router(
         path="/",
         directories=["app/static"],
         html_mode=True,
@@ -83,9 +83,8 @@ def create_app() -> Litestar:
             recipes.RecipeController,
             suggestions.SuggestionController,
             static_router,
+            spa_router,
         ],
-        # Note: SPA router should be added last or excluded until frontend is ready
-        # spa_router,
         dependencies={
             "db_session": Provide(provide_db_session),
             "ingredient_service": Provide(provide_ingredient_service),
