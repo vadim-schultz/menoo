@@ -31,7 +31,7 @@ services:
       - key: SUGGESTION_RATE_PERIOD
         value: "60"
       - key: CORS_ALLOWED_ORIGINS
-        value: "*"
+        value: '["*"]'
 
 databases:
   - name: menoo-db
