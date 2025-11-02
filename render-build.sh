@@ -12,7 +12,7 @@ pip install -e backend/.
 echo "Building frontend..."
 cd frontend
 npm install --legacy-peer-deps
-npm run build
+npx vite build
 cd ..
 
 # Copy frontend build to backend static
