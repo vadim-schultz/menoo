@@ -6,5 +6,5 @@ export DATABASE_URL=$(echo $DATABASE_URL | sed 's|postgresql://|postgresql+async
 
 # Start application
 cd backend
-python -m litestar run --app app.main:app --host 0.0.0.0 --port $PORT
+uvicorn app.main:app --host 0.0.0.0 --port $PORT
 
