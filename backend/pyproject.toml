@@ -8,6 +8,7 @@ dependencies = [
     "sqlalchemy[asyncio]",
     "alembic",
     "aiosqlite",
+    "asyncpg",
     "pydantic",
     "pydantic-settings",
     "python-dotenv",
