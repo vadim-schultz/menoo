@@ -5,8 +5,6 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Iterable
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.enums import CuisineType
 from app.models import Recipe as RecipeModel, RecipeIngredient
 from app.repositories import (
@@ -26,20 +24,18 @@ from app.schemas.requests.suggestion import SuggestionRequest
 class RecipeService:
     """Service for recipe business logic."""
 
-    def __init__(self, session: AsyncSession) -> None:
-        """Initialize service with database session."""
-        self.recipe_repo = RecipeRepository(session)
-        self.recipe_ingredient_repo = RecipeIngredientRepository(session)
-        self.ingredient_repo = IngredientRepository(session)
-        self._session = session
-        self._suggestion_service: SuggestionService | None = None
-
-    @property
-    def suggestion_service(self) -> SuggestionService:
-        """Lazily initialize suggestion service."""
-        if self._suggestion_service is None:
-            self._suggestion_service = SuggestionService(self._session)
-        return self._suggestion_service
+    def __init__(
+        self,
+        recipe_repo: RecipeRepository,
+        recipe_ingredient_repo: RecipeIngredientRepository,
+        ingredient_repo: IngredientRepository,
+        suggestion_service: SuggestionService,
+    ) -> None:
+        """Initialize service with repositories and suggestion service."""
+        self.recipe_repo = recipe_repo
+        self.recipe_ingredient_repo = recipe_ingredient_repo
+        self.ingredient_repo = ingredient_repo
+        self.suggestion_service = suggestion_service
 
     async def create_recipe(self, data: Recipe) -> RecipeModel:
         """Create a new recipe with ingredients."""

@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.models import Ingredient
 from app.repositories import IngredientRepository
 from app.schemas import IngredientCreate, IngredientFilter, IngredientPatch
@@ -14,9 +12,9 @@ from app.schemas import IngredientCreate, IngredientFilter, IngredientPatch
 class IngredientService:
     """Service for ingredient business logic."""
 
-    def __init__(self, session: AsyncSession) -> None:
-        """Initialize service with database session."""
-        self.repository = IngredientRepository(session)
+    def __init__(self, repository: IngredientRepository) -> None:
+        """Initialize service with ingredient repository."""
+        self.repository = repository
 
     async def create_ingredient(self, data: IngredientCreate) -> Ingredient:
         """Create a new ingredient or add quantity to existing one."""

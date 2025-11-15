@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.repositories import SuggestionRepository
 from app.schemas.core.recipe import Recipe
 from app.schemas.requests.suggestion import SuggestionRequest
@@ -18,8 +16,9 @@ DEFAULT_COMPLETION_PROMPT = (
 class SuggestionService:
     """Service for generating Marvin-powered recipe completions."""
 
-    def __init__(self, session: AsyncSession) -> None:
-        self.suggestion_repo = SuggestionRepository(session)
+    def __init__(self, suggestion_repo: SuggestionRepository) -> None:
+        """Initialize service with suggestion repository."""
+        self.suggestion_repo = suggestion_repo
 
     @staticmethod
     def _compose_prompt(request: SuggestionRequest, draft: Recipe) -> str:

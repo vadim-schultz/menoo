@@ -7,9 +7,16 @@ from collections.abc import AsyncGenerator
 from litestar.datastructures import State
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.repositories import (
+    IngredientRepository,
+    RecipeIngredientRepository,
+    RecipeRepository,
+    SuggestionRepository,
+)
 from app.services import IngredientService, RecipeService, SuggestionService
 
 
+# Layer 1: Database Session
 async def provide_db_session(state: State) -> AsyncGenerator[AsyncSession, None]:
     """Provide database session as dependency."""
     async with state.session_factory() as session:
@@ -21,16 +28,54 @@ async def provide_db_session(state: State) -> AsyncGenerator[AsyncSession, None]
             raise
 
 
-async def provide_ingredient_service(db_session: AsyncSession) -> IngredientService:
+# Layer 2: Repositories
+async def provide_ingredient_repository(db_session: AsyncSession) -> IngredientRepository:
+    """Provide ingredient repository."""
+    return IngredientRepository(db_session)
+
+
+async def provide_recipe_repository(db_session: AsyncSession) -> RecipeRepository:
+    """Provide recipe repository."""
+    return RecipeRepository(db_session)
+
+
+async def provide_recipe_ingredient_repository(
+    db_session: AsyncSession,
+) -> RecipeIngredientRepository:
+    """Provide recipe ingredient repository."""
+    return RecipeIngredientRepository(db_session)
+
+
+async def provide_suggestion_repository(db_session: AsyncSession) -> SuggestionRepository:
+    """Provide suggestion repository."""
+    return SuggestionRepository(db_session)
+
+
+# Layer 3: Services
+async def provide_ingredient_service(
+    ingredient_repository: IngredientRepository,
+) -> IngredientService:
     """Provide ingredient service."""
-    return IngredientService(db_session)
+    return IngredientService(ingredient_repository)
 
 
-async def provide_recipe_service(db_session: AsyncSession) -> RecipeService:
-    """Provide recipe service."""
-    return RecipeService(db_session)
-
-
-async def provide_suggestion_service(db_session: AsyncSession) -> SuggestionService:
+async def provide_suggestion_service(
+    suggestion_repository: SuggestionRepository,
+) -> SuggestionService:
     """Provide suggestion service."""
-    return SuggestionService(db_session)
+    return SuggestionService(suggestion_repository)
+
+
+async def provide_recipe_service(
+    recipe_repository: RecipeRepository,
+    recipe_ingredient_repository: RecipeIngredientRepository,
+    ingredient_repository: IngredientRepository,
+    suggestion_service: SuggestionService,
+) -> RecipeService:
+    """Provide recipe service."""
+    return RecipeService(
+        recipe_repository,
+        recipe_ingredient_repository,
+        ingredient_repository,
+        suggestion_service,
+    )

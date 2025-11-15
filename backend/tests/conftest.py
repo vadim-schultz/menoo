@@ -70,3 +70,64 @@ def mock_ai_service():
     """Mock AI service for suggestion tests."""
     with respx.mock:
         yield respx
+
+
+# Repository fixtures
+@pytest.fixture
+def ingredient_repository(db_session):
+    """Create ingredient repository."""
+    from app.repositories import IngredientRepository
+    return IngredientRepository(db_session)
+
+
+@pytest.fixture
+def recipe_repository(db_session):
+    """Create recipe repository."""
+    from app.repositories import RecipeRepository
+    return RecipeRepository(db_session)
+
+
+@pytest.fixture
+def recipe_ingredient_repository(db_session):
+    """Create recipe ingredient repository."""
+    from app.repositories import RecipeIngredientRepository
+    return RecipeIngredientRepository(db_session)
+
+
+@pytest.fixture
+def suggestion_repository(db_session):
+    """Create suggestion repository."""
+    from app.repositories import SuggestionRepository
+    return SuggestionRepository(db_session)
+
+
+# Service fixtures
+@pytest.fixture
+def ingredient_service(ingredient_repository):
+    """Create ingredient service."""
+    from app.services import IngredientService
+    return IngredientService(ingredient_repository)
+
+
+@pytest.fixture
+def suggestion_service(suggestion_repository):
+    """Create suggestion service."""
+    from app.services import SuggestionService
+    return SuggestionService(suggestion_repository)
+
+
+@pytest.fixture
+def recipe_service(
+    recipe_repository,
+    recipe_ingredient_repository,
+    ingredient_repository,
+    suggestion_service,
+):
+    """Create recipe service."""
+    from app.services import RecipeService
+    return RecipeService(
+        recipe_repository,
+        recipe_ingredient_repository,
+        ingredient_repository,
+        suggestion_service,
+    )

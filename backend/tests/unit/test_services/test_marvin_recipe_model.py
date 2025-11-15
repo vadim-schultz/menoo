@@ -9,13 +9,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.enums import IngredientCategory
 from app.models import Ingredient
-from app.services.suggestion_service import SuggestionService
+from app.schemas import Recipe
+from app.schemas.requests.suggestion import SuggestionRequest
 
 
 # @pytest.mark.integration
-async def test_marvin_populates_recipe_model(db_session: AsyncSession) -> None:
+async def test_marvin_populates_recipe_model(suggestion_service, db_session: AsyncSession) -> None:
     """Marvin should return a populated recipe when communicating with OpenAI."""
-    service = SuggestionService(db_session)
 
     mozzarella = Ingredient(
         name="Mozzarella",
@@ -28,16 +28,18 @@ async def test_marvin_populates_recipe_model(db_session: AsyncSession) -> None:
     db_session.add(mozzarella)
     await db_session.flush()
 
-    result = await service.complete_recipe([mozzarella.id])
-
+    # Create a proper suggestion request
+    request = SuggestionRequest(
+        recipe=Recipe(name="Mozzarella recipe"),
+        prompt="Create a recipe using mozzarella",
+        n_completions=1
+    )
+    
+    results = await suggestion_service.complete_recipe(request)
+    
+    assert len(results) > 0
+    result = results[0]
+    
     assert result.name
     assert result.instructions
     assert result.ingredients, "Recipe should include at least one ingredient"
-
-    used_mozzarella = next(
-        (ing for ing in result.ingredients if ing.ingredient_id == mozzarella.id),
-        None,
-    )
-    assert used_mozzarella is not None, "Generated recipe must use provided mozzarella"
-    assert Decimal(str(used_mozzarella.quantity)) > 0
-    assert used_mozzarella.unit

@@ -16,8 +16,12 @@ from app.config import get_settings
 from app.controllers import ingredients, recipes, suggestions
 from app.dependencies import (
     provide_db_session,
+    provide_ingredient_repository,
     provide_ingredient_service,
+    provide_recipe_ingredient_repository,
+    provide_recipe_repository,
     provide_recipe_service,
+    provide_suggestion_repository,
     provide_suggestion_service,
 )
 from app.events import lifespan
@@ -86,7 +90,14 @@ def create_app() -> Litestar:
             spa_router,
         ],
         dependencies={
+            # Layer 1: Database
             "db_session": Provide(provide_db_session),
+            # Layer 2: Repositories
+            "ingredient_repository": Provide(provide_ingredient_repository),
+            "recipe_repository": Provide(provide_recipe_repository),
+            "recipe_ingredient_repository": Provide(provide_recipe_ingredient_repository),
+            "suggestion_repository": Provide(provide_suggestion_repository),
+            # Layer 3: Services
             "ingredient_service": Provide(provide_ingredient_service),
             "recipe_service": Provide(provide_recipe_service),
             "suggestion_service": Provide(provide_suggestion_service),
