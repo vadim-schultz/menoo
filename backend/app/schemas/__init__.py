@@ -14,6 +14,7 @@ from app.schemas.core.recipe import (
 # Request schemas - REST API request wrappers
 from app.schemas.requests import (
     RecipeCreateRequest,
+    RecipeListRequest,
     RecipeUpdateRequest,
     SuggestionRequest,
 )
@@ -52,6 +53,7 @@ __all__ = [
     "StorageInstructions",
     # Request schemas
     "RecipeCreateRequest",
+    "RecipeListRequest",
     "RecipeUpdateRequest",
     "SuggestionRequest",
     # Response schemas

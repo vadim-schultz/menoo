@@ -5,20 +5,18 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Iterable
 
-from app.enums import CuisineType
 from app.models import Recipe as RecipeModel, RecipeIngredient
 from app.repositories import (
     IngredientRepository,
     RecipeIngredientRepository,
     RecipeRepository,
 )
-from app.services.suggestion_service import SuggestionService
 from app.schemas import (
     Recipe,
     RecipeIngredientRead,
 )
 from app.schemas.core.recipe import IngredientPreparation
-from app.schemas.requests.suggestion import SuggestionRequest
+from app.schemas.requests.recipe import RecipeListRequest
 
 
 class RecipeService:
@@ -29,13 +27,11 @@ class RecipeService:
         recipe_repo: RecipeRepository,
         recipe_ingredient_repo: RecipeIngredientRepository,
         ingredient_repo: IngredientRepository,
-        suggestion_service: SuggestionService,
     ) -> None:
-        """Initialize service with repositories and suggestion service."""
+        """Initialize service with repositories."""
         self.recipe_repo = recipe_repo
         self.recipe_ingredient_repo = recipe_ingredient_repo
         self.ingredient_repo = ingredient_repo
-        self.suggestion_service = suggestion_service
 
     async def create_recipe(self, data: Recipe) -> RecipeModel:
         """Create a new recipe with ingredients."""
@@ -56,15 +52,6 @@ class RecipeService:
             "timing": timing,  # Keep full timing dict for JSON column
         })
         
-        # Ensure required fields have defaults
-        recipe_dict.setdefault("servings", 1)
-        recipe_dict.setdefault("cuisine_types", [])
-        recipe_dict.setdefault("meal_types", [])
-        recipe_dict.setdefault("dietary_requirements", [])
-        recipe_dict.setdefault("contains_allergens", [])
-        recipe_dict.setdefault("equipment_requirements", [])
-        recipe_dict.setdefault("tags", [])
-        
         recipe = await self.recipe_repo.create(RecipeModel(**recipe_dict))
 
         if data.ingredients:
@@ -81,28 +68,17 @@ class RecipeService:
 
     async def list_recipes(
         self,
-        *,
-        max_prep_time_minutes: int | None = None,
-        max_cook_time_minutes: int | None = None,
-        cuisine: CuisineType | None = None,
-        name_contains: str | None = None,
-        page: int = 1,
-        page_size: int = 100,
+        request: RecipeListRequest,
     ) -> tuple[list[RecipeModel], int]:
         """List recipes with filters and pagination."""
-        if page < 1:
-            raise ValueError("Page must be >= 1")
-        if page_size < 1 or page_size > 1000:
-            raise ValueError("Page size must be between 1 and 1000")
-
-        skip = (page - 1) * page_size
+        skip = (request.page - 1) * request.page_size
         recipes, total = await self.recipe_repo.list(
-            max_prep_time_minutes=max_prep_time_minutes,
-            max_cook_time_minutes=max_cook_time_minutes,
-            cuisine=cuisine.value if cuisine else None,
-            name_contains=name_contains,
+            max_prep_time_minutes=request.max_prep_time_minutes,
+            max_cook_time_minutes=request.max_cook_time_minutes,
+            cuisine=request.cuisine.value if request.cuisine else None,
+            name_contains=request.name_contains,
             skip=skip,
-            limit=page_size,
+            limit=request.page_size,
         )
         return list(recipes), total
 
@@ -216,8 +192,6 @@ class RecipeService:
     def _serialize_ingredient_payload(self, ingredient: IngredientPreparation) -> dict:
         """Convert an ingredient preparation into persistence payload."""
         detail_json = ingredient.model_dump(mode="json")
-        detail_json.setdefault("ingredient_id", ingredient.ingredient_id)
-        detail_json.setdefault("order_in_recipe", ingredient.order_in_recipe)
         return {
             "ingredient_id": ingredient.ingredient_id,
             "quantity": ingredient.quantity,

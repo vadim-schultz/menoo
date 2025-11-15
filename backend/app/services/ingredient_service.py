@@ -7,6 +7,7 @@ from decimal import Decimal
 from app.models import Ingredient
 from app.repositories import IngredientRepository
 from app.schemas import IngredientCreate, IngredientFilter, IngredientPatch
+from app.schemas.core.ingredient import Ingredient as IngredientSchema
 
 
 class IngredientService:
@@ -21,32 +22,21 @@ class IngredientService:
         # Check if ingredient with same name already exists
         existing = await self.repository.get_by_name(data.name)
         if existing:
-            existing_dict = {
-                "name": existing.name,
-                "category": existing.category,
-                "storage_location": existing.storage_location,
-                "quantity": Decimal(str(existing.quantity))
-                if existing.quantity is not None
-                else Decimal("0"),
-                "unit": existing.unit,
-                "expiry_date": existing.expiry_date,
-                "notes": existing.notes,
-            }
-            new_dict = data.model_dump()
-
-            existing_quantity = existing_dict.pop("quantity")
-            new_quantity_raw = new_dict.pop("quantity", None)
-            new_quantity = (
-                Decimal(str(new_quantity_raw))
-                if new_quantity_raw is not None
-                else Decimal("0")
+            # Convert SQLAlchemy model to Pydantic model
+            existing_schema = IngredientSchema.model_validate(existing)
+            
+            # Merge with new data using model_copy
+            merged = existing_schema.model_copy(
+                update=data.model_dump(exclude_unset=True)
             )
-
-            merged = {**existing_dict, **new_dict}
-            merged_quantity = existing_quantity + new_quantity
-            merged["quantity"] = merged_quantity
-
-            for key, value in merged.items():
+            
+            # Handle quantity addition
+            existing_quantity = existing_schema.quantity or Decimal("0")
+            new_quantity = data.quantity or Decimal("0")
+            merged.quantity = existing_quantity + new_quantity
+            
+            # Apply merged data back to SQLAlchemy model
+            for key, value in merged.model_dump(exclude_unset=True).items():
                 setattr(existing, key, value)
 
             return await self.repository.update(existing)

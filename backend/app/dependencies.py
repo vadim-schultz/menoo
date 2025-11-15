@@ -70,12 +70,10 @@ async def provide_recipe_service(
     recipe_repository: RecipeRepository,
     recipe_ingredient_repository: RecipeIngredientRepository,
     ingredient_repository: IngredientRepository,
-    suggestion_service: SuggestionService,
 ) -> RecipeService:
     """Provide recipe service."""
     return RecipeService(
         recipe_repository,
         recipe_ingredient_repository,
         ingredient_repository,
-        suggestion_service,
     )

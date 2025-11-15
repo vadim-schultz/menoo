@@ -24,11 +24,6 @@ from app.enums import (
 )
 
 
-# ============================================================================
-# Supporting Sub-Models
-# ============================================================================
-
-
 class Marination(BaseModel):
     """Marination specification."""
 
@@ -220,11 +215,6 @@ class StorageInstructions(BaseModel):
     )
 
 
-# ============================================================================
-# Definitive Recipe Model
-# ============================================================================
-
-
 class Recipe(BaseModel):
     """Definitive Recipe model with all comprehensive fields.
     
@@ -281,7 +271,7 @@ class Recipe(BaseModel):
     )
 
     # Servings and yield
-    servings: int | None = Field(None, gt=0, description="Number of servings")
+    servings: int = Field(default=1, gt=0, description="Number of servings")
     yield_description: str | None = Field(
         None,
         max_length=100,
