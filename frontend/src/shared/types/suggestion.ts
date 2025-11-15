@@ -22,30 +22,34 @@ export interface SuggestionAcceptRequest {
   generated_recipe: GeneratedRecipe;
 }
 
-export interface SuggestionRequest {
-  available_ingredients: number[];
-  max_prep_time?: number | null;
-  max_cook_time?: number | null;
-  difficulty?: string | null;
-  dietary_restrictions?: string[];
-  max_results?: number;
+export interface RecipeDraftIngredient {
+  ingredient_id?: number | null;
+  name?: string | null;
+  quantity?: number | null;
+  unit?: string | null;
+  notes?: string | null;
 }
 
-export interface RecipeSuggestion {
-  recipe_id: number | null;
-  recipe_name: string;
-  match_score: number;
-  missing_ingredients: string[];
-  matched_ingredients: string[];
-  reason?: string | null;
-  is_ai_generated: boolean;
-  generated_recipe?: GeneratedRecipe | null;
+export interface RecipeDraft {
+  name?: string | null;
+  description?: string | null;
+  instructions?: string | null;
+  cuisine_types?: string[];
+  meal_types?: string[];
+  dietary_requirements?: string[];
+  notes?: string | null;
+  tags?: string[];
+  ingredients?: RecipeDraftIngredient[];
+}
+
+export interface SuggestionRequest {
+  recipe?: RecipeDraft;
+  prompt?: string | null;
+  n_completions?: number;
 }
 
 export interface SuggestionResponse {
-  suggestions: RecipeSuggestion[];
-  source: string;
-  cache_hit: boolean;
+  recipes: GeneratedRecipe[];
 }
 
 export interface ShoppingListRequest {

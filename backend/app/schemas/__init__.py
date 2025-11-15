@@ -1,59 +1,71 @@
-"""Schemas package."""
+"""Schemas package - organized by core models, requests, and responses."""
 
+# Core models - definitive domain models
+from app.schemas.core import Ingredient, Recipe
+from app.schemas.core.recipe import (
+    DifficultyMetrics,
+    EquipmentRequirement,
+    IngredientPreparation,
+    NutritionInfo,
+    RecipeTiming,
+    StorageInstructions,
+)
+
+# Request schemas - REST API request wrappers
+from app.schemas.requests import (
+    RecipeCreateRequest,
+    RecipeUpdateRequest,
+    SuggestionRequest,
+)
+
+# Response schemas - REST API response wrappers
+from app.schemas.responses import (
+    RecipeDetail,
+    RecipeListResponse,
+    RecipeResponse,
+    SuggestionResponse,
+)
+
+# Response sub-types
+from app.schemas.responses.recipe import RecipeIngredientRead
+
+# Legacy ingredient schemas (from old structure)
 from app.schemas.ingredient import (
-    IngredientCreate,  # Backward compatibility alias
+    IngredientCreate,
     IngredientFilter,
     IngredientListResponse,
     IngredientPatch,
     IngredientRead,
-    IngredientUpdate,  # Backward compatibility alias
+    IngredientUpdate,
     IngredientWrite,
-)
-from app.schemas.recipe import (
-    RecipeCreate,
-    RecipeDetail,
-    RecipeGenerationRequest,
-    RecipeIngredientCreate,
-    RecipeIngredientRead,
-    RecipeListResponse,
-    RecipeRead,
-    RecipeUpdate,
-)
-from app.schemas.suggestion import (
-    GeneratedRecipe,
-    GeneratedRecipeIngredient,
-    RecipeSuggestion,
-    ShoppingListItem,
-    ShoppingListRequest,
-    ShoppingListResponse,
-    SuggestionAcceptRequest,
-    SuggestionRequest,
-    SuggestionResponse,
 )
 
 __all__ = [
-    "IngredientCreate",  # Backward compatibility
-    "IngredientUpdate",  # Backward compatibility
+    # Core models
+    "Recipe",
+    "Ingredient",
+    "DifficultyMetrics",
+    "EquipmentRequirement",
+    "IngredientPreparation",
+    "NutritionInfo",
+    "RecipeTiming",
+    "StorageInstructions",
+    # Request schemas
+    "RecipeCreateRequest",
+    "RecipeUpdateRequest",
+    "SuggestionRequest",
+    # Response schemas
+    "RecipeResponse",
+    "RecipeDetail",
+    "RecipeListResponse",
+    "RecipeIngredientRead",
+    "SuggestionResponse",
+    # Legacy ingredient schemas
+    "IngredientCreate",
+    "IngredientUpdate",
     "IngredientWrite",
     "IngredientPatch",
     "IngredientRead",
     "IngredientFilter",
     "IngredientListResponse",
-    "RecipeCreate",
-    "RecipeUpdate",
-    "RecipeRead",
-    "RecipeDetail",
-    "RecipeListResponse",
-    "RecipeGenerationRequest",
-    "RecipeIngredientCreate",
-    "RecipeIngredientRead",
-    "SuggestionRequest",
-    "SuggestionResponse",
-    "SuggestionAcceptRequest",
-    "RecipeSuggestion",
-    "GeneratedRecipe",
-    "GeneratedRecipeIngredient",
-    "ShoppingListRequest",
-    "ShoppingListResponse",
-    "ShoppingListItem",
 ]

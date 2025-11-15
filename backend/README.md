@@ -194,7 +194,7 @@ Always mock Marvin calls in tests to avoid API costs:
 @pytest.fixture
 def mock_marvin(monkeypatch):
     async def mock_generate(*args, **kwargs):
-        return GeneratedRecipe(
+        return Recipe(
             name="Test Recipe",
             ingredients=[...],
             instructions="Test instructions"

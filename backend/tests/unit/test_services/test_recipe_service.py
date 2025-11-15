@@ -1,12 +1,22 @@
 """Unit tests for recipe service."""
 
+from decimal import Decimal
+
 import pytest
 
-from app.schemas.ingredient import IngredientCreate
-from app.schemas.recipe import RecipeCreate, RecipeIngredientCreate, RecipeUpdate
+from app.enums import CuisineType
+from app.schemas import (
+    IngredientCreate,
+    Recipe,
+)
+from app.schemas.core.recipe import IngredientPreparation
 from app.services.ingredient_service import IngredientService
 from app.services.recipe_service import RecipeService
-from tests.fixtures.factories import ingredient_factory, recipe_factory
+from tests.fixtures.factories import (
+    ingredient_factory,
+    recipe_factory,
+    recipe_ingredient_factory,
+)
 
 
 class TestRecipeCreation:
@@ -16,7 +26,7 @@ class TestRecipeCreation:
     async def test_create_recipe_without_ingredients(self, db_session):
         """Should create recipe without ingredients."""
         service = RecipeService(db_session)
-        data = RecipeCreate(**recipe_factory(name="Simple Recipe"), ingredients=[])
+        data = Recipe(**recipe_factory(name="Simple Recipe"), ingredients=[])
 
         result = await service.create_recipe(data)
         await db_session.commit()
@@ -36,12 +46,12 @@ class TestRecipeCreation:
 
         # Create recipe with ingredient
         service = RecipeService(db_session)
-        recipe_data = RecipeCreate(
+        recipe_data = Recipe(
             **recipe_factory(name="Tomato Soup"),
             ingredients=[
-                RecipeIngredientCreate(
+                IngredientPreparation(
                     ingredient_id=ingredient.id,
-                    quantity=500,
+                    quantity=Decimal("500"),
                     unit="g",
                     is_optional=False,
                 )
@@ -59,12 +69,12 @@ class TestRecipeCreation:
     async def test_create_recipe_with_invalid_ingredient(self, db_session):
         """Should fail with invalid ingredient ID."""
         service = RecipeService(db_session)
-        recipe_data = RecipeCreate(
+        recipe_data = Recipe(
             **recipe_factory(name="Invalid Recipe"),
             ingredients=[
-                RecipeIngredientCreate(
+                IngredientPreparation(
                     ingredient_id=999,
-                    quantity=500,
+                    quantity=Decimal("500"),
                     unit="g",
                 )
             ],
@@ -81,16 +91,16 @@ class TestRecipeUpdate:
     async def test_update_recipe_metadata(self, db_session):
         """Should update recipe metadata fields."""
         service = RecipeService(db_session)
-        data = RecipeCreate(**recipe_factory(name="Original"), ingredients=[])
+        data = Recipe(**recipe_factory(name="Original"), ingredients=[])
         recipe = await service.create_recipe(data)
         await db_session.commit()
 
-        update_data = RecipeUpdate(name="Updated", difficulty="hard")
+        update_data = Recipe(name="Updated", author="Chef Updated")
         result = await service.update_recipe(recipe.id, update_data)
         await db_session.commit()
 
         assert result.name == "Updated"
-        assert result.difficulty == "hard"
+        assert result.author == "Chef Updated"
 
     @pytest.mark.unit
     async def test_update_recipe_ingredients(self, db_session):
@@ -105,10 +115,10 @@ class TestRecipeUpdate:
 
         # Create recipe with first ingredient
         service = RecipeService(db_session)
-        recipe_data = RecipeCreate(
+        recipe_data = Recipe(
             **recipe_factory(name="Test Recipe"),
             ingredients=[
-                RecipeIngredientCreate(
+                IngredientPreparation(
                     ingredient_id=ing1.id,
                     quantity=500,
                     unit="g",
@@ -119,11 +129,11 @@ class TestRecipeUpdate:
         await db_session.commit()
 
         # Update to use second ingredient
-        update_data = RecipeUpdate(
+        update_data = Recipe(
             ingredients=[
-                RecipeIngredientCreate(
+                IngredientPreparation(
                     ingredient_id=ing2.id,
-                    quantity=300,
+                    quantity=Decimal("300"),
                     unit="g",
                 )
             ]
@@ -138,7 +148,7 @@ class TestRecipeUpdate:
     async def test_update_nonexistent_recipe(self, db_session):
         """Should fail when updating non-existent recipe."""
         service = RecipeService(db_session)
-        update_data = RecipeUpdate(name="New Name")
+        update_data = Recipe(name="New Name")
 
         with pytest.raises(ValueError, match="not found"):
             await service.update_recipe(999, update_data)
@@ -153,7 +163,7 @@ class TestRecipeListing:
         service = RecipeService(db_session)
 
         for i in range(3):
-            data = RecipeCreate(**recipe_factory(name=f"Recipe{i}"), ingredients=[])
+            data = Recipe(**recipe_factory(name=f"Recipe{i}"), ingredients=[])
             await service.create_recipe(data)
         await db_session.commit()
 
@@ -163,21 +173,25 @@ class TestRecipeListing:
         assert total == 3
 
     @pytest.mark.unit
-    async def test_list_recipes_filter_by_difficulty(self, db_session):
-        """Should filter recipes by difficulty."""
+    async def test_list_recipes_filter_by_cuisine(self, db_session):
+        """Should filter recipes by cuisine."""
         service = RecipeService(db_session)
 
-        data1 = RecipeCreate(**recipe_factory(difficulty="easy"), ingredients=[])
-        data2 = RecipeCreate(**recipe_factory(difficulty="hard"), ingredients=[])
+        data1 = Recipe(
+            **recipe_factory(cuisine_types=[CuisineType.ITALIAN.value]), ingredients=[]
+        )
+        data2 = Recipe(
+            **recipe_factory(cuisine_types=[CuisineType.JAPANESE.value]), ingredients=[]
+        )
         await service.create_recipe(data1)
         await service.create_recipe(data2)
         await db_session.commit()
 
-        result, total = await service.list_recipes(difficulty="easy")
+        result, total = await service.list_recipes(cuisine=CuisineType.ITALIAN)
 
         assert len(result) == 1
         assert total == 1
-        assert result[0].difficulty == "easy"
+        assert "italian" in result[0].cuisine_types
 
     @pytest.mark.unit
     async def test_list_recipes_pagination(self, db_session):
@@ -185,7 +199,7 @@ class TestRecipeListing:
         service = RecipeService(db_session)
 
         for i in range(5):
-            data = RecipeCreate(**recipe_factory(name=f"Recipe{i}"), ingredients=[])
+            data = Recipe(**recipe_factory(name=f"Recipe{i}"), ingredients=[])
             await service.create_recipe(data)
         await db_session.commit()
 
@@ -218,7 +232,7 @@ class TestRecipeDeletion:
     async def test_delete_recipe(self, db_session):
         """Should soft delete recipe."""
         service = RecipeService(db_session)
-        data = RecipeCreate(**recipe_factory(name="To Delete"), ingredients=[])
+        data = Recipe(**recipe_factory(name="To Delete"), ingredients=[])
         recipe = await service.create_recipe(data)
         await db_session.commit()
 
@@ -250,12 +264,12 @@ class TestRecipeRetrieval:
         await db_session.commit()
 
         service = RecipeService(db_session)
-        recipe_data = RecipeCreate(
+        recipe_data = Recipe(
             **recipe_factory(name="Test"),
             ingredients=[
-                RecipeIngredientCreate(
+                IngredientPreparation(
                     ingredient_id=ingredient.id,
-                    quantity=500,
+                    quantity=Decimal("500"),
                     unit="g",
                 )
             ],
@@ -293,18 +307,18 @@ class TestRecipeIngredientCalculations:
 
         # Create recipe requiring both
         service = RecipeService(db_session)
-        recipe_data = RecipeCreate(
+        recipe_data = Recipe(
             **recipe_factory(name="Test"),
             ingredients=[
-                RecipeIngredientCreate(
+                IngredientPreparation(
                     ingredient_id=ing1.id,
-                    quantity=500,
+                    quantity=Decimal("500"),
                     unit="g",
                     is_optional=False,
                 ),
-                RecipeIngredientCreate(
+                IngredientPreparation(
                     ingredient_id=ing2.id,
-                    quantity=300,
+                    quantity=Decimal("300"),
                     unit="g",
                     is_optional=False,
                 ),
@@ -329,12 +343,12 @@ class TestRecipeIngredientCalculations:
         await db_session.commit()
 
         service = RecipeService(db_session)
-        recipe_data = RecipeCreate(
+        recipe_data = Recipe(
             **recipe_factory(name="Test"),
             ingredients=[
-                RecipeIngredientCreate(
+                IngredientPreparation(
                     ingredient_id=ingredient.id,
-                    quantity=500,
+                    quantity=Decimal("500"),
                     unit="g",
                     is_optional=False,
                 )

@@ -9,12 +9,19 @@ from typing import Literal
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = BASE_DIR.parent
+ENV_FILES = (
+    BASE_DIR / ".env",
+    PROJECT_ROOT / ".env",
+)
+
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=[str(path) for path in ENV_FILES],
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
@@ -40,6 +47,14 @@ class Settings(BaseSettings):
     openai_api_key: str = Field(default="", description="OpenAI API key")
     marvin_cache_enabled: bool = True
     marvin_cache_ttl_seconds: int = 3600  # 1 hour
+    marvin_home_path: Path | None = Field(
+        default=None,
+        description="Optional override for Marvin home directory (for tests).",
+    )
+    marvin_database_url: str | None = Field(
+        default=None,
+        description="Optional override for Marvin database URL.",
+    )
 
     # Rate Limiting
     suggestion_rate_limit: int = 10  # requests per minute

@@ -9,7 +9,7 @@ from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Ingredient
-from app.models.ingredient import StorageLocation
+from app.enums import IngredientCategory
 
 
 class IngredientRepository:
@@ -50,7 +50,8 @@ class IngredientRepository:
     async def list(
         self,
         *,
-        storage_location: StorageLocation | None = None,
+        category: IngredientCategory | None = None,
+        storage_location: str | None = None,
         expiring_before: date | None = None,
         name_contains: str | None = None,
         skip: int = 0,
@@ -59,6 +60,9 @@ class IngredientRepository:
         """List ingredients with optional filters and pagination."""
         # Build query conditions
         conditions = [Ingredient.is_deleted.is_(False)]
+
+        if category:
+            conditions.append(Ingredient.category == category)
 
         if storage_location:
             conditions.append(Ingredient.storage_location == storage_location)

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Index, Numeric, String, UniqueConstraint
+from sqlalchemy import ForeignKey, Index, JSON, Numeric, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, IDMixin
@@ -29,10 +29,12 @@ class RecipeIngredient(Base, IDMixin):
         nullable=False,
         index=True,
     )
-    quantity: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False)
+    quantity: Mapped[float] = mapped_column(Numeric(12, 3), nullable=False)
     unit: Mapped[str] = mapped_column(String(20), nullable=False)
     is_optional: Mapped[bool] = mapped_column(default=False, nullable=False)
     note: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    order_in_recipe: Mapped[int | None] = mapped_column(nullable=True)
+    preparation_details: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
 
     # Relationships
     recipe: Mapped[Recipe] = relationship("Recipe", back_populates="ingredient_associations")

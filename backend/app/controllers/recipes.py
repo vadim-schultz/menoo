@@ -5,17 +5,18 @@ from __future__ import annotations
 from litestar import Controller, delete, get, patch, post, put
 from litestar.params import Parameter
 
+from app.enums import CuisineType
 from app.schemas import (
-    GeneratedRecipe,
-    RecipeCreate,
+    Recipe,
+    RecipeCreateRequest,
     RecipeDetail,
-    RecipeGenerationRequest,
-    RecipeIngredientCreate,
     RecipeIngredientRead,
     RecipeListResponse,
-    RecipeRead,
-    RecipeUpdate,
+    RecipeResponse,
+    RecipeUpdateRequest,
 )
+from app.schemas.core.recipe import IngredientPreparation
+from app.schemas.requests.suggestion import SuggestionRequest
 from app.services import RecipeService
 
 
@@ -29,14 +30,18 @@ class RecipeController(Controller):
     async def list_recipes(
         self,
         recipe_service: RecipeService,
-        difficulty: str | None = Parameter(
-            default=None, query="difficulty", description="Filter by difficulty"
+        cuisine: CuisineType | None = Parameter(
+            default=None, query="cuisine", description="Filter by cuisine type"
         ),
-        max_prep_time: int | None = Parameter(
-            default=None, query="max_prep_time", description="Maximum prep time in minutes"
+        max_prep_time_minutes: int | None = Parameter(
+            default=None,
+            query="max_prep_time_minutes",
+            description="Maximum prep time in minutes",
         ),
-        max_cook_time: int | None = Parameter(
-            default=None, query="max_cook_time", description="Maximum cook time in minutes"
+        max_cook_time_minutes: int | None = Parameter(
+            default=None,
+            query="max_cook_time_minutes",
+            description="Maximum cook time in minutes",
         ),
         name_contains: str | None = Parameter(
             default=None, query="name", description="Search by name"
@@ -46,16 +51,16 @@ class RecipeController(Controller):
     ) -> RecipeListResponse:
         """List all recipes with optional filters."""
         recipes, total = await recipe_service.list_recipes(
-            difficulty=difficulty,
-            max_prep_time=max_prep_time,
-            max_cook_time=max_cook_time,
+            cuisine=cuisine,
+            max_prep_time_minutes=max_prep_time_minutes,
+            max_cook_time_minutes=max_cook_time_minutes,
             name_contains=name_contains,
             page=page,
             page_size=page_size,
         )
 
         return RecipeListResponse(
-            items=[RecipeRead.model_validate(recipe) for recipe in recipes],
+            items=[RecipeResponse.model_validate(recipe) for recipe in recipes],
             total=total,
             page=page,
             page_size=page_size,
@@ -66,10 +71,10 @@ class RecipeController(Controller):
     async def create_recipe(
         self,
         recipe_service: RecipeService,
-        data: RecipeCreate,
+        data: RecipeCreateRequest,
     ) -> RecipeDetail:
         """Create a new recipe."""
-        recipe = await recipe_service.create_recipe(data)
+        recipe = await recipe_service.create_recipe(data.recipe)
 
         # Build detailed response
         ingredients = await recipe_service.get_recipe_ingredients(recipe.id)
@@ -101,11 +106,10 @@ class RecipeController(Controller):
         self,
         recipe_service: RecipeService,
         recipe_id: int,
-        data: RecipeCreate,
+        data: RecipeCreateRequest,
     ) -> RecipeDetail:
         """Replace a recipe (full update)."""
-        update_data = RecipeUpdate(**data.model_dump())
-        recipe = await recipe_service.update_recipe(recipe_id, update_data)
+        recipe = await recipe_service.update_recipe(recipe_id, data.recipe)
         ingredients = await recipe_service.get_recipe_ingredients(recipe_id)
 
         response = RecipeDetail.model_validate(recipe)
@@ -119,10 +123,10 @@ class RecipeController(Controller):
         self,
         recipe_service: RecipeService,
         recipe_id: int,
-        data: RecipeUpdate,
+        data: RecipeUpdateRequest,
     ) -> RecipeDetail:
         """Partially update a recipe."""
-        recipe = await recipe_service.update_recipe(recipe_id, data)
+        recipe = await recipe_service.update_recipe(recipe_id, data.recipe)
         ingredients = await recipe_service.get_recipe_ingredients(recipe_id)
 
         response = RecipeDetail.model_validate(recipe)
@@ -155,11 +159,11 @@ class RecipeController(Controller):
         self,
         recipe_service: RecipeService,
         recipe_id: int,
-        data: list[RecipeIngredientCreate],
+        data: list[IngredientPreparation],
     ) -> list[RecipeIngredientRead]:
         """Add or update ingredients for a recipe."""
         # Use update with just ingredients
-        update_data = RecipeUpdate(ingredients=data)
+        update_data = Recipe(ingredients=data)
         await recipe_service.update_recipe(recipe_id, update_data)
         return await recipe_service.get_recipe_ingredients(recipe_id)
 
@@ -167,8 +171,8 @@ class RecipeController(Controller):
     async def generate_recipe(
         self,
         recipe_service: RecipeService,
-        data: RecipeGenerationRequest,
-    ) -> GeneratedRecipe:
+        data: SuggestionRequest,
+    ) -> Recipe:
         """
         Generate a complete recipe using AI from minimal input.
 
@@ -176,14 +180,15 @@ class RecipeController(Controller):
         returns a complete AI-generated recipe. The result can be used with
         POST /recipes to create the recipe.
         """
-        return await recipe_service.generate_recipe_from_partial(data)
+        results = await recipe_service.suggestion_service.complete_recipe(data)
+        return results[0] if results else data.recipe
 
     @post("/suggest")
     async def suggest_recipe(
         self,
         recipe_service: RecipeService,
-        data: RecipeGenerationRequest,
-    ) -> GeneratedRecipe:
+        data: SuggestionRequest,
+    ) -> Recipe:
         """
         Suggest a recipe based on partial information.
 
@@ -191,4 +196,5 @@ class RecipeController(Controller):
         used to create recipes. This endpoint is intended for generating
         suggestions during recipe creation workflow.
         """
-        return await recipe_service.generate_recipe_from_partial(data)
+        results = await recipe_service.suggestion_service.complete_recipe(data)
+        return results[0] if results else data.recipe

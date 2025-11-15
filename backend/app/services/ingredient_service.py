@@ -23,29 +23,34 @@ class IngredientService:
         # Check if ingredient with same name already exists
         existing = await self.repository.get_by_name(data.name)
         if existing:
-            # Dump both to dicts and merge
             existing_dict = {
                 "name": existing.name,
+                "category": existing.category,
                 "storage_location": existing.storage_location,
-                "quantity": Decimal(str(existing.quantity)) if existing.quantity is not None else Decimal("0"),
+                "quantity": Decimal(str(existing.quantity))
+                if existing.quantity is not None
+                else Decimal("0"),
+                "unit": existing.unit,
                 "expiry_date": existing.expiry_date,
+                "notes": existing.notes,
             }
             new_dict = data.model_dump()
-            
-            # Extract quantities before merging
+
             existing_quantity = existing_dict.pop("quantity")
-            new_quantity = new_dict.pop("quantity", Decimal("0"))
-            
-            # Merge: new data overrides existing fields
+            new_quantity_raw = new_dict.pop("quantity", None)
+            new_quantity = (
+                Decimal(str(new_quantity_raw))
+                if new_quantity_raw is not None
+                else Decimal("0")
+            )
+
             merged = {**existing_dict, **new_dict}
-            
-            # Add quantities back (sum them)
-            merged["quantity"] = existing_quantity + new_quantity
-            
-            # Update existing ingredient with merged data
+            merged_quantity = existing_quantity + new_quantity
+            merged["quantity"] = merged_quantity
+
             for key, value in merged.items():
                 setattr(existing, key, value)
-            
+
             return await self.repository.update(existing)
 
         # Create ingredient from Pydantic model

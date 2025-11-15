@@ -6,9 +6,10 @@ side effects at import time and allow for proper testing isolation.
 
 from __future__ import annotations
 
-import marvin
+import os
+from pathlib import Path
 
-from app.config import get_settings
+from app.config import BASE_DIR, get_settings
 
 
 def configure_marvin() -> None:
@@ -20,8 +21,6 @@ def configure_marvin() -> None:
     Raises:
         ValueError: If OpenAI API key is not configured.
     """
-    import os
-
     settings = get_settings()
 
     if not settings.openai_api_key:
@@ -29,23 +28,50 @@ def configure_marvin() -> None:
             "OpenAI API key is required. Set OPENAI_API_KEY environment variable."
         )
 
-    # Configure Marvin settings
-    # Marvin reads from OPENAI_API_KEY environment variable by default
-    # Set it if not already set, or if it differs from our config
-    if os.environ.get('OPENAI_API_KEY') != settings.openai_api_key:
-        os.environ['OPENAI_API_KEY'] = settings.openai_api_key
+    # Ensure OpenAI key is visible to Marvin
+    if os.environ.get("OPENAI_API_KEY") != settings.openai_api_key:
+        os.environ["OPENAI_API_KEY"] = settings.openai_api_key
 
-    # Also try to set it directly on Marvin settings if the structure supports it
-    # This provides redundancy in case Marvin doesn't read from environment
+    # Determine Marvin home path inside the workspace unless overridden
+    home_path: Path = (
+        settings.marvin_home_path
+        if settings.marvin_home_path is not None
+        else (BASE_DIR / ".marvin")
+    )
+    home_path = home_path.expanduser().resolve()
+    home_path.mkdir(parents=True, exist_ok=True)
+
+    if os.environ.get("MARVIN_HOME_PATH") != str(home_path):
+        os.environ["MARVIN_HOME_PATH"] = str(home_path)
+
+    # Point Marvin at a writable SQLite database unless a custom URL is set
+    default_db_url = f"sqlite+aiosqlite:///{home_path / 'marvin.db'}"
+    if settings.marvin_database_url:
+        os.environ.setdefault("MARVIN_DATABASE_URL", settings.marvin_database_url)
+    else:
+        if os.environ.get("MARVIN_DATABASE_URL") != default_db_url:
+            os.environ["MARVIN_DATABASE_URL"] = default_db_url
+
+    # Import Marvin after environment variables are prepared so it picks up overrides
+    import marvin  # noqa: WPS433 - runtime import required for configuration
+
+    # Ensure Marvin's settings object uses the same paths
     try:
-        # Try accessing marvin.settings.openai.api_key (older Marvin versions)
-        if hasattr(marvin, 'settings') and hasattr(marvin.settings, 'openai'):
-            if hasattr(marvin.settings.openai, 'api_key'):
-                marvin.settings.openai.api_key = settings.openai_api_key  # type: ignore[attr-defined]
-    except (AttributeError, TypeError):
-        # If direct settings access fails, rely on environment variable
-        # Marvin will pick it up automatically on next API call
+        if hasattr(marvin, "settings"):
+            if getattr(marvin.settings, "home_path", None) != home_path:
+                marvin.settings.home_path = home_path  # type: ignore[attr-defined]
+            target_db_url = (
+                settings.marvin_database_url if settings.marvin_database_url else default_db_url
+            )
+            if getattr(marvin.settings, "database_url", None) != target_db_url:
+                marvin.settings.database_url = target_db_url  # type: ignore[attr-defined]
+    except Exception:  # pragma: no cover - best effort sync with Marvin settings
         pass
 
-    # Optional: Configure additional Marvin settings based on app config
-    # (caching, rate limits, etc. can be handled at the service layer)
+    # Also try to set the OpenAI key directly on Marvin settings if supported
+    try:
+        if hasattr(marvin, "settings") and hasattr(marvin.settings, "openai"):
+            if hasattr(marvin.settings.openai, "api_key"):
+                marvin.settings.openai.api_key = settings.openai_api_key  # type: ignore[attr-defined]
+    except (AttributeError, TypeError):
+        pass

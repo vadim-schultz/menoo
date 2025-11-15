@@ -6,9 +6,23 @@ integration tests to create consistent, realistic test scenarios.
 """
 
 from datetime import date, timedelta
+from decimal import Decimal
 from typing import Any
 
 from faker import Faker
+
+from app.enums import (
+    AllergenType,
+    CookingMethod,
+    CuisineType,
+    DietaryRequirement,
+    IngredientCategory,
+    MechanicalTreatment,
+    MealType,
+    StorageType,
+    TemperatureLevel,
+    ThermalTreatment,
+)
 
 fake = Faker()
 
@@ -29,9 +43,12 @@ def ingredient_factory(**overrides: Any) -> dict[str, Any]:
     """
     defaults = {
         "name": fake.word().capitalize(),
+        "category": fake.random_element(list(IngredientCategory)).value,
         "storage_location": fake.random_element(["fridge", "cupboard", "pantry", "counter"]),
-        "quantity": fake.random_int(min=1, max=1000),
+        "quantity": Decimal(str(round(fake.random.uniform(10, 1000), 2))),
+        "unit": fake.random_element(["g", "kg", "ml", "l", "cup", "tbsp", "tsp"]),
         "expiry_date": fake.date_between(start_date="today", end_date="+30d"),
+        "notes": fake.sentence(nb_words=6) if fake.boolean(chance_of_getting_true=25) else None,
     }
     return {**defaults, **overrides}
 
@@ -40,6 +57,11 @@ def ingredient_payload_factory(**overrides: Any) -> dict[str, Any]:
     """Generate JSON-serializable ingredient payload data."""
     data = ingredient_factory(**overrides)
     expiry_date = data.get("expiry_date")
+    quantity = data.get("quantity")
+    if isinstance(quantity, Decimal):
+        data["quantity"] = float(quantity)
+    category = data.get("category")
+    # category already serialized above
     if isinstance(expiry_date, date):
         data["expiry_date"] = expiry_date.isoformat()
     return data
@@ -52,21 +74,68 @@ def recipe_factory(**overrides: Any) -> dict[str, Any]:
         **overrides: Override default values with specific values.
 
     Returns:
-        Dictionary with recipe data suitable for RecipeCreate schema.
+        Dictionary with recipe data suitable for Recipe schema.
 
     Example:
         >>> data = recipe_factory(difficulty="easy")
         >>> data["difficulty"]
         'easy'
     """
+    prep_time = fake.random_int(min=5, max=60)
+    cook_time = fake.random_int(min=10, max=120)
+    total_active = prep_time + cook_time
     defaults = {
         "name": f"{fake.word()} {fake.word()}".title(),
         "description": fake.sentence(),
         "instructions": fake.paragraph(nb_sentences=5),
-        "difficulty": fake.random_element(["easy", "medium", "hard"]),
-        "prep_time": fake.random_int(min=5, max=60),
-        "cook_time": fake.random_int(min=10, max=180),
+        "author": fake.name(),
+        "source": fake.url(),
+        "cuisine_types": [fake.random_element(list(CuisineType)).value],
+        "meal_types": [fake.random_element(list(MealType)).value],
+        "cooking_method": fake.random_element(list(CookingMethod)).value,
+        "dietary_requirements": [
+            fake.random_element(list(DietaryRequirement)).value
+            for _ in range(fake.random_int(min=0, max=2))
+        ],
+        "contains_allergens": [
+            fake.random_element(list(AllergenType)).value
+            for _ in range(fake.random_int(min=0, max=1))
+        ],
+        "allergen_warnings": fake.sentence() if fake.boolean(chance_of_getting_true=20) else None,
+        "timing": {
+            "prep_time_minutes": prep_time,
+            "cook_time_minutes": cook_time,
+            "total_active_time_minutes": total_active,
+        },
+        "difficulty_metrics": {
+            "technical_complexity_score": fake.random_int(min=1, max=10),
+            "step_count": fake.random_int(min=1, max=20),
+        },
         "servings": fake.random_int(min=1, max=12),
+        "yield_description": fake.sentence(nb_words=4),
+        "equipment_requirements": [
+            {
+                "name": fake.random_element(["Mixing Bowl", "Saucepan", "Skillet"]),
+                "is_essential": True,
+                "notes": None,
+            }
+        ],
+        "oven_temperature_celsius": round(fake.random.uniform(160, 220), 1),
+        "oven_settings": fake.random_element(["convection", "conventional", "fan"]),
+        "nutrition_info": {
+            "calories": round(fake.random.uniform(200, 800), 1),
+            "protein_grams": round(fake.random.uniform(5, 40), 1),
+        },
+        "storage_instructions": {
+            "storage_type": StorageType.REFRIGERATE.value,
+            "shelf_life_days": fake.random_int(min=1, max=5),
+        },
+        "tags": [fake.word() for _ in range(2)],
+        "notes": fake.sentence(nb_words=6),
+        "variations": fake.sentence(nb_words=6),
+        "estimated_cost_per_serving": Decimal(str(round(fake.random.uniform(1, 15), 2))),
+        "seasonality": [fake.random_element(["spring", "summer", "autumn", "winter"])],
+        "ingredients": [],
     }
     return {**defaults, **overrides}
 
@@ -87,10 +156,28 @@ def recipe_ingredient_factory(**overrides: Any) -> dict[str, Any]:
     """
     defaults = {
         "ingredient_id": fake.random_int(min=1, max=100),
-        "quantity": round(fake.random.uniform(0.1, 1000), 2),
+        "quantity": Decimal(str(round(fake.random.uniform(5, 500), 2))),
         "unit": fake.random_element(["g", "kg", "ml", "l", "cup", "tbsp", "tsp"]),
         "is_optional": fake.boolean(chance_of_getting_true=20),
-        "note": fake.sentence() if fake.boolean(chance_of_getting_true=30) else None,
+        "mechanical_treatments": [fake.random_element(list(MechanicalTreatment)).value],
+        "size_specification": None,
+        "thermal_treatments": [
+            {
+                "method": fake.random_element(list(ThermalTreatment)).value,
+                "temperature_level": fake.random_element(list(TemperatureLevel)).value,
+                "duration_minutes": fake.random_int(min=1, max=30),
+            }
+        ],
+        "marination": None,
+        "brining": None,
+        "seasoning": None,
+        "preparation_steps": [fake.sentence(nb_words=5)],
+        "resting_time_minutes": fake.random_int(min=0, max=15),
+        "temperature_before_use": fake.random_element(
+            ["room_temperature", "chilled", "warm"]
+        ),
+        "notes": fake.sentence() if fake.boolean(chance_of_getting_true=30) else None,
+        "order_in_recipe": fake.random_int(min=1, max=5),
     }
     return {**defaults, **overrides}
 
@@ -210,22 +297,38 @@ def pantry_ingredient_factory(**overrides: Any) -> dict[str, Any]:
     return ingredient_factory(storage_location="pantry", **overrides)
 
 
-# Difficulty-specific recipe factories
+# Difficulty-specific recipe factories (based on timing and metrics)
 def easy_recipe_factory(**overrides: Any) -> dict[str, Any]:
     """Generate easy recipe with short prep/cook times."""
+    prep_time = fake.random_int(min=5, max=20)
+    cook_time = fake.random_int(min=10, max=30)
     return recipe_factory(
-        difficulty="easy",
-        prep_time=fake.random_int(min=5, max=20),
-        cook_time=fake.random_int(min=10, max=30),
+        timing={
+            "prep_time_minutes": prep_time,
+            "cook_time_minutes": cook_time,
+            "total_active_time_minutes": prep_time + cook_time,
+        },
+        difficulty_metrics={
+            "technical_complexity_score": 2,
+            "step_count": fake.random_int(min=3, max=6),
+        },
         **overrides,
     )
 
 
 def hard_recipe_factory(**overrides: Any) -> dict[str, Any]:
     """Generate hard recipe with longer prep/cook times."""
+    prep_time = fake.random_int(min=30, max=60)
+    cook_time = fake.random_int(min=60, max=120)
     return recipe_factory(
-        difficulty="hard",
-        prep_time=fake.random_int(min=30, max=60),
-        cook_time=fake.random_int(min=60, max=180),
+        timing={
+            "prep_time_minutes": prep_time,
+            "cook_time_minutes": cook_time,
+            "total_active_time_minutes": prep_time + cook_time,
+        },
+        difficulty_metrics={
+            "technical_complexity_score": 8,
+            "step_count": fake.random_int(min=10, max=20),
+        },
         **overrides,
     )

@@ -7,18 +7,23 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
-from app.models.ingredient import StorageLocation
+from app.enums import IngredientCategory
 
 
 class IngredientBase(BaseModel):
-    """Base ingredient schema with common fields."""
+    """Base ingredient schema with category information."""
 
     name: str = Field(..., min_length=1, max_length=100, description="Ingredient name")
-    storage_location: StorageLocation | None = Field(
-        None, description="Storage location"
-    )
-    quantity: Decimal = Field(default=Decimal("0"), ge=0, description="Quantity in grams")
+    category: IngredientCategory = Field(..., description="Ingredient category")
+    storage_location: str | None = Field(None, description="Storage location")
+    quantity: Decimal | None = Field(None, ge=0, description="Current quantity in stock")
+    unit: str | None = Field(None, description="Unit for current quantity")
     expiry_date: date | None = Field(None, description="Expiration date")
+    notes: str | None = Field(None, description="Additional notes about ingredient")
+
+    @field_serializer("quantity", when_used="json")
+    def serialize_quantity(self, value: Decimal | None) -> float | None:
+        return float(value) if value is not None else None
 
 
 class IngredientWrite(IngredientBase):
@@ -36,15 +41,19 @@ class IngredientPatch(BaseModel):
     """Schema for partial updates (all fields optional)."""
 
     name: str | None = Field(None, min_length=1, max_length=100)
-    storage_location: StorageLocation | None = None
-    quantity: Decimal | None = Field(None, ge=0, description="Quantity in grams")
+    category: IngredientCategory | None = None
+    storage_location: str | None = None
+    quantity: Decimal | None = Field(None, ge=0, description="Current quantity in stock")
+    unit: str | None = None
     expiry_date: date | None = None
+    notes: str | None = None
 
 
 class IngredientFilter(BaseModel):
     """Schema for filtering ingredients in list queries."""
 
-    storage_location: StorageLocation | None = None
+    category: IngredientCategory | None = None
+    storage_location: str | None = None
     expiring_before: date | None = None
     name_contains: str | None = None
     page: int = Field(default=1, ge=1)

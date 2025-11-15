@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
+from typing import Iterable
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Recipe, RecipeIngredient
+from app.enums import CuisineType
+from app.models import Recipe as RecipeModel, RecipeIngredient
 from app.repositories import (
     IngredientRepository,
     RecipeIngredientRepository,
@@ -12,12 +16,11 @@ from app.repositories import (
 )
 from app.services.suggestion_service import SuggestionService
 from app.schemas import (
-    GeneratedRecipe,
-    RecipeCreate,
-    RecipeGenerationRequest,
+    Recipe,
     RecipeIngredientRead,
-    RecipeUpdate,
 )
+from app.schemas.core.recipe import IngredientPreparation
+from app.schemas.requests.suggestion import SuggestionRequest
 
 
 class RecipeService:
@@ -38,45 +41,42 @@ class RecipeService:
             self._suggestion_service = SuggestionService(self._session)
         return self._suggestion_service
 
-    async def create_recipe(self, data: RecipeCreate) -> Recipe:
+    async def create_recipe(self, data: Recipe) -> RecipeModel:
         """Create a new recipe with ingredients."""
-        # Validate ingredients exist
+        await self._validate_ingredients_exist(data.ingredients)
+
+        # Use model_dump to serialize Pydantic model to dict, excluding ingredients
+        recipe_dict = data.model_dump(mode="json", exclude={"ingredients"})
+        
+        # Extract timing fields to top-level columns for SQLAlchemy model
+        timing = recipe_dict.pop("timing", {})
+        recipe_dict.update({
+            "prep_time_minutes": timing.get("prep_time_minutes"),
+            "cook_time_minutes": timing.get("cook_time_minutes"),
+            "marinating_time_minutes": timing.get("marinating_time_minutes"),
+            "resting_time_minutes": timing.get("resting_time_minutes"),
+            "inactive_time_minutes": timing.get("inactive_time_minutes"),
+            "total_active_time_minutes": timing.get("total_active_time_minutes"),
+            "timing": timing,  # Keep full timing dict for JSON column
+        })
+        
+        # Ensure required fields have defaults
+        recipe_dict.setdefault("servings", 1)
+        recipe_dict.setdefault("cuisine_types", [])
+        recipe_dict.setdefault("meal_types", [])
+        recipe_dict.setdefault("dietary_requirements", [])
+        recipe_dict.setdefault("contains_allergens", [])
+        recipe_dict.setdefault("equipment_requirements", [])
+        recipe_dict.setdefault("tags", [])
+        
+        recipe = await self.recipe_repo.create(RecipeModel(**recipe_dict))
+
         if data.ingredients:
-            ingredient_ids = [ing.ingredient_id for ing in data.ingredients]
-            existing_ingredients = await self.ingredient_repo.get_by_ids(ingredient_ids)
-            if len(existing_ingredients) != len(set(ingredient_ids)):
-                raise ValueError("One or more ingredient IDs are invalid")
+            await self._persist_ingredients(recipe.id, data.ingredients)
 
-        # Create recipe
-        recipe = Recipe(
-            name=data.name,
-            description=data.description,
-            instructions=data.instructions,
-            prep_time=data.prep_time,
-            cook_time=data.cook_time,
-            servings=data.servings,
-            difficulty=data.difficulty,
-        )
-
-        recipe = await self.recipe_repo.create(recipe)
-
-        # Add ingredient associations
-        if data.ingredients:
-            for ing_data in data.ingredients:
-                association = RecipeIngredient(
-                    recipe_id=recipe.id,
-                    ingredient_id=ing_data.ingredient_id,
-                    quantity=ing_data.quantity,
-                    unit=ing_data.unit,
-                    is_optional=ing_data.is_optional,
-                    note=ing_data.note,
-                )
-                await self.recipe_ingredient_repo.create(association)
-
-        # Reload recipe with associations
         return await self.recipe_repo.get_by_id(recipe.id, load_ingredients=True) or recipe
 
-    async def get_recipe(self, recipe_id: int, load_ingredients: bool = True) -> Recipe:
+    async def get_recipe(self, recipe_id: int, load_ingredients: bool = True) -> RecipeModel:
         """Get recipe by ID."""
         recipe = await self.recipe_repo.get_by_id(recipe_id, load_ingredients=load_ingredients)
         if not recipe:
@@ -85,13 +85,14 @@ class RecipeService:
 
     async def list_recipes(
         self,
-        difficulty: str | None = None,
-        max_prep_time: int | None = None,
-        max_cook_time: int | None = None,
+        *,
+        max_prep_time_minutes: int | None = None,
+        max_cook_time_minutes: int | None = None,
+        cuisine: CuisineType | None = None,
         name_contains: str | None = None,
         page: int = 1,
         page_size: int = 100,
-    ) -> tuple[list[Recipe], int]:
+    ) -> tuple[list[RecipeModel], int]:
         """List recipes with filters and pagination."""
         if page < 1:
             raise ValueError("Page must be >= 1")
@@ -100,51 +101,27 @@ class RecipeService:
 
         skip = (page - 1) * page_size
         recipes, total = await self.recipe_repo.list(
-            difficulty=difficulty,
-            max_prep_time=max_prep_time,
-            max_cook_time=max_cook_time,
+            max_prep_time_minutes=max_prep_time_minutes,
+            max_cook_time_minutes=max_cook_time_minutes,
+            cuisine=cuisine.value if cuisine else None,
             name_contains=name_contains,
             skip=skip,
             limit=page_size,
         )
-
         return list(recipes), total
 
-    async def update_recipe(self, recipe_id: int, data: RecipeUpdate) -> Recipe:
+    async def update_recipe(self, recipe_id: int, data: Recipe) -> RecipeModel:
         """Update a recipe and optionally its ingredients."""
         recipe = await self.get_recipe(recipe_id, load_ingredients=False)
 
-        # Update basic fields
-        if data.name is not None:
-            recipe.name = data.name
-        if data.description is not None:
-            recipe.description = data.description
-        if data.instructions is not None:
-            recipe.instructions = data.instructions
-        if data.prep_time is not None:
-            recipe.prep_time = data.prep_time
-        if data.cook_time is not None:
-            recipe.cook_time = data.cook_time
-        if data.servings is not None:
-            recipe.servings = data.servings
-        if data.difficulty is not None:
-            recipe.difficulty = data.difficulty
-
+        self._apply_recipe_updates(recipe, data)
         recipe = await self.recipe_repo.update(recipe)
 
-        # Update ingredients if provided
         if data.ingredients is not None:
-            # Validate ingredients exist
-            ingredient_ids = [ing.ingredient_id for ing in data.ingredients]
-            existing_ingredients = await self.ingredient_repo.get_by_ids(ingredient_ids)
-            if len(existing_ingredients) != len(set(ingredient_ids)):
-                raise ValueError("One or more ingredient IDs are invalid")
+            await self._validate_ingredients_exist(data.ingredients)
+            serialized = [self._serialize_ingredient_payload(ing) for ing in data.ingredients]
+            await self.recipe_ingredient_repo.upsert_recipe_ingredients(recipe.id, serialized)
 
-            # Upsert ingredients
-            ingredient_data = [ing.model_dump() for ing in data.ingredients]
-            await self.recipe_ingredient_repo.upsert_recipe_ingredients(recipe.id, ingredient_data)
-
-        # Reload with associations
         return await self.recipe_repo.get_by_id(recipe.id, load_ingredients=True) or recipe
 
     async def delete_recipe(self, recipe_id: int) -> None:
@@ -156,24 +133,29 @@ class RecipeService:
         """Get all ingredients for a recipe with details."""
         recipe = await self.get_recipe(recipe_id, load_ingredients=True)
 
-        result = []
+        ingredients: list[RecipeIngredientRead] = []
         for assoc in recipe.ingredient_associations:
-            result.append(
-                RecipeIngredientRead(
-                    id=assoc.id,
-                    ingredient_id=assoc.ingredient_id,
-                    ingredient_name=assoc.ingredient.name,
-                    quantity=assoc.quantity,
-                    unit=assoc.unit,
-                    is_optional=assoc.is_optional,
-                    note=assoc.note,
-                )
+            payload = dict(assoc.preparation_details or {})
+            payload.update(
+                {
+                    "id": assoc.id,
+                    "ingredient_id": assoc.ingredient_id,
+                    "ingredient_name": assoc.ingredient.name,
+                }
             )
-
-        return result
+            payload.setdefault("order_in_recipe", assoc.order_in_recipe)
+            payload.setdefault("is_optional", assoc.is_optional)
+            if "quantity" not in payload and assoc.quantity is not None:
+                payload["quantity"] = float(assoc.quantity)
+            if "unit" not in payload:
+                payload["unit"] = assoc.unit
+            ingredients.append(RecipeIngredientRead.model_validate(payload))
+        return ingredients
 
     async def calculate_missing_ingredients(
-        self, recipe_id: int, available_ingredient_ids: list[int]
+        self,
+        recipe_id: int,
+        available_ingredient_ids: list[int],
     ) -> list[str]:
         """Calculate which ingredients are missing for a recipe."""
         recipe = await self.get_recipe(recipe_id, load_ingredients=True)
@@ -181,68 +163,71 @@ class RecipeService:
         required_ids = {
             assoc.ingredient_id for assoc in recipe.ingredient_associations if not assoc.is_optional
         }
-
-        available_set = set(available_ingredient_ids)
-        missing_ids = required_ids - available_set
-
+        missing_ids = required_ids - set(available_ingredient_ids)
         if not missing_ids:
             return []
 
         missing_ingredients = await self.ingredient_repo.get_by_ids(list(missing_ids))
         return [ing.name for ing in missing_ingredients]
 
-    async def generate_recipe_from_partial(
-        self, request: RecipeGenerationRequest
-    ) -> GeneratedRecipe:
-        """
-        Generate a complete recipe using AI from partial information.
 
-        This method uses SuggestionService internally to generate recipes via AI.
+    async def _validate_ingredients_exist(
+        self,
+        ingredients: Iterable[IngredientPreparation] | None,
+    ) -> None:
+        if not ingredients:
+            return
+        ingredient_ids = [ing.ingredient_id for ing in ingredients]
+        existing_ingredients = await self.ingredient_repo.get_by_ids(ingredient_ids)
+        if len(existing_ingredients) != len(set(ingredient_ids)):
+            raise ValueError("One or more ingredient IDs are invalid")
 
-        Args:
-            request: RecipeGenerationRequest with partial recipe data
 
-        Returns:
-            GeneratedRecipe with complete recipe data
+    def _apply_recipe_updates(self, recipe: RecipeModel, data: Recipe) -> None:
+        """Apply partial updates to recipe instance."""
+        # Get non-None fields from Pydantic model, excluding ingredients
+        updates = data.model_dump(mode="json", exclude_unset=True, exclude={"ingredients"})
+        
+        if not updates:
+            return
+        
+        # Handle timing extraction to top-level columns
+        if "timing" in updates:
+            timing = updates.pop("timing")
+            recipe.timing = timing
+            recipe.prep_time_minutes = timing.get("prep_time_minutes")
+            recipe.cook_time_minutes = timing.get("cook_time_minutes")
+            recipe.marinating_time_minutes = timing.get("marinating_time_minutes")
+            recipe.resting_time_minutes = timing.get("resting_time_minutes")
+            recipe.inactive_time_minutes = timing.get("inactive_time_minutes")
+            recipe.total_active_time_minutes = timing.get("total_active_time_minutes")
+        
+        # Apply all other updates directly
+        for key, value in updates.items():
+            setattr(recipe, key, value)
 
-        Raises:
-            ValueError: If generation fails or invalid input
-        """
-        return await self.suggestion_service.generate_recipe_from_partial(request)
+    async def _persist_ingredients(
+        self,
+        recipe_id: int,
+        ingredients: Iterable[IngredientPreparation],
+    ) -> None:
+        """Persist ingredient associations for a recipe."""
+        for ing in ingredients:
+            payload = self._serialize_ingredient_payload(ing)
+            association = RecipeIngredient(recipe_id=recipe_id, **payload)
+            await self.recipe_ingredient_repo.create(association)
 
-    def _convert_generated_to_create(
-        self, generated: GeneratedRecipe
-    ) -> RecipeCreate:
-        """
-        Convert GeneratedRecipe to RecipeCreate format.
-
-        Args:
-            generated: AI-generated recipe
-
-        Returns:
-            RecipeCreate suitable for create_recipe method
-        """
-        from decimal import Decimal
-
-        recipe_ingredients = [
-            RecipeIngredientCreate(
-                ingredient_id=ing.ingredient_id,
-                quantity=Decimal(str(ing.quantity)),
-                unit=ing.unit,
-                is_optional=False,
-                note=None,
-            )
-            for ing in generated.ingredients
-            if ing.ingredient_id > 0  # Only include ingredients from our database
-        ]
-
-        return RecipeCreate(
-            name=generated.name,
-            description=generated.description,
-            instructions=generated.instructions,
-            prep_time=generated.prep_time_minutes,
-            cook_time=generated.cook_time_minutes,
-            servings=generated.servings or 1,
-            difficulty=generated.difficulty,
-            ingredients=recipe_ingredients,
-        )
+    def _serialize_ingredient_payload(self, ingredient: IngredientPreparation) -> dict:
+        """Convert an ingredient preparation into persistence payload."""
+        detail_json = ingredient.model_dump(mode="json")
+        detail_json.setdefault("ingredient_id", ingredient.ingredient_id)
+        detail_json.setdefault("order_in_recipe", ingredient.order_in_recipe)
+        return {
+            "ingredient_id": ingredient.ingredient_id,
+            "quantity": ingredient.quantity,
+            "unit": ingredient.unit,
+            "is_optional": ingredient.is_optional,
+            "note": ingredient.notes,
+            "order_in_recipe": ingredient.order_in_recipe,
+            "preparation_details": detail_json,
+        }

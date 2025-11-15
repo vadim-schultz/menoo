@@ -42,41 +42,39 @@ class RecipeRepository:
     async def list(
         self,
         *,
-        difficulty: str | None = None,
-        max_prep_time: int | None = None,
-        max_cook_time: int | None = None,
+        max_prep_time_minutes: int | None = None,
+        max_cook_time_minutes: int | None = None,
+        cuisine: str | None = None,
         name_contains: str | None = None,
         skip: int = 0,
         limit: int = 100,
     ) -> tuple[Sequence[Recipe], int]:
         """List recipes with optional filters and pagination."""
-        # Build query conditions
         conditions = [Recipe.is_deleted.is_(False)]
 
-        if difficulty:
-            conditions.append(Recipe.difficulty == difficulty)
+        if max_prep_time_minutes is not None:
+            conditions.append(Recipe.prep_time_minutes <= max_prep_time_minutes)
 
-        if max_prep_time is not None:
-            conditions.append(Recipe.prep_time <= max_prep_time)
+        if max_cook_time_minutes is not None:
+            conditions.append(Recipe.cook_time_minutes <= max_cook_time_minutes)
 
-        if max_cook_time is not None:
-            conditions.append(Recipe.cook_time <= max_cook_time)
+        if cuisine:
+            conditions.append(Recipe.cuisine_types.contains([cuisine]))
 
         if name_contains:
             conditions.append(Recipe.name.ilike(f"%{name_contains}%"))
 
-        # Count total
         count_query = select(func.count()).select_from(Recipe).where(and_(*conditions))
-        total_result = await self.session.execute(count_query)
-        total = total_result.scalar_one()
+        total = (await self.session.execute(count_query)).scalar_one()
 
-        # Get paginated results
         query = (
-            select(Recipe).where(and_(*conditions)).order_by(Recipe.name).offset(skip).limit(limit)
+            select(Recipe)
+            .where(and_(*conditions))
+            .order_by(Recipe.name)
+            .offset(skip)
+            .limit(limit)
         )
-        result = await self.session.execute(query)
-        recipes = result.scalars().all()
-
+        recipes = (await self.session.execute(query)).scalars().all()
         return recipes, total
 
     async def update(self, recipe: Recipe) -> Recipe:

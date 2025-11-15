@@ -7,7 +7,7 @@
 
 import { http, HttpResponse } from 'msw';
 import type {
-  RecipeSuggestion,
+  GeneratedRecipe,
   SuggestionResponse,
   SuggestionAcceptRequest,
 } from '@/shared/types/suggestion';
@@ -17,47 +17,24 @@ import type { IngredientRead } from '@/shared/types/ingredient';
 const API_BASE = 'http://localhost:8000/api/v1';
 
 // Mock data factories
-export const createMockAISuggestion = (
-  overrides?: Partial<RecipeSuggestion>
-): RecipeSuggestion => ({
-  recipe_id: null,
-  recipe_name: 'AI-Generated Pasta Carbonara',
-  match_score: 0.95,
-  missing_ingredients: [],
-  matched_ingredients: ['Pasta', 'Eggs', 'Bacon', 'Parmesan'],
-  reason: 'Great match! You have all the ingredients for a classic Italian dish.',
-  is_ai_generated: true,
-  generated_recipe: {
-    name: 'AI-Generated Pasta Carbonara',
-    description: 'A creamy Italian pasta dish with eggs, bacon, and parmesan cheese.',
-    ingredients: [
-      { ingredient_id: 1, name: 'Pasta', quantity: 400, unit: 'g' },
-      { ingredient_id: 2, name: 'Eggs', quantity: 4, unit: 'whole' },
-      { ingredient_id: 3, name: 'Bacon', quantity: 200, unit: 'g' },
-      { ingredient_id: 4, name: 'Parmesan', quantity: 100, unit: 'g' },
-    ],
-    instructions: '1. Cook pasta\n2. Fry bacon\n3. Mix eggs and cheese\n4. Combine all',
-    prep_time_minutes: 10,
-    cook_time_minutes: 15,
-    servings: 4,
-    difficulty: 'easy',
-    cuisine_type: 'Italian',
-    meal_type: 'dinner',
-  },
-  ...overrides,
-});
-
-export const createMockTraditionalSuggestion = (
-  overrides?: Partial<RecipeSuggestion>
-): RecipeSuggestion => ({
-  recipe_id: 100,
-  recipe_name: 'Traditional Spaghetti Bolognese',
-  match_score: 0.8,
-  missing_ingredients: ['Ground Beef'],
-  matched_ingredients: ['Pasta', 'Tomato Sauce', 'Onion'],
-  reason: null,
-  is_ai_generated: false,
-  generated_recipe: null,
+export const createMockGeneratedRecipe = (
+  overrides?: Partial<GeneratedRecipe>
+): GeneratedRecipe => ({
+  name: 'AI-Generated Pasta Carbonara',
+  description: 'A creamy Italian pasta dish with eggs, bacon, and parmesan cheese.',
+  ingredients: [
+    { ingredient_id: 1, name: 'Pasta', quantity: 400, unit: 'g' },
+    { ingredient_id: 2, name: 'Eggs', quantity: 4, unit: 'whole' },
+    { ingredient_id: 3, name: 'Bacon', quantity: 200, unit: 'g' },
+    { ingredient_id: 4, name: 'Parmesan', quantity: 100, unit: 'g' },
+  ],
+  instructions: '1. Cook pasta\n2. Fry bacon\n3. Mix eggs and cheese\n4. Combine all',
+  prep_time_minutes: 10,
+  cook_time_minutes: 15,
+  servings: 4,
+  difficulty: 'easy',
+  cuisine_type: 'Italian',
+  meal_type: 'dinner',
   ...overrides,
 });
 
@@ -105,24 +82,9 @@ export const createMockIngredient = (overrides?: Partial<IngredientRead>): Ingre
 export const handlers = [
   // GET /suggestions/recipes - Get recipe suggestions
   http.post(`${API_BASE}/suggestions/recipes`, async ({ request }) => {
-    const body = (await request.json()) as { available_ingredients: number[] };
-
-    if (!body.available_ingredients || body.available_ingredients.length === 0) {
-      return HttpResponse.json<SuggestionResponse>(
-        {
-          suggestions: [createMockAISuggestion()],
-          source: 'ai',
-          cache_hit: false,
-        },
-        { status: 201 }
-      );
-    }
-
     return HttpResponse.json<SuggestionResponse>(
       {
-        suggestions: [createMockAISuggestion(), createMockTraditionalSuggestion()],
-        source: 'ai',
-        cache_hit: false,
+        recipes: [createMockGeneratedRecipe()],
       },
       { status: 201 }
     );
@@ -151,22 +113,9 @@ export const handlers = [
   }),
   // Relative URL handlers matching client
   http.post(`/api/v1/suggestions/recipes`, async ({ request }) => {
-    const body = (await request.json()) as { available_ingredients: number[] };
-    if (!body.available_ingredients || body.available_ingredients.length === 0) {
-      return HttpResponse.json<SuggestionResponse>(
-        {
-          suggestions: [createMockAISuggestion()],
-          source: 'ai',
-          cache_hit: false,
-        },
-        { status: 201 }
-      );
-    }
     return HttpResponse.json<SuggestionResponse>(
       {
-        suggestions: [createMockAISuggestion(), createMockTraditionalSuggestion()],
-        source: 'ai',
-        cache_hit: false,
+        recipes: [createMockGeneratedRecipe()],
       },
       { status: 201 }
     );
