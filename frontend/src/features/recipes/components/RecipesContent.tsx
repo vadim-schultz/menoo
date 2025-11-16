@@ -1,8 +1,10 @@
-import { Button, Modal } from '../../../shared/components';
+import { Button } from '../../../shared/components';
 import { Plus } from 'lucide-preact';
 import type { RecipeDetail, RecipeCreate } from '../../../shared/types';
 import { RecipeForm } from './index';
 import { RecipeList } from './RecipeList';
+import { Card, CardBody, CardHeader } from '../../../shared/components/ui/Card';
+import { Heading, Flex } from '@chakra-ui/react';
 
 interface RecipeFormInitialData {
   ingredientIds?: number[];
@@ -41,29 +43,32 @@ export function RecipesContent({
 }: RecipesContentProps) {
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1.5rem',
-        }}
-      >
-        <h1>Recipes</h1>
+      <Flex align="center" justify="space-between" mb={6}>
+        <Heading as="h1" size="lg">Recipes</Heading>
         <Button icon={Plus} onClick={onOpenCreate} aria-label="Add Recipe" />
-      </div>
+      </Flex>
 
       <RecipeList recipes={recipes} onEdit={onEdit} onDelete={onDelete} />
 
-      <Modal isOpen={isModalOpen} onClose={onCloseModal} title={editingRecipe ? 'Edit Recipe' : 'Add Recipe'}>
-        <RecipeForm
-          recipe={editingRecipe}
-          onSubmit={(data) => (editingRecipe ? onUpdate(editingRecipe.id, data) : onCreate(data))}
-          onCancel={onCloseModal}
-          loading={creating || updating}
-          initialData={initialData}
-        />
-      </Modal>
+      {(isModalOpen || editingRecipe) && (
+        <Card aria-label={editingRecipe ? 'Edit Recipe' : 'Add Recipe'} mt={8}>
+          <CardHeader display="flex" alignItems="center" justifyContent="space-between" pb={2}>
+            <Heading as="h2" size="md" m={0}>
+              {editingRecipe ? 'Edit Recipe' : 'Add Recipe'}
+            </Heading>
+            <Button variant="secondary" onClick={onCloseModal}>Close</Button>
+          </CardHeader>
+          <CardBody pt={0}>
+            <RecipeForm
+              recipe={editingRecipe}
+              onSubmit={(data) => (editingRecipe ? onUpdate(editingRecipe.id, data) : onCreate(data))}
+              onCancel={onCloseModal}
+              loading={creating || updating}
+              initialData={initialData}
+            />
+          </CardBody>
+        </Card>
+      )}
     </div>
   );
 }

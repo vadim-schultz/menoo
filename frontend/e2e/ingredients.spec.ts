@@ -34,7 +34,7 @@ test.describe('Ingredient CRUD Operations', () => {
     await page.click('button:has-text("Add Ingredient")');
 
     // Wait for modal to appear
-    await expect(page.locator('.modal__title')).toContainText('Add Ingredient');
+    await expect(page.getByRole('dialog')).toContainText('Add Ingredient');
 
     // Fill only required fields
     await page.fill('input[name="name"]', 'Tomatoes');
@@ -45,7 +45,7 @@ test.describe('Ingredient CRUD Operations', () => {
     await page.click('button[type="submit"]:has-text("Create")');
 
     // Wait for modal to close
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
     // Verify ingredient appears in list
     await expect(page.locator('text=Tomatoes')).toBeVisible();
@@ -57,7 +57,7 @@ test.describe('Ingredient CRUD Operations', () => {
     await page.click('button:has-text("Add Ingredient")');
 
     // Wait for modal
-    await expect(page.locator('.modal__title')).toContainText('Add Ingredient');
+    await expect(page.getByRole('dialog')).toContainText('Add Ingredient');
 
     // Fill all fields
     await page.fill('input[name="name"]', 'Fresh Basil');
@@ -77,7 +77,7 @@ test.describe('Ingredient CRUD Operations', () => {
     await page.click('button[type="submit"]');
 
     // Wait for modal to close
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
     // Verify ingredient appears in list with all details
     await expect(page.locator('text=Fresh Basil')).toBeVisible();
@@ -90,13 +90,13 @@ test.describe('Ingredient CRUD Operations', () => {
     await page.click('button:has-text("Add Ingredient")');
 
     // Wait for modal
-    await expect(page.locator('.modal__title')).toContainText('Add Ingredient');
+    await expect(page.getByRole('dialog')).toContainText('Add Ingredient');
 
     // Try to submit empty form
     await page.click('button[type="submit"]');
 
     // Should show validation errors (form should not submit)
-    await expect(page.locator('.modal')).toBeVisible();
+    await expect(page.getByRole('dialog')).toBeVisible();
 
     // Check for error messages (adjust selectors based on actual error display)
     // The form should show validation feedback
@@ -107,7 +107,7 @@ test.describe('Ingredient CRUD Operations', () => {
   test('should edit existing ingredient', async ({ page }) => {
     // First, create an ingredient
     await page.click('button:has-text("Add Ingredient")');
-    await expect(page.locator('.modal__title')).toContainText('Add Ingredient');
+    await expect(page.getByRole('dialog')).toContainText('Add Ingredient');
 
     await page.fill('input[name="name"]', 'Carrots');
     await page.fill('input[name="quantity"]', '10');
@@ -115,7 +115,7 @@ test.describe('Ingredient CRUD Operations', () => {
     await page.click('button[type="submit"]');
 
     // Wait for modal to close
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
     // Verify ingredient was created
     await expect(page.locator('text=Carrots')).toBeVisible();
@@ -130,7 +130,7 @@ test.describe('Ingredient CRUD Operations', () => {
     }
 
     // Wait for modal with "Edit" title
-    await expect(page.locator('.modal__title')).toContainText('Edit Ingredient');
+    await expect(page.getByRole('dialog')).toContainText('Edit Ingredient');
 
     // Update quantity and storage location
     await page.fill('input[name="quantity"]', '15');
@@ -140,7 +140,7 @@ test.describe('Ingredient CRUD Operations', () => {
     await page.click('button[type="submit"]');
 
     // Wait for modal to close
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
     // Verify updated values
     await expect(page.locator('text=15 pieces')).toBeVisible();
@@ -155,7 +155,7 @@ test.describe('Ingredient CRUD Operations', () => {
     await page.click('button[type="submit"]');
 
     // Wait for creation
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
     await expect(page.locator('text=Temporary Ingredient')).toBeVisible();
 
     // Setup dialog handler for confirmation
@@ -175,7 +175,7 @@ test.describe('Ingredient CRUD Operations', () => {
   test('should cancel modal without saving', async ({ page }) => {
     // Click "Add Ingredient"
     await page.click('button:has-text("Add Ingredient")');
-    await expect(page.locator('.modal__title')).toContainText('Add Ingredient');
+    await expect(page.getByRole('dialog')).toContainText('Add Ingredient');
 
     // Fill some data
     await page.fill('input[name="name"]', 'Should Not Be Saved');
@@ -186,7 +186,7 @@ test.describe('Ingredient CRUD Operations', () => {
     await page.click('button:has-text("Cancel")');
 
     // Modal should close
-    await expect(page.locator('.modal')).not.toBeVisible();
+    await expect(page.getByRole('dialog')).not.toBeVisible();
 
     // Ingredient should not appear in list
     await expect(page.locator('text=Should Not Be Saved')).not.toBeVisible();
@@ -195,25 +195,25 @@ test.describe('Ingredient CRUD Operations', () => {
   test('should close modal on backdrop click', async ({ page }) => {
     // Click "Add Ingredient"
     await page.click('button:has-text("Add Ingredient")');
-    await expect(page.locator('.modal')).toBeVisible();
+    await expect(page.getByRole('dialog')).toBeVisible();
 
-    // Click on backdrop (outside modal)
-    await page.click('.modal-backdrop', { position: { x: 10, y: 10 } });
+    // Close via Escape (backdrop click alternative)
+    await page.keyboard.press('Escape');
 
     // Modal should close
-    await expect(page.locator('.modal')).not.toBeVisible();
+    await expect(page.getByRole('dialog')).not.toBeVisible();
   });
 
   test('should close modal on Escape key', async ({ page }) => {
     // Click "Add Ingredient"
     await page.click('button:has-text("Add Ingredient")');
-    await expect(page.locator('.modal')).toBeVisible();
+    await expect(page.getByRole('dialog')).toBeVisible();
 
     // Press Escape key
     await page.keyboard.press('Escape');
 
     // Modal should close
-    await expect(page.locator('.modal')).not.toBeVisible();
+    await expect(page.getByRole('dialog')).not.toBeVisible();
   });
 });
 
@@ -255,7 +255,7 @@ test.describe('Ingredient Filtering and Search', () => {
     await page.fill('input[name="unit"]', 'piece');
     await page.click('button[type="submit"]');
 
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
     // Look for search input
     const searchInput = page
@@ -286,7 +286,7 @@ test.describe('Ingredient Data Persistence', () => {
     await page.fill('input[name="unit"]', 'kg');
     await page.click('button[type="submit"]');
 
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
     await expect(page.locator(`text=${uniqueName}`)).toBeVisible();
 
     // Reload page

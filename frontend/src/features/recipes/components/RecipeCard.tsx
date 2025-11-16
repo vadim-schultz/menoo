@@ -2,6 +2,12 @@ import type { RecipeDetail } from '../../../shared/types';
 import { Button } from '../../../shared/components';
 import { Pencil, Trash2 } from 'lucide-preact';
 import { formatTime } from '../services/recipeFormatting';
+import { Card, CardBody, CardHeader } from '../../../shared/components/ui/Card';
+import { Heading, Text } from '../../../shared/components/ui/Typography';
+import { SimpleGrid, HStack } from '../../../shared/components/ui/Layout';
+import { Box } from '../../../shared/components/ui/Box';
+import { Stack } from '../../../shared/components/ui/Layout';
+import { Badge } from '../../../shared/components/ui/Badge';
 
 interface RecipeCardProps {
   recipe: RecipeDetail;
@@ -11,60 +17,154 @@ interface RecipeCardProps {
 
 export function RecipeCard({ recipe, onEdit, onDelete }: RecipeCardProps) {
   const totalIngredients = recipe.ingredients?.length || 0;
+  const cuisines = (recipe.cuisine_types || []).join(', ');
+  const meals = (recipe.meal_types || []).join(', ');
+  const allergens = (recipe.contains_allergens || []).join(', ');
 
   return (
-    <article style={{ border: '1px solid var(--pico-border-color)', borderRadius: 'var(--pico-border-radius)', padding: '1rem' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h3 style={{ margin: 0 }}>{recipe.name}</h3>
-          {recipe.description && <p style={{ marginTop: '0.25rem', color: 'var(--pico-muted-color)' }}>{recipe.description}</p>}
-        </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <Button icon={Pencil} variant="secondary" onClick={() => onEdit(recipe)} aria-label="Edit recipe" />
-          <Button icon={Trash2} variant="danger" onClick={() => onDelete(recipe.id)} aria-label="Delete recipe" />
-        </div>
-      </header>
+    <Card>
+      <CardHeader pb={2}>
+        <HStack justify="space-between" align="center">
+          <Box>
+            <Heading as="h3" size="md">
+              {recipe.name}
+            </Heading>
+            {recipe.description && (
+              <Text mt={1} color="gray.600" noOfLines={2} fontSize="sm">
+                {recipe.description}
+              </Text>
+            )}
+            <HStack spacing={3} flexWrap="wrap" mt={1}>
+              {recipe.author && (
+                <Text color="gray.600" fontSize="xs">
+                  By {recipe.author}
+                </Text>
+              )}
+              {recipe.source && (
+                <Text color="gray.600" fontSize="xs">
+                  Source: {recipe.source}
+                </Text>
+              )}
+            </HStack>
+          </Box>
+          <HStack spacing={2}>
+            <Button icon={Pencil} variant="secondary" onClick={() => onEdit(recipe)} aria-label="Edit recipe" />
+            <Button icon={Trash2} variant="danger" onClick={() => onDelete(recipe.id)} aria-label="Delete recipe" />
+          </HStack>
+        </HStack>
+      </CardHeader>
+      <CardBody pt={0}>
+        <SimpleGrid columns={{ base: 2, sm: 3, md: 4 }} spacing={3} mt={2}>
+          <Box>
+            <Text color="gray.600" fontSize="xs">
+              Prep
+            </Text>
+            <Text>{formatTime((recipe as any).prep_time ?? recipe.timing_full?.prep_time_minutes)}</Text>
+          </Box>
+          <Box>
+            <Text color="gray.600" fontSize="xs">
+              Cook
+            </Text>
+            <Text>{formatTime((recipe as any).cook_time ?? recipe.timing_full?.cook_time_minutes)}</Text>
+          </Box>
+          <Box>
+            <Text color="gray.600" fontSize="xs">
+              Servings
+            </Text>
+            <Text>{recipe.servings || '-'}</Text>
+          </Box>
+          <Box>
+            <Text color="gray.600" fontSize="xs">
+              Ingredients
+            </Text>
+            <Text>{totalIngredients}</Text>
+          </Box>
+          {recipe.cooking_method && (
+            <Box>
+              <Text color="gray.600" fontSize="xs">
+                Method
+              </Text>
+              <Text>{recipe.cooking_method}</Text>
+            </Box>
+          )}
+          {cuisines && (
+            <Box>
+              <Text color="gray.600" fontSize="xs">
+                Cuisine
+              </Text>
+              <Text>{cuisines}</Text>
+            </Box>
+          )}
+          {meals && (
+            <Box>
+              <Text color="gray.600" fontSize="xs">
+                Meal
+              </Text>
+              <Text>{meals}</Text>
+            </Box>
+          )}
+        </SimpleGrid>
 
-      <section style={{ marginTop: '0.75rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem' }}>
-        <div>
-          <small style={{ color: 'var(--pico-muted-color)' }}>Prep</small>
-          <div>{formatTime((recipe as any).prep_time)}</div>
-        </div>
-        <div>
-          <small style={{ color: 'var(--pico-muted-color)' }}>Cook</small>
-          <div>{formatTime((recipe as any).cook_time)}</div>
-        </div>
-        <div>
-          <small style={{ color: 'var(--pico-muted-color)' }}>Servings</small>
-          <div>{recipe.servings || '-'}</div>
-        </div>
-        <div>
-          <small style={{ color: 'var(--pico-muted-color)' }}>Ingredients</small>
-          <div>{totalIngredients}</div>
-        </div>
-      </section>
+        {recipe.ingredients && recipe.ingredients.length > 0 && (
+          <Box mt={3}>
+            <Heading as="h4" size="sm" mb={2}>
+              Ingredients
+            </Heading>
+            <Stack as="ul" m={0} pl={4} spacing={1}>
+              {recipe.ingredients.map((ing) => (
+                <Box as="li" key={ing.id}>
+                  {ing.ingredient_name}: {ing.quantity} {ing.unit}
+                </Box>
+              ))}
+            </Stack>
+          </Box>
+        )}
 
-      {recipe.ingredients && recipe.ingredients.length > 0 && (
-        <section style={{ marginTop: '0.75rem' }}>
-          <h4 style={{ margin: '0 0 0.5rem 0' }}>Ingredients</h4>
-          <ul style={{ margin: 0, paddingLeft: '1rem' }}>
-            {recipe.ingredients.map((ing) => (
-              <li key={ing.id}>
-                {ing.ingredient_name}: {ing.quantity} {ing.unit}
-              </li>
+        <Box mt={3}>
+          <Heading as="h4" size="sm" mb={2}>
+            Preparation
+          </Heading>
+          <Text whiteSpace="pre-wrap" fontFamily="inherit" m={0}>
+            {recipe.instructions}
+          </Text>
+        </Box>
+
+        {(allergens || (recipe.allergen_warnings || '')).length > 0 && (
+          <Box mt={3}>
+            <Heading as="h4" size="sm" mb={2}>
+              Allergens
+            </Heading>
+            <Stack spacing={1}>
+              {allergens && (
+                <Text>
+                  <Text as="span" fontWeight="semibold">
+                    Contains:
+                  </Text>{' '}
+                  {allergens}
+                </Text>
+              )}
+              {recipe.allergen_warnings && (
+                <Text>
+                  <Text as="span" fontWeight="semibold">
+                    Warnings:
+                  </Text>{' '}
+                  {recipe.allergen_warnings}
+                </Text>
+              )}
+            </Stack>
+          </Box>
+        )}
+
+        {recipe.tags && recipe.tags.length > 0 && (
+          <HStack mt={3} spacing={2} wrap="wrap">
+            {recipe.tags.map((t) => (
+              <Badge key={t} colorScheme="gray" variant="subtle">
+                {t}
+              </Badge>
             ))}
-          </ul>
-        </section>
-      )}
-
-      {recipe.instructions && (
-        <section style={{ marginTop: '0.75rem' }}>
-          <h4 style={{ margin: '0 0 0.5rem 0' }}>Preparation</h4>
-          <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>{recipe.instructions}</pre>
-        </section>
-      )}
-    </article>
+          </HStack>
+        )}
+      </CardBody>
+    </Card>
   );
 }
-
-

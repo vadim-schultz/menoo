@@ -65,7 +65,7 @@ test.describe('Recipe CRUD Operations', () => {
     await page.click('button:has-text("Add Recipe")');
 
     // Wait for modal to appear
-    await expect(page.locator('.modal__title')).toContainText('Add Recipe');
+    await expect(page.getByRole('dialog')).toContainText('Add Recipe');
 
     // Fill basic recipe information
     await page.fill('input[name="name"]', 'Simple Chicken Rice');
@@ -109,7 +109,7 @@ test.describe('Recipe CRUD Operations', () => {
     await page.click('button[type="submit"]');
 
     // Wait for modal to close
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
     // Verify recipe appears in list
     await expect(page.locator('text=Simple Chicken Rice')).toBeVisible();
@@ -120,7 +120,7 @@ test.describe('Recipe CRUD Operations', () => {
     await page.click('button:has-text("Add Recipe")');
 
     // Wait for modal
-    await expect(page.locator('.modal__title')).toContainText('Add Recipe');
+    await expect(page.getByRole('dialog')).toContainText('Add Recipe');
 
     // Fill all fields
     const uniqueName = `Complete Recipe ${Date.now()}`;
@@ -154,7 +154,7 @@ test.describe('Recipe CRUD Operations', () => {
     await page.click('button[type="submit"]');
 
     // Wait for modal to close
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
     // Verify recipe appears
     await expect(page.locator(`text=${uniqueName}`)).toBeVisible();
@@ -163,14 +163,14 @@ test.describe('Recipe CRUD Operations', () => {
   test('should validate required recipe fields', async ({ page }) => {
     // Click "Add Recipe"
     await page.click('button:has-text("Add Recipe")');
-    await expect(page.locator('.modal__title')).toContainText('Add Recipe');
+    await expect(page.getByRole('dialog')).toContainText('Add Recipe');
 
     // Try to submit with only name (missing required fields)
     await page.fill('input[name="name"]', 'Incomplete Recipe');
     await page.click('button[type="submit"]');
 
     // Modal should remain open (validation failed)
-    await expect(page.locator('.modal')).toBeVisible();
+    await expect(page.getByRole('dialog')).toBeVisible();
 
     // Fill remaining required fields
     await page.fill('textarea[name="instructions"]', 'Some instructions');
@@ -180,7 +180,7 @@ test.describe('Recipe CRUD Operations', () => {
     await page.click('button[type="submit"]');
 
     // Modal should close
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
   });
 
   test('should view recipe details', async ({ page }) => {
@@ -197,7 +197,7 @@ test.describe('Recipe CRUD Operations', () => {
     await page.selectOption('select[name="difficulty"]', 'easy');
 
     await page.click('button[type="submit"]');
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
     // Click on the recipe to view details
     await page.click(`text=${recipeName}`);
@@ -218,7 +218,7 @@ test.describe('Recipe CRUD Operations', () => {
     await page.fill('textarea[name="instructions"]', 'Original instructions');
     await page.fill('input[name="servings"]', '2');
     await page.click('button[type="submit"]');
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
     // Find and click edit button
     const editButton = page.locator('button:has-text("Edit")').first();
@@ -231,7 +231,7 @@ test.describe('Recipe CRUD Operations', () => {
     }
 
     // Wait for edit modal
-    await expect(page.locator('.modal__title')).toContainText('Edit Recipe');
+    await expect(page.getByRole('dialog')).toContainText('Edit Recipe');
 
     // Update fields
     const updatedName = `${originalName} (Updated)`;
@@ -241,7 +241,7 @@ test.describe('Recipe CRUD Operations', () => {
 
     // Submit
     await page.click('button[type="submit"]');
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
     // Verify updates
     await expect(page.locator(`text=${updatedName}`)).toBeVisible();
@@ -257,7 +257,7 @@ test.describe('Recipe CRUD Operations', () => {
     await page.fill('textarea[name="instructions"]', 'Will be deleted');
     await page.fill('input[name="servings"]', '1');
     await page.click('button[type="submit"]');
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
     // Verify it exists
     await expect(page.locator(`text=${tempName}`)).toBeVisible();
@@ -307,7 +307,7 @@ test.describe('Recipe Filtering and Search', () => {
     await page.fill('textarea[name="instructions"]', 'Search test');
     await page.fill('input[name="servings"]', '1');
     await page.click('button[type="submit"]');
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
     // Use search functionality
     const searchInput = page
@@ -368,7 +368,7 @@ test.describe('Recipe-Ingredient Relationship', () => {
     // This is a placeholder - actual implementation depends on the form structure
 
     await page.click('button[type="submit"]');
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
     // View recipe details
     await page.click(`text=${recipeName}`);

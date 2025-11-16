@@ -1,8 +1,14 @@
 import { render } from 'preact';
 import { App } from './app';
-import '@picocss/pico/css/pico.min.css';
+import { ChakraProvider } from '@chakra-ui/react';
+import theme from './theme';
 
 const root = document.getElementById('app');
 if (root) {
-  render(<App />, root);
+  render(
+    <ChakraProvider theme={theme}>
+      <App />
+    </ChakraProvider>,
+    root
+  );
 }

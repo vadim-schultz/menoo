@@ -26,7 +26,7 @@ test.describe('Complete User Journey: Ingredient → Recipe → Suggestion', () 
 
     for (const ing of testIngredients) {
       await page.click('button:has-text("Add Ingredient")');
-      await expect(page.locator('.modal')).toBeVisible();
+      await expect(page.getByRole('dialog')).toBeVisible();
 
       await page.fill('input[name="name"]', ing.name);
       await page.fill('input[name="quantity"]', ing.quantity);
@@ -34,7 +34,7 @@ test.describe('Complete User Journey: Ingredient → Recipe → Suggestion', () 
       await page.selectOption('select[name="storage_location"]', ing.location);
 
       await page.click('button[type="submit"]');
-      await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+      await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
       // Verify ingredient was created
       await expect(page.locator(`text=${ing.name}`)).toBeVisible();
@@ -45,7 +45,7 @@ test.describe('Complete User Journey: Ingredient → Recipe → Suggestion', () 
     await page.waitForLoadState('networkidle');
 
     await page.click('button:has-text("Add Recipe")');
-    await expect(page.locator('.modal')).toBeVisible();
+    await expect(page.getByRole('dialog')).toBeVisible();
 
     const recipeName = `Journey Pasta Recipe ${Date.now()}`;
     await page.fill('input[name="name"]', recipeName);
@@ -63,7 +63,7 @@ test.describe('Complete User Journey: Ingredient → Recipe → Suggestion', () 
     // This is a placeholder for the actual ingredient selection mechanism
 
     await page.click('button[type="submit"]');
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
     // Verify recipe was created
     await expect(page.locator(`text=${recipeName}`)).toBeVisible();
@@ -129,7 +129,7 @@ test.describe('AI Suggestion to Recipe Workflow', () => {
         await page.fill('input[name="quantity"]', '500');
         await page.fill('input[name="unit"]', 'grams');
         await page.click('button[type="submit"]');
-        await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+        await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
       }
     }
 
@@ -234,7 +234,7 @@ test.describe('Error Handling and Edge Cases', () => {
     await page.fill('input[name="quantity"]', '1');
     await page.fill('input[name="unit"]', 'piece');
     await page.click('button[type="submit"]');
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
     // Try to create again with same name
     await page.click('button:has-text("Add Ingredient")');
@@ -291,7 +291,7 @@ test.describe('Data Validation and Constraints', () => {
     await page.click('button[type="submit"]');
 
     // Form should show validation error or not submit
-    await expect(page.locator('.modal')).toBeVisible();
+    await expect(page.getByRole('dialog')).toBeVisible();
   });
 
   test('should enforce positive serving count for recipes', async ({ page }) => {
@@ -304,7 +304,7 @@ test.describe('Data Validation and Constraints', () => {
     await page.click('button[type="submit"]');
 
     // Should show validation error
-    await expect(page.locator('.modal')).toBeVisible();
+    await expect(page.getByRole('dialog')).toBeVisible();
   });
 
   test('should validate time constraints for suggestions', async ({ page }) => {
@@ -336,7 +336,7 @@ test.describe('Cross-Page Navigation and State', () => {
     await page.fill('input[name="quantity"]', '1');
     await page.fill('input[name="unit"]', 'kg');
     await page.click('button[type="submit"]');
-    await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
 
     // Navigate to recipes
     await page.goto('/recipes');

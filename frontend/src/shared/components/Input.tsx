@@ -1,205 +1,125 @@
-interface InputProps {
-  type?: string;
-  name: string;
-  value: string | number;
-  onChange: (value: string) => void;
-  onBlur?: () => void;
-  placeholder?: string;
-  label?: string;
-  error?: string;
-  required?: boolean;
-  disabled?: boolean;
-  className?: string;
+import { FormField } from './ui/FormField';
+import { Input as UIInput } from './ui/Input';
+import { Textarea as UITextarea } from './ui/Textarea';
+import { Select as UISelect } from './ui/Select';
+
+interface BaseFieldProps {
+	name: string;
+	label?: string;
+	error?: string;
+	required?: boolean;
+	disabled?: boolean;
+	className?: string;
+	placeholder?: string;
+	onBlur?: () => void;
+}
+
+interface InputProps extends BaseFieldProps {
+	type?: string;
+	value: string | number;
+	onChange: (value: string) => void;
 }
 
 export function Input({
-  type = 'text',
-  name,
-  value,
-  onChange,
-  onBlur,
-  placeholder,
-  label,
-  error,
-  required = false,
-  disabled = false,
-  className = '',
+	type = 'text',
+	name,
+	value,
+	onChange,
+	onBlur,
+	placeholder,
+	label,
+	error,
+	required = false,
+	disabled = false,
+	className = '',
 }: InputProps) {
-  const handleChange = (e: Event) => {
-    const target = e.target as HTMLInputElement;
-    onChange(target.value);
-  };
-
-  // Pico CSS uses native input styling, add error class if needed
-  const inputClasses = error ? ['[aria-invalid="true"]', className] : [className];
-  const inputClassString = inputClasses.filter(Boolean).join(' ');
-
-  return (
-    <div>
-      {label && (
-        <label htmlFor={name}>
-          {label}
-          {required && <span style={{ color: 'var(--pico-del-color, #c62828)' }}> *</span>}
-        </label>
-      )}
-      <input
-        type={type}
-        id={name}
-        name={name}
-        value={value}
-        onInput={handleChange}
-        onBlur={onBlur}
-        placeholder={placeholder}
-        required={required}
-        disabled={disabled}
-        className={inputClassString || undefined}
-        aria-invalid={error ? 'true' : undefined}
-        aria-describedby={error ? `${name}-error` : undefined}
-      />
-      {error && (
-        <small id={`${name}-error`} style={{ color: 'var(--pico-del-color, #c62828)' }}>
-          {error}
-        </small>
-      )}
-    </div>
-  );
+	return (
+		<FormField label={label} error={error} htmlFor={name} isRequired={required} className={className}>
+			<UIInput
+				id={name}
+				name={name}
+				type={type}
+				value={value as any}
+				onChange={(e: any) => onChange(e.target.value)}
+				onBlur={onBlur as any}
+				placeholder={placeholder}
+				isDisabled={disabled}
+			/>
+		</FormField>
+	);
 }
 
-interface TextareaProps {
-  name: string;
-  value: string;
-  onChange: (value: string) => void;
-  onBlur?: () => void;
-  placeholder?: string;
-  label?: string;
-  error?: string;
-  required?: boolean;
-  disabled?: boolean;
-  rows?: number;
-  className?: string;
+interface TextareaProps extends BaseFieldProps {
+	value: string;
+	onChange: (value: string) => void;
+	rows?: number;
 }
 
 export function Textarea({
-  name,
-  value,
-  onChange,
-  onBlur,
-  placeholder,
-  label,
-  error,
-  required = false,
-  disabled = false,
-  rows = 4,
-  className = '',
+	name,
+	value,
+	onChange,
+	onBlur,
+	placeholder,
+	label,
+	error,
+	required = false,
+	disabled = false,
+	rows = 4,
+	className = '',
 }: TextareaProps) {
-  const handleChange = (e: Event) => {
-    const target = e.target as HTMLTextAreaElement;
-    onChange(target.value);
-  };
-
-  // Pico CSS uses native textarea styling
-  const textareaClasses = error ? ['[aria-invalid="true"]', className] : [className];
-  const textareaClassString = textareaClasses.filter(Boolean).join(' ');
-
-  return (
-    <div>
-      {label && (
-        <label htmlFor={name}>
-          {label}
-          {required && <span style={{ color: 'var(--pico-del-color, #c62828)' }}> *</span>}
-        </label>
-      )}
-      <textarea
-        id={name}
-        name={name}
-        value={value}
-        onInput={handleChange}
-        onBlur={onBlur}
-        placeholder={placeholder}
-        required={required}
-        disabled={disabled}
-        rows={rows}
-        className={textareaClassString || undefined}
-        aria-invalid={error ? 'true' : undefined}
-        aria-describedby={error ? `${name}-error` : undefined}
-      />
-      {error && (
-        <small id={`${name}-error`} style={{ color: 'var(--pico-del-color, #c62828)' }}>
-          {error}
-        </small>
-      )}
-    </div>
-  );
+	return (
+		<FormField label={label} error={error} htmlFor={name} isRequired={required} className={className}>
+			<UITextarea
+				id={name}
+				name={name}
+				value={value as any}
+				onChange={(e: any) => onChange(e.target.value)}
+				onBlur={onBlur as any}
+				placeholder={placeholder}
+				isDisabled={disabled}
+				rows={rows}
+			/>
+		</FormField>
+	);
 }
 
-interface SelectProps {
-  name: string;
-  value: string;
-  onChange: (value: string) => void;
-  onBlur?: () => void;
-  options: { value: string; label: string }[];
-  label?: string;
-  error?: string;
-  required?: boolean;
-  disabled?: boolean;
-  placeholder?: string;
-  className?: string;
+interface SelectProps extends BaseFieldProps {
+	value: string;
+	onChange: (value: string) => void;
+	options: { value: string; label: string }[];
 }
 
 export function Select({
-  name,
-  value,
-  onChange,
-  onBlur,
-  options,
-  label,
-  error,
-  required = false,
-  disabled = false,
-  placeholder,
-  className = '',
+	name,
+	value,
+	onChange,
+	onBlur,
+	options,
+	label,
+	error,
+	required = false,
+	disabled = false,
+	placeholder,
+	className = '',
 }: SelectProps) {
-  const handleChange = (e: Event) => {
-    const target = e.target as HTMLSelectElement;
-    onChange(target.value);
-  };
-
-  // Pico CSS uses native select styling
-  const selectClasses = error ? ['[aria-invalid="true"]', className] : [className];
-  const selectClassString = selectClasses.filter(Boolean).join(' ');
-
-  return (
-    <div>
-      {label && (
-        <label htmlFor={name}>
-          {label}
-          {required && <span style={{ color: 'var(--pico-del-color, #c62828)' }}> *</span>}
-        </label>
-      )}
-      <select
-        id={name}
-        name={name}
-        value={value}
-        onChange={handleChange}
-        onBlur={onBlur}
-        required={required}
-        disabled={disabled}
-        className={selectClassString || undefined}
-        aria-invalid={error ? 'true' : undefined}
-        aria-describedby={error ? `${name}-error` : undefined}
-      >
-        {placeholder && <option value="">{placeholder}</option>}
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      {error && (
-        <small id={`${name}-error`} style={{ color: 'var(--pico-del-color, #c62828)' }}>
-          {error}
-        </small>
-      )}
-    </div>
-  );
+	return (
+		<FormField label={label} error={error} htmlFor={name} isRequired={required} className={className}>
+			<UISelect
+				id={name}
+				name={name}
+				value={value}
+				onChange={(e: any) => onChange(e.target.value)}
+				onBlur={onBlur as any}
+				placeholder={placeholder}
+				isDisabled={disabled}
+			>
+				{options.map((option) => (
+					<option key={option.value} value={option.value}>
+						{option.label}
+					</option>
+				))}
+			</UISelect>
+		</FormField>
+	);
 }

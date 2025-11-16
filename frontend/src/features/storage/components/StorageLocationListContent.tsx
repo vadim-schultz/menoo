@@ -20,7 +20,7 @@ export function StorageLocationListContent({
       style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-        gap: 'var(--pico-spacing)',
+        gap: '1rem',
       }}
     >
       {orderedLocations.map((location) => (

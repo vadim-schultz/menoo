@@ -6,10 +6,10 @@ export function HomeError({ message }: HomeErrorProps) {
   return (
     <article
       style={{
-        padding: 'var(--pico-spacing)',
-        backgroundColor: 'var(--pico-del-background, #fff5f5)',
-        color: 'var(--pico-del-color, #c62828)',
-        borderRadius: 'var(--pico-border-radius)',
+        padding: '1rem',
+        backgroundColor: '#FFF5F5',
+        color: '#C53030',
+        borderRadius: '0.5rem',
       }}
     >
       Error: {message || 'An error occurred'}

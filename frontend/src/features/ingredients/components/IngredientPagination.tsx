@@ -10,7 +10,7 @@ export interface IngredientPaginationProps {
 
 export const IngredientPagination = ({ page, pageSize, onPageChange }: IngredientPaginationProps) => {
   return (
-    <nav style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', justifyContent: 'center', padding: 'var(--pico-spacing)', marginTop: 'var(--pico-spacing)' }}>
+    <nav style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', justifyContent: 'center', padding: '1rem', marginTop: '1rem' }}>
       <Button
         type="button"
         variant="secondary"

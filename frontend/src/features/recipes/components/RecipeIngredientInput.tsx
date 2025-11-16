@@ -15,7 +15,9 @@ export function RecipeIngredientInput({ ingredients, onChange }: RecipeIngredien
     ingredientOptions,
     loading,
     entryIngredientId,
+    entryIngredientName,
     setEntryIngredientId,
+    setEntryIngredientName,
     entryQuantity,
     setEntryQuantity,
     confirmEntryAdd,
@@ -29,11 +31,11 @@ export function RecipeIngredientInput({ ingredients, onChange }: RecipeIngredien
         <label style={{ fontWeight: 500 }}>Ingredients</label>
       </div>
 
-      {/* Entry form row */}
+      {/* Entry form row (select existing or type a new name) */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '2fr 1fr auto',
+          gridTemplateColumns: '2fr 2fr 1fr auto',
           gap: '0.5rem',
           alignItems: 'end',
           marginBottom: '1rem',
@@ -45,6 +47,13 @@ export function RecipeIngredientInput({ ingredients, onChange }: RecipeIngredien
           onChange={(value) => setEntryIngredientId(parseInt(value) || 0)}
           options={ingredientOptions}
           placeholder="Select ingredient"
+        />
+
+        <Input
+          name={`entry-ingredient-name`}
+          value={entryIngredientName}
+          onChange={(value) => setEntryIngredientName(value)}
+          placeholder="Or type a new ingredient name"
         />
 
         <Input

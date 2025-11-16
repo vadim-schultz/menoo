@@ -26,9 +26,9 @@ export function IngredientsByStorageLocation({
 }: IngredientsByStorageLocationProps) {
   return (
     <div>
-      <header style={{ marginBottom: 'var(--pico-spacing)' }}>
+      <header style={{ marginBottom: '1rem' }}>
         <h1>Ingredients by Storage Location</h1>
-        <p style={{ color: 'var(--pico-muted-color)' }}>
+        <p style={{ color: '#4A5568' }}>
           View and manage your ingredients organized by where they're stored.
         </p>
       </header>

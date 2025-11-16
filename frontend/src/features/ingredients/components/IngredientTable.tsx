@@ -4,6 +4,7 @@ import { Button, Input } from '../../../shared/components';
 import { EmptyState } from './EmptyState';
 import { formatDate, formatStorageLocation } from '../services/formatting';
 import { useTableSort } from '../hooks/useTableSort';
+import { Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '../../../shared/components/ui/Table';
 
 interface IngredientTableProps {
   ingredients: IngredientRead[];
@@ -68,51 +69,51 @@ export const IngredientTable = ({
   }
 
   return (
-    <figure style={{ overflowX: 'auto', margin: 0 }}>
-      <table role="grid">
-        <thead>
-          <tr>
-            <th scope="col" style={{ verticalAlign: 'bottom' }}>
+    <TableContainer>
+      <Table>
+        <Thead>
+          <Tr>
+            <Th scope="col" style={{ verticalAlign: 'bottom' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span>Name</span>
                 <SortButton column="name" />
               </div>
               <Input name="name_filter" value={nameContains} onChange={onNameContainsChange} placeholder="Filter by name..." />
-            </th>
-            <th scope="col" style={{ verticalAlign: 'bottom' }}>
+            </Th>
+            <Th scope="col" style={{ verticalAlign: 'bottom' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span>Quantity</span>
                 <SortButton column="quantity" />
               </div>
-            </th>
-            <th scope="col" style={{ verticalAlign: 'bottom' }}>
+            </Th>
+            <Th scope="col" style={{ verticalAlign: 'bottom' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span>Storage Location</span>
                 <SortButton column="storage_location" />
               </div>
               <Input name="storage_filter" value={storageLocation} onChange={(v) => onStorageLocationChange(v)} placeholder="Filter by location..." />
-            </th>
-            <th scope="col" style={{ verticalAlign: 'bottom' }}>
+            </Th>
+            <Th scope="col" style={{ verticalAlign: 'bottom' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span>Expiry Date</span>
                 <SortButton column="expiry_date" />
               </div>
               <Input name="expiry_filter" type="date" value={expiringBefore} onChange={onExpiringBeforeChange} placeholder="Expiring before..." />
-            </th>
-            <th scope="col">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
+            </Th>
+            <Th scope="col">Actions</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
           {ingredients.map((ingredient) => (
-            <tr key={ingredient.id}>
-              <td>{ingredient.name}</td>
-              <td>
+            <Tr key={ingredient.id}>
+              <Td>{ingredient.name}</Td>
+              <Td>
                 {ingredient.quantity ?? '-'}
                 {ingredient.unit ? ` ${ingredient.unit}` : ''}
-              </td>
-              <td>{formatStorageLocation(ingredient.storage_location)}</td>
-              <td>{formatDate(ingredient.expiry_date)}</td>
-              <td>
+              </Td>
+              <Td>{formatStorageLocation(ingredient.storage_location)}</Td>
+              <Td>{formatDate(ingredient.expiry_date)}</Td>
+              <Td>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <Button
                     icon={Pencil}
@@ -129,12 +130,12 @@ export const IngredientTable = ({
                     aria-label="Delete ingredient"
                   />
                 </div>
-              </td>
-            </tr>
+              </Td>
+            </Tr>
           ))}
-        </tbody>
-      </table>
-    </figure>
+        </Tbody>
+      </Table>
+    </TableContainer>
   );
 };
 

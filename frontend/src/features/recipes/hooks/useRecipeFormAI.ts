@@ -3,23 +3,20 @@ import type { UseFormReturn } from '../../../shared/hooks';
 import type { RecipeCreate } from '../../../shared/types';
 import { useRecipeAI } from './useRecipeAI';
 import type { SuggestionRequest } from '../../../shared/types';
+import { showToast } from '../../../shared/components/ui/Toast';
+import { ingredientService } from '../../ingredients/services/ingredientService';
 
 export function useRecipeFormAI(
   form: UseFormReturn<RecipeCreate>,
   ingredients: RecipeIngredientCreate[],
   setIngredients: (ings: RecipeIngredientCreate[]) => void
 ) {
-  const { generateRecipe, convertGeneratedToCreate } = useRecipeAI();
+  const { generateRecipe, convertGeneratedToCreate, generating } = useRecipeAI();
 
   const handleGenerateRecipe = async () => {
-    const ingredientIds = ingredients
-      .filter((ing) => ing.ingredient_id > 0)
-      .map((ing) => ing.ingredient_id);
-
-    if (ingredientIds.length === 0) {
-      alert('Please add at least one ingredient before generating a recipe');
-      return;
-    }
+    // For AI suggestions, use all available pantry ingredients (independent of manual form)
+    const available = await ingredientService.list({ page_size: 1000 } as any);
+    const ingredientIds = (available || []).map((i) => i.id);
 
     const request: SuggestionRequest = {
       recipe: {
@@ -31,7 +28,7 @@ export function useRecipeFormAI(
           prep_time_minutes: form.values.prep_time || null,
           cook_time_minutes: form.values.cook_time || null,
         },
-        ingredients: ingredientIds.map((id) => ({
+        ingredients: ingredientIds.map((id: number) => ({
           ingredient_id: id,
           quantity: 1,
           unit: 'unit',
@@ -61,17 +58,12 @@ export function useRecipeFormAI(
   };
 
   const handleEnhanceRecipe = async () => {
-    const ingredientIds = ingredients
-      .filter((ing) => ing.ingredient_id > 0)
-      .map((ing) => ing.ingredient_id);
-
-    if (ingredientIds.length === 0) {
-      alert('Please add at least one ingredient before enhancing a recipe');
-      return;
-    }
+    // For enhancement, also use full pantry
+    const available = await ingredientService.list({ page_size: 1000 } as any);
+    const ingredientIds = (available || []).map((i) => i.id);
 
     if (!form.values.name && !form.values.description) {
-      alert('Please provide at least a recipe name or description to enhance');
+      showToast('Add some context first', 'warning', 'Provide a name or description to enhance.');
       return;
     }
 
@@ -85,7 +77,7 @@ export function useRecipeFormAI(
           prep_time_minutes: form.values.prep_time || null,
           cook_time_minutes: form.values.cook_time || null,
         },
-        ingredients: ingredientIds.map((id) => ({
+        ingredients: ingredientIds.map((id: number) => ({
           ingredient_id: id,
           quantity: 1,
           unit: 'unit',
@@ -126,7 +118,7 @@ export function useRecipeFormAI(
     }
   };
 
-  return { handleGenerateRecipe, handleEnhanceRecipe };
+  return { handleGenerateRecipe, handleEnhanceRecipe, generating };
 }
 
 

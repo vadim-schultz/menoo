@@ -1,29 +1,28 @@
 import { Utensils, Package } from 'lucide-preact';
+import { Box, Container, Flex, HStack, Link, Text } from '@chakra-ui/react';
 
 export function Navigation() {
   return (
-    <nav>
-      <ul style={{ display: 'flex', listStyle: 'none', margin: 0, padding: 'var(--pico-spacing)', gap: 'var(--pico-spacing)', borderBottom: '1px solid var(--pico-border-color)' }}>
-        <li>
-          <strong>
-            <a href="/" style={{ textDecoration: 'none', color: 'var(--pico-primary)' }}>
+    <Box borderBottom="1px" borderColor="gray.200">
+      <Container maxW="container.lg" py={2}>
+        <Flex align="center" gap={3}>
+          <Text as="b" fontSize="md">
+            <Link href="/" textDecoration="none">
               Menoo
-            </a>
-          </strong>
-        </li>
-        <li style={{ marginLeft: 'auto' }}>
-          <a href="/ingredients" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
-            <Package size={16} />
-            Ingredients
-          </a>
-        </li>
-        <li>
-          <a href="/recipes" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
-            <Utensils size={16} />
-            Recipes
-          </a>
-        </li>
-      </ul>
-    </nav>
+            </Link>
+          </Text>
+          <HStack spacing={4} ml="auto">
+            <Link href="/ingredients" display="inline-flex" alignItems="center" gap="0.5rem">
+              <Package size={16} />
+              Ingredients
+            </Link>
+            <Link href="/recipes" display="inline-flex" alignItems="center" gap="0.5rem">
+              <Utensils size={16} />
+              Recipes
+            </Link>
+          </HStack>
+        </Flex>
+      </Container>
+    </Box>
   );
 }

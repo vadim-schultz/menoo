@@ -8,7 +8,9 @@ export interface UseRecipeIngredientInputReturn {
   ingredientOptions: { value: string; label: string }[];
   loading: boolean;
   entryIngredientId: number;
+  entryIngredientName: string;
   setEntryIngredientId: (id: number) => void;
+  setEntryIngredientName: (name: string) => void;
   entryQuantity: number;
   setEntryQuantity: (qty: number) => void;
   confirmEntryAdd: (ingredients: RecipeIngredientCreate[], onChange: (ings: RecipeIngredientCreate[]) => void) => void;
@@ -28,6 +30,7 @@ export function useRecipeIngredientInput(): UseRecipeIngredientInputReturn {
 
   // Entry form state (top row)
   const [entryIngredientId, setEntryIngredientId] = useState<number>(0);
+  const [entryIngredientName, setEntryIngredientName] = useState<string>('');
   const [entryQuantity, setEntryQuantity] = useState<number>(0);
 
   useEffect(() => {
@@ -56,9 +59,10 @@ export function useRecipeIngredientInput(): UseRecipeIngredientInputReturn {
 
   const confirmEntryAdd = useCallback(
     (ingredients: RecipeIngredientCreate[], onChange: (ings: RecipeIngredientCreate[]) => void) => {
-      if (!entryIngredientId || entryQuantity <= 0) return;
+      if ((!entryIngredientId && !entryIngredientName.trim()) || entryQuantity <= 0) return;
       const newIngredient: RecipeIngredientCreate = {
-        ingredient_id: entryIngredientId,
+        ingredient_id: entryIngredientId || undefined,
+        ingredient_name: entryIngredientId ? undefined : entryIngredientName.trim(),
         quantity: entryQuantity,
         unit: 'unit',
         is_optional: false,
@@ -66,8 +70,10 @@ export function useRecipeIngredientInput(): UseRecipeIngredientInputReturn {
       };
       onChange([...ingredients, newIngredient]);
       setEntryQuantity(0);
+      setEntryIngredientId(0);
+      setEntryIngredientName('');
     },
-    [entryIngredientId, entryQuantity]
+    [entryIngredientId, entryIngredientName, entryQuantity]
   );
 
   const removeIngredient = useCallback(
@@ -101,7 +107,9 @@ export function useRecipeIngredientInput(): UseRecipeIngredientInputReturn {
     ingredientOptions,
     loading,
     entryIngredientId,
+    entryIngredientName,
     setEntryIngredientId,
+    setEntryIngredientName,
     entryQuantity,
     setEntryQuantity,
     confirmEntryAdd,

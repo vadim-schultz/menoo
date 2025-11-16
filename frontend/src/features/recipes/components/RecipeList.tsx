@@ -9,7 +9,7 @@ interface RecipeListProps {
 
 export function RecipeList({ recipes, onEdit, onDelete }: RecipeListProps) {
   if (!recipes || recipes.length === 0) {
-    return <p style={{ color: 'var(--pico-muted-color)' }}>No recipes yet.</p>;
+    return <p style={{ color: '#4A5568' }}>No recipes yet.</p>;
   }
   return (
     <div style={{ display: 'grid', gap: '1rem' }}>

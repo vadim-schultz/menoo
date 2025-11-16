@@ -1,4 +1,5 @@
 import type { ComponentChildren } from 'preact';
+import { Container } from '@chakra-ui/react';
 
 interface LayoutProps {
   children: ComponentChildren;
@@ -6,10 +7,8 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   return (
-    <div>
-      <main style={{ maxWidth: '1200px', width: '100%', margin: '0 auto', padding: 'var(--pico-spacing)' }}>
-        {children}
-      </main>
-    </div>
+    <Container maxW="container.lg" p={4}>
+      {children}
+    </Container>
   );
 }

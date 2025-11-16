@@ -21,7 +21,10 @@
     "prepare": "cd .. && husky frontend/.husky"
   },
   "dependencies": {
-    "@picocss/pico": "^2.1.1",
+    "@chakra-ui/react": "^2.8.2",
+    "@emotion/react": "^11.13.5",
+    "@emotion/styled": "^11.13.5",
+    "framer-motion": "^11.15.0",
     "@preact/signals": "^1.2.2",
     "@testing-library/preact-hooks": "^1.1.0",
     "lucide-preact": "^0.552.0",

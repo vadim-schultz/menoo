@@ -14,7 +14,7 @@ export function StorageLocationCard({ location, ingredients, onEdit, onDelete }:
     <article>
       <header>
         <h3 style={{ margin: 0 }}>{formatLocationName(location)}</h3>
-        <small style={{ color: 'var(--pico-muted-color)' }}>{ingredients.length} items</small>
+        <small style={{ color: '#4A5568' }}>{ingredients.length} items</small>
       </header>
       <StorageLocationTable ingredients={ingredients} onEdit={onEdit} onDelete={onDelete} />
     </article>

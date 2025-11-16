@@ -2,6 +2,7 @@ import type { RecipeDetail } from '../../../shared/types';
 import { Pencil, Trash2 } from 'lucide-preact';
 import { Button } from '../../../shared/components';
 import { formatDifficulty, formatTime, truncateText } from '../services/recipeFormatting';
+import { Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '../../../shared/components/ui/Table';
 
 interface RecipeTableContentProps {
   recipes: RecipeDetail[];
@@ -11,31 +12,31 @@ interface RecipeTableContentProps {
 
 export function RecipeTableContent({ recipes, onEdit, onDelete }: RecipeTableContentProps) {
   return (
-    <figure style={{ overflowX: 'auto', margin: 0 }}>
-      <table role="grid">
-        <thead>
-          <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Description</th>
-            <th scope="col">Difficulty</th>
-            <th scope="col">Prep Time</th>
-            <th scope="col">Cook Time</th>
-            <th scope="col">Servings</th>
-            <th scope="col">Ingredients</th>
-            <th scope="col">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
+    <TableContainer>
+      <Table>
+        <Thead>
+          <Tr>
+            <Th scope="col">Name</Th>
+            <Th scope="col">Description</Th>
+            <Th scope="col">Difficulty</Th>
+            <Th scope="col">Prep Time</Th>
+            <Th scope="col">Cook Time</Th>
+            <Th scope="col">Servings</Th>
+            <Th scope="col">Ingredients</Th>
+            <Th scope="col">Actions</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
           {recipes.map((recipe) => (
-            <tr key={recipe.id}>
-              <td>{recipe.name}</td>
-              <td>{truncateText(recipe.description)}</td>
-              <td>{formatDifficulty(recipe.difficulty)}</td>
-              <td>{formatTime(recipe.prep_time)}</td>
-              <td>{formatTime(recipe.cook_time)}</td>
-              <td>{recipe.servings || '-'}</td>
-              <td>{recipe.ingredients?.length || 0}</td>
-              <td>
+            <Tr key={recipe.id}>
+              <Td>{recipe.name}</Td>
+              <Td>{truncateText(recipe.description)}</Td>
+              <Td>{formatDifficulty(recipe.difficulty)}</Td>
+              <Td>{formatTime(recipe.prep_time)}</Td>
+              <Td>{formatTime(recipe.cook_time)}</Td>
+              <Td>{recipe.servings || '-'}</Td>
+              <Td>{recipe.ingredients?.length || 0}</Td>
+              <Td>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <Button
                     icon={Pencil}
@@ -52,12 +53,12 @@ export function RecipeTableContent({ recipes, onEdit, onDelete }: RecipeTableCon
                     aria-label="Delete recipe"
                   />
                 </div>
-              </td>
-            </tr>
+              </Td>
+            </Tr>
           ))}
-        </tbody>
-      </table>
-    </figure>
+        </Tbody>
+      </Table>
+    </TableContainer>
   );
 }
 

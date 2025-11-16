@@ -16,10 +16,10 @@ export function RecipeIngredientListContent({ ingredients, ingredientOptions, on
         <div
           key={index}
           style={{
-            border: '1px solid var(--pico-border-color)',
-            borderRadius: 'var(--pico-border-radius)',
+            border: '1px solid #E2E8F0',
+            borderRadius: '0.5rem',
             padding: '0.75rem',
-            backgroundColor: 'var(--pico-muted-border-color, transparent)',
+            backgroundColor: 'transparent',
           }}
         >
           <div

@@ -2,6 +2,7 @@ import type { IngredientRead } from '../../../shared/types/ingredient';
 import { Pencil, Trash2 } from 'lucide-preact';
 import { Button } from '../../../shared/components';
 import { formatDate } from '../services';
+import { Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '../../../shared/components/ui/Table';
 
 interface StorageLocationTableContentProps {
   ingredients: IngredientRead[];
@@ -11,26 +12,26 @@ interface StorageLocationTableContentProps {
 
 export function StorageLocationTableContent({ ingredients, onEdit, onDelete }: StorageLocationTableContentProps) {
   return (
-    <figure style={{ overflowX: 'auto', margin: 0 }}>
-      <table role="grid" style={{ fontSize: '0.875rem' }}>
-        <thead>
-          <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Expiry</th>
-            <th scope="col">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
+    <TableContainer>
+      <Table>
+        <Thead>
+          <Tr>
+            <Th scope="col">Name</Th>
+            <Th scope="col">Quantity</Th>
+            <Th scope="col">Expiry</Th>
+            <Th scope="col">Actions</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
           {ingredients.map((ingredient) => (
-            <tr key={ingredient.id}>
-              <td>{ingredient.name}</td>
-              <td>
+            <Tr key={ingredient.id}>
+              <Td>{ingredient.name}</Td>
+              <Td>
                 {ingredient.quantity ?? '-'}
                 {ingredient.unit ? ` ${ingredient.unit}` : ''}
-              </td>
-              <td>{formatDate(ingredient.expiry_date)}</td>
-              <td>
+              </Td>
+              <Td>{formatDate(ingredient.expiry_date)}</Td>
+              <Td>
                 <div style={{ display: 'flex', gap: '0.25rem' }}>
                   <Button
                     icon={Pencil}
@@ -47,12 +48,12 @@ export function StorageLocationTableContent({ ingredients, onEdit, onDelete }: S
                     aria-label="Delete ingredient"
                   />
                 </div>
-              </td>
-            </tr>
+              </Td>
+            </Tr>
           ))}
-        </tbody>
-      </table>
-    </figure>
+        </Tbody>
+      </Table>
+    </TableContainer>
   );
 }
 
