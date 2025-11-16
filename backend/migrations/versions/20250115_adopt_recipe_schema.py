@@ -7,8 +7,8 @@ Create Date: 2025-01-15
 
 from __future__ import annotations
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "b8f5bf5b6e64"
@@ -71,9 +71,7 @@ def upgrade() -> None:
         "recipes",
         sa.Column("meal_types", sa.JSON(), nullable=False, server_default=sa.text("'[]'")),
     )
-    op.add_column(
-        "recipes", sa.Column("cooking_method", sa.String(length=50), nullable=True)
-    )
+    op.add_column("recipes", sa.Column("cooking_method", sa.String(length=50), nullable=True))
     op.add_column(
         "recipes",
         sa.Column(
@@ -99,14 +97,10 @@ def upgrade() -> None:
     )
     op.add_column("recipes", sa.Column("prep_time_minutes", sa.Integer(), nullable=True))
     op.add_column("recipes", sa.Column("cook_time_minutes", sa.Integer(), nullable=True))
-    op.add_column(
-        "recipes", sa.Column("marinating_time_minutes", sa.Integer(), nullable=True)
-    )
+    op.add_column("recipes", sa.Column("marinating_time_minutes", sa.Integer(), nullable=True))
     op.add_column("recipes", sa.Column("resting_time_minutes", sa.Integer(), nullable=True))
     op.add_column("recipes", sa.Column("inactive_time_minutes", sa.Integer(), nullable=True))
-    op.add_column(
-        "recipes", sa.Column("total_active_time_minutes", sa.Integer(), nullable=True)
-    )
+    op.add_column("recipes", sa.Column("total_active_time_minutes", sa.Integer(), nullable=True))
     op.add_column("recipes", sa.Column("difficulty_metrics", sa.JSON(), nullable=True))
     op.add_column("recipes", sa.Column("yield_description", sa.String(length=100), nullable=True))
     op.add_column(
@@ -161,7 +155,11 @@ def upgrade() -> None:
             timing_payload["prep_time_minutes"] = prep_time
         if cook_time is not None:
             timing_payload["cook_time_minutes"] = cook_time
-        if timing_payload and "prep_time_minutes" in timing_payload and "cook_time_minutes" in timing_payload:
+        if (
+            timing_payload
+            and "prep_time_minutes" in timing_payload
+            and "cook_time_minutes" in timing_payload
+        ):
             timing_payload["total_active_time_minutes"] = (
                 timing_payload["prep_time_minutes"] + timing_payload["cook_time_minutes"]
             )
@@ -172,15 +170,15 @@ def upgrade() -> None:
         if cook_time is not None:
             update_values["cook_time_minutes"] = cook_time
         if "total_active_time_minutes" in timing_payload:
-            update_values["total_active_time_minutes"] = (
-                timing_payload["total_active_time_minutes"]
-            )
+            update_values["total_active_time_minutes"] = timing_payload["total_active_time_minutes"]
         if timing_payload:
             update_values["timing"] = timing_payload
 
         if update_values:
             conn.execute(
-                sa.update(recipes_table).where(recipes_table.c.id == recipe_id).values(**update_values)
+                sa.update(recipes_table)
+                .where(recipes_table.c.id == recipe_id)
+                .values(**update_values)
             )
 
     op.drop_column("recipes", "prep_time")
@@ -188,7 +186,13 @@ def upgrade() -> None:
     op.drop_column("recipes", "difficulty")
 
     # Remove server defaults now that initial data migration is complete.
-    for column_name in ("cuisine_types", "meal_types", "dietary_requirements", "contains_allergens", "tags"):
+    for column_name in (
+        "cuisine_types",
+        "meal_types",
+        "dietary_requirements",
+        "contains_allergens",
+        "tags",
+    ):
         op.alter_column("recipes", column_name, server_default=None)
     op.alter_column("recipes", "timing", server_default=None)
     op.alter_column("recipes", "equipment_requirements", server_default=None)
@@ -253,4 +257,3 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     raise RuntimeError("Downgrade is not supported for this migration.")
-

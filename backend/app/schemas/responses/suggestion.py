@@ -9,7 +9,7 @@ from app.schemas.core.recipe import Recipe
 
 class SuggestionResponse(BaseModel):
     """Response with recipe suggestions.
-    
+
     Contains a list of core Recipe models (completed by Marvin).
     """
 
@@ -17,4 +17,3 @@ class SuggestionResponse(BaseModel):
         ...,
         description="AI-completed recipes returned by Marvin",
     )
-

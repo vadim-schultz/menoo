@@ -11,7 +11,7 @@ from app.schemas.core.recipe import IngredientPreparation, Recipe
 
 class RecipeResponse(Recipe):
     """Response for a single recipe.
-    
+
     Extends the core Recipe model with REST-specific fields (ID, timestamps, etc.).
     The core Recipe fields remain unchanged - this just adds API metadata.
     """
@@ -36,7 +36,7 @@ class RecipeIngredientRead(IngredientPreparation):
 
 class RecipeDetail(RecipeResponse):
     """Detailed recipe response with expanded ingredients.
-    
+
     Extends RecipeResponse with ingredient details and missing ingredients list.
     """
 
@@ -57,4 +57,3 @@ class RecipeListResponse(BaseModel):
     page: int
     page_size: int
     has_next: bool
-

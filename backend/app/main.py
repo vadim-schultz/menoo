@@ -6,11 +6,11 @@ from litestar import Litestar, Request, get
 from litestar.config.cors import CORSConfig
 from litestar.contrib.pydantic import PydanticPlugin
 from litestar.di import Provide
-from litestar.exceptions import ValidationException
+from litestar.exceptions import NotFoundException, ValidationException
 from litestar.openapi import OpenAPIConfig
 from litestar.response import Response
 from litestar.static_files import create_static_files_router
-from litestar.status_codes import HTTP_422_UNPROCESSABLE_ENTITY
+from litestar.status_codes import HTTP_404_NOT_FOUND, HTTP_422_UNPROCESSABLE_ENTITY
 
 from app.config import get_settings
 from app.controllers import ingredients, recipes, suggestions
@@ -31,6 +31,19 @@ def validation_exception_handler(_: Request, exc: ValidationException) -> Respon
     """Return a 422 response when request validation fails."""
     detail = exc.extra if exc.extra is not None else exc.detail
     return Response(status_code=HTTP_422_UNPROCESSABLE_ENTITY, content={"detail": detail})
+
+
+def value_error_handler(_: Request, exc: ValueError) -> Response:
+    """Convert ValueError to appropriate HTTP status code."""
+    error_message = str(exc)
+    # Convert "not found" ValueErrors to 404
+    if "not found" in error_message.lower():
+        return Response(
+            status_code=HTTP_404_NOT_FOUND,
+            content={"detail": error_message},
+        )
+    # Other ValueErrors remain as 400 Bad Request
+    return Response(status_code=400, content={"detail": error_message})
 
 
 @get("/healthz", tags=["health"])
@@ -106,7 +119,10 @@ def create_app() -> Litestar:
         openapi_config=openapi_config,
         lifespan=[lifespan],
         plugins=[PydanticPlugin()],
-        exception_handlers={ValidationException: validation_exception_handler},
+        exception_handlers={
+            ValidationException: validation_exception_handler,
+            ValueError: value_error_handler,
+        },
         debug=settings.debug,
     )
 

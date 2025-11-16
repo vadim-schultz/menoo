@@ -190,4 +190,3 @@ class StorageType(str, Enum):
     FREEZE = "freeze"
     ROOM_TEMPERATURE = "room_temperature"
     COOL_DRY_PLACE = "cool_dry_place"
-

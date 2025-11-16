@@ -16,8 +16,8 @@ from app.enums import (
     CookingMethod,
     CuisineType,
     DietaryRequirement,
-    MechanicalTreatment,
     MealType,
+    MechanicalTreatment,
     StorageType,
     TemperatureLevel,
     ThermalTreatment,
@@ -32,7 +32,7 @@ class Marination(BaseModel):
         default="refrigerated",
         description="Marination temperature",
     )
-    marinade_recipe: "Recipe | None" = Field(
+    marinade_recipe: Recipe | None = Field(
         None, description="Nested recipe definition for the marinade"
     )
     description: str | None = Field(None, description="Marinade description")
@@ -71,7 +71,9 @@ class ThermalTreatmentSpec(BaseModel):
     """Specification for a thermal treatment."""
 
     method: ThermalTreatment = Field(..., description="Thermal treatment method")
-    temperature_celsius: float | None = Field(None, ge=0, description="Specific temperature in Celsius")
+    temperature_celsius: float | None = Field(
+        None, ge=0, description="Specific temperature in Celsius"
+    )
     temperature_level: TemperatureLevel | None = Field(
         None, description="Temperature level if specific temp not provided"
     )
@@ -207,9 +209,7 @@ class StorageInstructions(BaseModel):
 
     storage_type: StorageType | None = Field(None, description="Storage method")
     shelf_life_days: int | None = Field(None, ge=0, description="How long the dish keeps")
-    reheating_instructions: str | None = Field(
-        None, description="Best method to reheat"
-    )
+    reheating_instructions: str | None = Field(None, description="Best method to reheat")
     freezing_instructions: str | None = Field(
         None, description="Freezing instructions if applicable"
     )
@@ -217,10 +217,10 @@ class StorageInstructions(BaseModel):
 
 class Recipe(BaseModel):
     """Definitive Recipe model with all comprehensive fields.
-    
+
     This single model is used for both partial (draft) and complete (populated) recipes.
     All fields are optional or have defaults to allow partial population.
-    
+
     Used for:
     - Draft recipes (partial data before AI completion)
     - Completed recipes (fully populated by Marvin or user)
@@ -242,9 +242,7 @@ class Recipe(BaseModel):
     meal_types: list[MealType] = Field(
         default_factory=list, description="Meal type classifications"
     )
-    cooking_method: CookingMethod | None = Field(
-        None, description="Overall cooking method"
-    )
+    cooking_method: CookingMethod | None = Field(None, description="Overall cooking method")
 
     # Dietary information
     dietary_requirements: list[DietaryRequirement] = Field(
@@ -303,9 +301,7 @@ class Recipe(BaseModel):
     # Additional information
     tags: list[str] = Field(default_factory=list, description="Searchable tags")
     notes: str | None = Field(None, description="Additional notes")
-    variations: str | None = Field(
-        None, description="Recipe variations or substitutions"
-    )
+    variations: str | None = Field(None, description="Recipe variations or substitutions")
     estimated_cost_per_serving: Decimal | None = Field(
         None, ge=0, description="Estimated cost per serving"
     )
@@ -327,4 +323,3 @@ class Recipe(BaseModel):
 # Resolve forward references for recursive models
 Recipe.model_rebuild()
 Marination.model_rebuild()
-

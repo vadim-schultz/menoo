@@ -32,11 +32,6 @@ class IngredientWrite(IngredientBase):
     pass
 
 
-# Backward compatibility aliases
-IngredientCreate = IngredientWrite
-IngredientUpdate = IngredientWrite
-
-
 class IngredientPatch(BaseModel):
     """Schema for partial updates (all fields optional)."""
 

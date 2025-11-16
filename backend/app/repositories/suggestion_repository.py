@@ -17,11 +17,9 @@ class SuggestionRepository:
         self.session = session
         configure_marvin()
 
-    async def generate_recipe(
-        self, prompt: str, n_completions: int, draft: Recipe
-    ) -> list[Recipe]:
+    async def generate_recipe(self, prompt: str, n_completions: int, draft: Recipe) -> list[Recipe]:
         """Generate recipe completions using Marvin API.
-        
+
         Accepts a partial Recipe model and returns completed Recipe instances populated by Marvin.
         The same Recipe model is used for both partial (draft) and complete (populated) data.
         """
@@ -29,6 +27,5 @@ class SuggestionRepository:
             target=Recipe,
             n=n_completions,
             instructions=prompt,
-            context=draft,
+            context=draft.model_dump(),
         )
-

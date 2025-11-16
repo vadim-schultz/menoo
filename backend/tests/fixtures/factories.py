@@ -17,8 +17,8 @@ from app.enums import (
     CuisineType,
     DietaryRequirement,
     IngredientCategory,
-    MechanicalTreatment,
     MealType,
+    MechanicalTreatment,
     StorageType,
     TemperatureLevel,
     ThermalTreatment,
@@ -34,7 +34,7 @@ def ingredient_factory(**overrides: Any) -> dict[str, Any]:
         **overrides: Override default values with specific values.
 
     Returns:
-        Dictionary with ingredient data suitable for IngredientCreate schema.
+        Dictionary with ingredient data suitable for core Ingredient schema.
 
     Example:
         >>> data = ingredient_factory(name="Custom Tomato")
@@ -60,8 +60,6 @@ def ingredient_payload_factory(**overrides: Any) -> dict[str, Any]:
     quantity = data.get("quantity")
     if isinstance(quantity, Decimal):
         data["quantity"] = float(quantity)
-    category = data.get("category")
-    # category already serialized above
     if isinstance(expiry_date, date):
         data["expiry_date"] = expiry_date.isoformat()
     return data
@@ -173,9 +171,7 @@ def recipe_ingredient_factory(**overrides: Any) -> dict[str, Any]:
         "seasoning": None,
         "preparation_steps": [fake.sentence(nb_words=5)],
         "resting_time_minutes": fake.random_int(min=0, max=15),
-        "temperature_before_use": fake.random_element(
-            ["room_temperature", "chilled", "warm"]
-        ),
+        "temperature_before_use": fake.random_element(["room_temperature", "chilled", "warm"]),
         "notes": fake.sentence() if fake.boolean(chance_of_getting_true=30) else None,
         "order_in_recipe": fake.random_int(min=1, max=5),
     }

@@ -12,7 +12,7 @@ from app.enums import IngredientCategory
 
 class Ingredient(BaseModel):
     """Definitive Ingredient model.
-    
+
     This single model is used for both partial (draft) and complete (populated) ingredients.
     All fields are optional or have defaults to allow partial population.
     """
@@ -28,4 +28,3 @@ class Ingredient(BaseModel):
     @field_serializer("quantity", when_used="json")
     def serialize_quantity(self, value: Decimal | None) -> float | None:
         return float(value) if value is not None else None
-

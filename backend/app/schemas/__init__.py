@@ -13,6 +13,10 @@ from app.schemas.core.recipe import (
 
 # Request schemas - REST API request wrappers
 from app.schemas.requests import (
+    IngredientCreateRequest,
+    IngredientListRequest,
+    IngredientPatch,
+    IngredientUpdateRequest,
     RecipeCreateRequest,
     RecipeListRequest,
     RecipeUpdateRequest,
@@ -21,6 +25,8 @@ from app.schemas.requests import (
 
 # Response schemas - REST API response wrappers
 from app.schemas.responses import (
+    IngredientListResponse,
+    IngredientResponse,
     RecipeDetail,
     RecipeListResponse,
     RecipeResponse,
@@ -29,17 +35,6 @@ from app.schemas.responses import (
 
 # Response sub-types
 from app.schemas.responses.recipe import RecipeIngredientRead
-
-# Legacy ingredient schemas (from old structure)
-from app.schemas.ingredient import (
-    IngredientCreate,
-    IngredientFilter,
-    IngredientListResponse,
-    IngredientPatch,
-    IngredientRead,
-    IngredientUpdate,
-    IngredientWrite,
-)
 
 __all__ = [
     # Core models
@@ -52,22 +47,20 @@ __all__ = [
     "RecipeTiming",
     "StorageInstructions",
     # Request schemas
+    "IngredientCreateRequest",
+    "IngredientListRequest",
+    "IngredientPatch",
+    "IngredientUpdateRequest",
     "RecipeCreateRequest",
     "RecipeListRequest",
     "RecipeUpdateRequest",
     "SuggestionRequest",
     # Response schemas
+    "IngredientResponse",
+    "IngredientListResponse",
     "RecipeResponse",
     "RecipeDetail",
     "RecipeListResponse",
     "RecipeIngredientRead",
     "SuggestionResponse",
-    # Legacy ingredient schemas
-    "IngredientCreate",
-    "IngredientUpdate",
-    "IngredientWrite",
-    "IngredientPatch",
-    "IngredientRead",
-    "IngredientFilter",
-    "IngredientListResponse",
 ]

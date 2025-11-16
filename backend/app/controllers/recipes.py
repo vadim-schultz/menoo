@@ -28,19 +28,19 @@ class RecipeController(Controller):
     async def list_recipes(
         self,
         recipe_service: RecipeService,
-        data: RecipeListRequest | None = None,
+        filters: RecipeListRequest | None = None,
     ) -> RecipeListResponse:
         """List all recipes with optional filters."""
-        if data is None:
-            data = RecipeListRequest()
-        recipes, total = await recipe_service.list_recipes(data)
+        if filters is None:
+            filters = RecipeListRequest()
+        recipes, total = await recipe_service.list_recipes(filters)
 
         return RecipeListResponse(
             items=[RecipeResponse.model_validate(recipe) for recipe in recipes],
             total=total,
-            page=data.page,
-            page_size=data.page_size,
-            has_next=(data.page * data.page_size) < total,
+            page=filters.page,
+            page_size=filters.page_size,
+            has_next=(filters.page * filters.page_size) < total,
         )
 
     @post("/")

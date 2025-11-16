@@ -24,9 +24,7 @@ def configure_marvin() -> None:
     settings = get_settings()
 
     if not settings.openai_api_key:
-        raise ValueError(
-            "OpenAI API key is required. Set OPENAI_API_KEY environment variable."
-        )
+        raise ValueError("OpenAI API key is required. Set OPENAI_API_KEY environment variable.")
 
     # Ensure OpenAI key is visible to Marvin
     if os.environ.get("OPENAI_API_KEY") != settings.openai_api_key:

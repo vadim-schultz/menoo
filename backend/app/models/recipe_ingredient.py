@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Index, JSON, Numeric, String, UniqueConstraint
+from sqlalchemy import JSON, ForeignKey, Index, Numeric, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, IDMixin

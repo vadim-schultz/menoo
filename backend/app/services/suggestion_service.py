@@ -22,7 +22,7 @@ class SuggestionService:
 
     async def complete_recipe(self, request: SuggestionRequest) -> list[Recipe]:
         """Complete a recipe draft using Marvin.
-        
+
         Accepts a partial Recipe model and passes it to Marvin for completion.
         The same Recipe model is used for both partial (draft) and complete (populated) data.
         Marvin will extract necessary context from the Recipe model itself.

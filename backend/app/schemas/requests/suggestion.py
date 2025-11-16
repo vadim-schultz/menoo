@@ -9,7 +9,7 @@ from app.schemas.core.recipe import Recipe
 
 class SuggestionRequest(BaseModel):
     """Request for recipe suggestions.
-    
+
     Contains the core Recipe model (partial) plus REST-specific fields
     for controlling the suggestion API (prompt, n_completions).
     """
@@ -28,4 +28,3 @@ class SuggestionRequest(BaseModel):
         le=5,
         description="Number of recipe variations to request from Marvin",
     )
-

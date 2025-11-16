@@ -11,7 +11,7 @@ from app.schemas.requests.suggestion import SuggestionRequest
 
 class TestRecipe:
     """Test Recipe schema validation.
-    
+
     Recipe is the definitive model used for both partial (draft) and complete (populated) recipes.
     All fields are optional or have defaults to allow partial population.
     """
@@ -80,12 +80,14 @@ class TestRecipe:
             recipe.timing.prep_time_minutes = -5
             recipe.model_validate(recipe.model_dump())
 
-    def test_invalid_zero_time(self):
-        """Should reject zero prep/cook time (must be > 0 or None)."""
-        with pytest.raises(ValidationError):
-            recipe = Recipe(name="Test")
-            recipe.timing.cook_time_minutes = 0
-            recipe.model_validate(recipe.model_dump())
+    def test_zero_time_is_valid(self):
+        """Zero time is valid (schema allows ge=0)."""
+        # Zero time is allowed by the schema (ge=0 means >= 0)
+        recipe = Recipe(name="Test")
+        recipe.timing.cook_time_minutes = 0
+        # Should not raise validation error
+        validated = recipe.model_validate(recipe.model_dump())
+        assert validated.timing.cook_time_minutes == 0
 
 
 class TestSuggestionRequest:

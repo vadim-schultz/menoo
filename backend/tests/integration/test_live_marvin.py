@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from pprint import pprint
 
 import pytest
 from dotenv import load_dotenv
 
 from app.config import BASE_DIR
-from app.schemas.core.recipe import IngredientPreparation, Recipe
+from app.repositories import SuggestionRepository
+from app.schemas.core.recipe import Recipe
 from app.schemas.requests.suggestion import SuggestionRequest
 from app.services import SuggestionService
 
@@ -38,7 +40,8 @@ async def test_live_marvin_recipe_completion(db_session):
     if not api_key:
         pytest.skip("OPENAI_API_KEY is not configured; skipping live Marvin test.")
 
-    service = SuggestionService(db_session)
+    suggestion_repo = SuggestionRepository(db_session)
+    service = SuggestionService(suggestion_repo)
 
     # Create partial Recipe model (draft) - some fields can be None for partial input
     draft = Recipe(
@@ -69,3 +72,4 @@ async def test_live_marvin_recipe_completion(db_session):
     assert completed.ingredients, "Completed recipe should include ingredients."
     assert completed.servings is None or completed.servings > 0
 
+    pprint(completed.model_dump())

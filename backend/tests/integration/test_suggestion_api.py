@@ -1,7 +1,6 @@
 """Integration tests for suggestion endpoints."""
 
 import pytest
-from unittest.mock import AsyncMock, patch
 
 SUGGESTIONS_URL = "/api/v1/suggestions"
 
@@ -9,8 +8,9 @@ SUGGESTIONS_URL = "/api/v1/suggestions"
 @pytest.fixture
 def mock_marvin_recipe():
     """Create a mock recipe that Marvin would generate."""
-    from app.schemas.core.recipe import IngredientPreparation, Recipe
     from decimal import Decimal
+
+    from app.schemas.core.recipe import IngredientPreparation, Recipe
 
     return Recipe(
         name="Quick Pasta Primavera",

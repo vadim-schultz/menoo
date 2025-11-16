@@ -5,7 +5,8 @@ from datetime import date, timedelta
 import pytest
 from pydantic import ValidationError
 
-from app.schemas.ingredient import IngredientCreate, IngredientFilter, IngredientPatch
+from app.schemas.core.ingredient import Ingredient
+from app.schemas.requests.ingredient import IngredientListRequest, IngredientPatch
 from tests.fixtures.factories import ingredient_factory
 
 
@@ -15,7 +16,7 @@ class TestIngredientCreation:
     @pytest.mark.unit
     async def test_create_valid_ingredient(self, ingredient_service, db_session):
         """Should create ingredient with valid data."""
-        data = IngredientCreate(**ingredient_factory(name="Tomato"))
+        data = Ingredient(**ingredient_factory(name="Tomato"))
 
         result = await ingredient_service.create_ingredient(data)
         await db_session.commit()
@@ -29,12 +30,12 @@ class TestIngredientCreation:
         """Should add quantity to existing ingredient with same name."""
 
         # Create first ingredient with quantity 100
-        data1 = IngredientCreate(**ingredient_factory(name="Tomato", quantity=100))
+        data1 = Ingredient(**ingredient_factory(name="Tomato", quantity=100))
         result1 = await ingredient_service.create_ingredient(data1)
         await db_session.commit()
 
         # Create duplicate with quantity 50 - should add to existing
-        data2 = IngredientCreate(**ingredient_factory(name="Tomato", quantity=50))
+        data2 = Ingredient(**ingredient_factory(name="Tomato", quantity=50))
         result2 = await ingredient_service.create_ingredient(data2)
         await db_session.commit()
 
@@ -43,14 +44,16 @@ class TestIngredientCreation:
         assert float(result2.quantity) == 150.0
 
     @pytest.mark.unit
-    async def test_create_case_insensitive_duplicate_adds_quantity(self, ingredient_service, db_session):
+    async def test_create_case_insensitive_duplicate_adds_quantity(
+        self, ingredient_service, db_session
+    ):
         """Should detect duplicate names case-insensitively and add quantity."""
 
-        data1 = IngredientCreate(**ingredient_factory(name="Tomato", quantity=100))
+        data1 = Ingredient(**ingredient_factory(name="Tomato", quantity=100))
         result1 = await ingredient_service.create_ingredient(data1)
         await db_session.commit()
 
-        data2 = IngredientCreate(**ingredient_factory(name="TOMATO", quantity=25))
+        data2 = Ingredient(**ingredient_factory(name="TOMATO", quantity=25))
         result2 = await ingredient_service.create_ingredient(data2)
         await db_session.commit()
 
@@ -62,24 +65,21 @@ class TestIngredientCreation:
     async def test_create_duplicate_updates_other_fields(self, ingredient_service, db_session):
         """Should update storage_location and expiry_date when creating duplicate."""
         from datetime import date, timedelta
-        
+
         # Create first ingredient
-        data1 = IngredientCreate(**ingredient_factory(
-            name="Tomato",
-            quantity=100,
-            storage_location="fridge"
-        ))
+        data1 = Ingredient(
+            **ingredient_factory(name="Tomato", quantity=100, storage_location="fridge")
+        )
         result1 = await ingredient_service.create_ingredient(data1)
         await db_session.commit()
 
         # Create duplicate with different fields
         tomorrow = date.today() + timedelta(days=1)
-        data2 = IngredientCreate(**ingredient_factory(
-            name="Tomato",
-            quantity=50,
-            storage_location="counter",
-            expiry_date=tomorrow
-        ))
+        data2 = Ingredient(
+            **ingredient_factory(
+                name="Tomato", quantity=50, storage_location="counter", expiry_date=tomorrow
+            )
+        )
         result2 = await ingredient_service.create_ingredient(data2)
         await db_session.commit()
 
@@ -94,14 +94,14 @@ class TestIngredientCreation:
         """Should handle None quantities correctly."""
 
         # Create first ingredient with None quantity
-        data1 = IngredientCreate(**ingredient_factory(name="Tomato", quantity=None))
+        data1 = Ingredient(**ingredient_factory(name="Tomato", quantity=None))
         result1 = await ingredient_service.create_ingredient(data1)
         await db_session.commit()
         # When quantity is None, it defaults to 0
         initial_qty = float(result1.quantity) if result1.quantity is not None else 0.0
 
         # Create duplicate with quantity 50
-        data2 = IngredientCreate(**ingredient_factory(name="Tomato", quantity=50))
+        data2 = Ingredient(**ingredient_factory(name="Tomato", quantity=50))
         result2 = await ingredient_service.create_ingredient(data2)
         await db_session.commit()
 
@@ -118,7 +118,7 @@ class TestIngredientUpdate:
         """Should update existing ingredient successfully."""
 
         # Create ingredient
-        data = IngredientCreate(**ingredient_factory(name="Tomato"))
+        data = Ingredient(**ingredient_factory(name="Tomato"))
         ingredient = await ingredient_service.create_ingredient(data)
         await db_session.commit()
 
@@ -141,13 +141,12 @@ class TestIngredientUpdate:
     async def test_update_to_duplicate_name_fails(self, ingredient_service, db_session):
         """Should fail when updating name to existing name (database constraint)."""
         from sqlalchemy.exc import IntegrityError
-        
 
         # Create two ingredients
-        data1 = IngredientCreate(**ingredient_factory(name="Tomato"))
+        data1 = Ingredient(**ingredient_factory(name="Tomato"))
         ing1 = await ingredient_service.create_ingredient(data1)
 
-        data2 = IngredientCreate(**ingredient_factory(name="Potato"))
+        data2 = Ingredient(**ingredient_factory(name="Potato"))
         await ingredient_service.create_ingredient(data2)
         await db_session.commit()
 
@@ -167,11 +166,11 @@ class TestIngredientListing:
 
         # Create ingredients
         for i in range(3):
-            data = IngredientCreate(**ingredient_factory(name=f"Item{i}"))
+            data = Ingredient(**ingredient_factory(name=f"Item{i}"))
             await ingredient_service.create_ingredient(data)
         await db_session.commit()
 
-        filters = IngredientFilter()
+        filters = IngredientListRequest()
         result = await ingredient_service.list_ingredients(filters)
 
         assert len(result) == 3
@@ -181,13 +180,13 @@ class TestIngredientListing:
         """Should filter by storage location."""
 
         # Create ingredients in different locations
-        data1 = IngredientCreate(**ingredient_factory(storage_location="fridge"))
-        data2 = IngredientCreate(**ingredient_factory(storage_location="cupboard"))
+        data1 = Ingredient(**ingredient_factory(storage_location="fridge"))
+        data2 = Ingredient(**ingredient_factory(storage_location="cupboard"))
         await ingredient_service.create_ingredient(data1)
         await ingredient_service.create_ingredient(data2)
         await db_session.commit()
 
-        filters = IngredientFilter(storage_location="fridge")
+        filters = IngredientListRequest(storage_location="fridge")
         result = await ingredient_service.list_ingredients(filters)
 
         assert len(result) == 1
@@ -198,17 +197,17 @@ class TestIngredientListing:
         """Should reject invalid page number."""
 
         with pytest.raises(ValidationError, match="greater than or equal to 1"):
-            IngredientFilter(page=0)
+            IngredientListRequest(page=0)
 
     @pytest.mark.unit
     async def test_list_pagination_invalid_limit(self, db_session):
         """Should reject limit out of bounds (1-1000)."""
 
         with pytest.raises(ValidationError, match="greater than or equal to 1"):
-            IngredientFilter(page_size=0)
+            IngredientListRequest(page_size=0)
 
         with pytest.raises(ValidationError, match="less than or equal to 1000"):
-            IngredientFilter(page_size=1001)
+            IngredientListRequest(page_size=1001)
 
     @pytest.mark.unit
     async def test_list_with_expiry_filter(self, ingredient_service, db_session):
@@ -218,13 +217,13 @@ class TestIngredientListing:
         tomorrow = today + timedelta(days=1)
         next_week = today + timedelta(days=7)
 
-        data1 = IngredientCreate(**ingredient_factory(expiry_date=tomorrow))
-        data2 = IngredientCreate(**ingredient_factory(expiry_date=next_week))
+        data1 = Ingredient(**ingredient_factory(expiry_date=tomorrow))
+        data2 = Ingredient(**ingredient_factory(expiry_date=next_week))
         await ingredient_service.create_ingredient(data1)
         await ingredient_service.create_ingredient(data2)
         await db_session.commit()
 
-        filters = IngredientFilter(expiring_before=tomorrow + timedelta(days=2))
+        filters = IngredientListRequest(expiring_before=tomorrow + timedelta(days=2))
         result = await ingredient_service.list_ingredients(filters)
 
         assert len(result) == 1
@@ -233,13 +232,13 @@ class TestIngredientListing:
     async def test_list_with_name_filter(self, ingredient_service, db_session):
         """Should filter by name substring."""
 
-        data1 = IngredientCreate(**ingredient_factory(name="Cherry Tomato"))
-        data2 = IngredientCreate(**ingredient_factory(name="Potato"))
+        data1 = Ingredient(**ingredient_factory(name="Cherry Tomato"))
+        data2 = Ingredient(**ingredient_factory(name="Potato"))
         await ingredient_service.create_ingredient(data1)
         await ingredient_service.create_ingredient(data2)
         await db_session.commit()
 
-        filters = IngredientFilter(name_contains="tomato")
+        filters = IngredientListRequest(name_contains="tomato")
         result = await ingredient_service.list_ingredients(filters)
 
         assert len(result) == 1
@@ -253,7 +252,7 @@ class TestIngredientDeletion:
     async def test_delete_existing_ingredient(self, ingredient_service, db_session):
         """Should soft delete existing ingredient."""
 
-        data = IngredientCreate(**ingredient_factory(name="Tomato"))
+        data = Ingredient(**ingredient_factory(name="Tomato"))
         ingredient = await ingredient_service.create_ingredient(data)
         await db_session.commit()
 
@@ -279,7 +278,7 @@ class TestIngredientRetrieval:
     async def test_get_existing_ingredient(self, ingredient_service, db_session):
         """Should retrieve existing ingredient by ID."""
 
-        data = IngredientCreate(**ingredient_factory(name="Tomato"))
+        data = Ingredient(**ingredient_factory(name="Tomato"))
         created = await ingredient_service.create_ingredient(data)
         await db_session.commit()
 

@@ -68,11 +68,7 @@ class RecipeRepository:
         total = (await self.session.execute(count_query)).scalar_one()
 
         query = (
-            select(Recipe)
-            .where(and_(*conditions))
-            .order_by(Recipe.name)
-            .offset(skip)
-            .limit(limit)
+            select(Recipe).where(and_(*conditions)).order_by(Recipe.name).offset(skip).limit(limit)
         )
         recipes = (await self.session.execute(query)).scalars().all()
         return recipes, total

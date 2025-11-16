@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from decimal import Decimal
-from typing import Iterable
+from collections.abc import Iterable
 
-from app.models import Recipe as RecipeModel, RecipeIngredient
+from app.models import Recipe as RecipeModel
+from app.models import RecipeIngredient
 from app.repositories import (
     IngredientRepository,
     RecipeIngredientRepository,
@@ -39,19 +39,21 @@ class RecipeService:
 
         # Use model_dump to serialize Pydantic model to dict, excluding ingredients
         recipe_dict = data.model_dump(mode="json", exclude={"ingredients"})
-        
+
         # Extract timing fields to top-level columns for SQLAlchemy model
         timing = recipe_dict.pop("timing", {})
-        recipe_dict.update({
-            "prep_time_minutes": timing.get("prep_time_minutes"),
-            "cook_time_minutes": timing.get("cook_time_minutes"),
-            "marinating_time_minutes": timing.get("marinating_time_minutes"),
-            "resting_time_minutes": timing.get("resting_time_minutes"),
-            "inactive_time_minutes": timing.get("inactive_time_minutes"),
-            "total_active_time_minutes": timing.get("total_active_time_minutes"),
-            "timing": timing,  # Keep full timing dict for JSON column
-        })
-        
+        recipe_dict.update(
+            {
+                "prep_time_minutes": timing.get("prep_time_minutes"),
+                "cook_time_minutes": timing.get("cook_time_minutes"),
+                "marinating_time_minutes": timing.get("marinating_time_minutes"),
+                "resting_time_minutes": timing.get("resting_time_minutes"),
+                "inactive_time_minutes": timing.get("inactive_time_minutes"),
+                "total_active_time_minutes": timing.get("total_active_time_minutes"),
+                "timing": timing,  # Keep full timing dict for JSON column
+            }
+        )
+
         recipe = await self.recipe_repo.create(RecipeModel(**recipe_dict))
 
         if data.ingredients:
@@ -142,7 +144,6 @@ class RecipeService:
         missing_ingredients = await self.ingredient_repo.get_by_ids(list(missing_ids))
         return [ing.name for ing in missing_ingredients]
 
-
     async def _validate_ingredients_exist(
         self,
         ingredients: Iterable[IngredientPreparation] | None,
@@ -154,15 +155,14 @@ class RecipeService:
         if len(existing_ingredients) != len(set(ingredient_ids)):
             raise ValueError("One or more ingredient IDs are invalid")
 
-
     def _apply_recipe_updates(self, recipe: RecipeModel, data: Recipe) -> None:
         """Apply partial updates to recipe instance."""
         # Get non-None fields from Pydantic model, excluding ingredients
         updates = data.model_dump(mode="json", exclude_unset=True, exclude={"ingredients"})
-        
+
         if not updates:
             return
-        
+
         # Handle timing extraction to top-level columns
         if "timing" in updates:
             timing = updates.pop("timing")
@@ -173,7 +173,7 @@ class RecipeService:
             recipe.resting_time_minutes = timing.get("resting_time_minutes")
             recipe.inactive_time_minutes = timing.get("inactive_time_minutes")
             recipe.total_active_time_minutes = timing.get("total_active_time_minutes")
-        
+
         # Apply all other updates directly
         for key, value in updates.items():
             setattr(recipe, key, value)

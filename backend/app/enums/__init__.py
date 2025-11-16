@@ -6,8 +6,8 @@ from .recipe import (
     CuisineType,
     DietaryRequirement,
     IngredientCategory,
-    MechanicalTreatment,
     MealType,
+    MechanicalTreatment,
     StorageType,
     TemperatureLevel,
     ThermalTreatment,
@@ -25,4 +25,3 @@ __all__ = [
     "IngredientCategory",
     "StorageType",
 ]
-

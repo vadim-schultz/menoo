@@ -8,8 +8,8 @@ from datetime import date
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Ingredient
 from app.enums import IngredientCategory
+from app.models import Ingredient
 
 
 class IngredientRepository:
