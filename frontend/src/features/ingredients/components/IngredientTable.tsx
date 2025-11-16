@@ -1,6 +1,6 @@
-import type { IngredientRead, StorageLocation } from '../../../shared/types/ingredient';
+import type { IngredientRead } from '../../../shared/types/ingredient';
 import { Pencil, Trash2, ChevronUp, ChevronDown } from 'lucide-preact';
-import { Button, Input, Select } from '../../../shared/components';
+import { Button, Input } from '../../../shared/components';
 import { EmptyState } from './EmptyState';
 import { formatDate, formatStorageLocation } from '../services/formatting';
 import { useTableSort } from '../hooks/useTableSort';
@@ -11,10 +11,10 @@ interface IngredientTableProps {
   onDelete: (id: number) => void;
   // Filter props
   nameContains: string;
-  storageLocation: StorageLocation | '';
+  storageLocation: string | '';
   expiringBefore: string;
   onNameContainsChange: (value: string) => void;
-  onStorageLocationChange: (value: StorageLocation | '') => void;
+  onStorageLocationChange: (value: string | '') => void;
   onExpiringBeforeChange: (value: string) => void;
   // Sort props
   sortColumn?: 'name' | 'quantity' | 'storage_location' | 'expiry_date' | null;
@@ -81,7 +81,7 @@ export const IngredientTable = ({
             </th>
             <th scope="col" style={{ verticalAlign: 'bottom' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span>Quantity (grams)</span>
+                <span>Quantity</span>
                 <SortButton column="quantity" />
               </div>
             </th>
@@ -90,18 +90,7 @@ export const IngredientTable = ({
                 <span>Storage Location</span>
                 <SortButton column="storage_location" />
               </div>
-              <Select
-                name="storage_filter"
-                value={storageLocation}
-                onChange={(v) => onStorageLocationChange((v || '') as StorageLocation | '')}
-                options={[
-                  { value: '', label: 'All' },
-                  { value: 'fridge', label: 'Fridge' },
-                  { value: 'cupboard', label: 'Cupboard' },
-                  { value: 'pantry', label: 'Pantry' },
-                  { value: 'counter', label: 'Counter' },
-                ]}
-              />
+              <Input name="storage_filter" value={storageLocation} onChange={(v) => onStorageLocationChange(v)} placeholder="Filter by location..." />
             </th>
             <th scope="col" style={{ verticalAlign: 'bottom' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -117,7 +106,10 @@ export const IngredientTable = ({
           {ingredients.map((ingredient) => (
             <tr key={ingredient.id}>
               <td>{ingredient.name}</td>
-              <td>{ingredient.quantity}g</td>
+              <td>
+                {ingredient.quantity ?? '-'}
+                {ingredient.unit ? ` ${ingredient.unit}` : ''}
+              </td>
               <td>{formatStorageLocation(ingredient.storage_location)}</td>
               <td>{formatDate(ingredient.expiry_date)}</td>
               <td>

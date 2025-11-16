@@ -7,9 +7,7 @@
 
 import { http, HttpResponse } from 'msw';
 import type {
-  GeneratedRecipe,
   SuggestionResponse,
-  SuggestionAcceptRequest,
 } from '@/shared/types/suggestion';
 import type { RecipeDetail } from '@/shared/types/recipe';
 import type { IngredientRead } from '@/shared/types/ingredient';
@@ -18,23 +16,19 @@ const API_BASE = 'http://localhost:8000/api/v1';
 
 // Mock data factories
 export const createMockGeneratedRecipe = (
-  overrides?: Partial<GeneratedRecipe>
-): GeneratedRecipe => ({
+  overrides?: any
+) => ({
   name: 'AI-Generated Pasta Carbonara',
   description: 'A creamy Italian pasta dish with eggs, bacon, and parmesan cheese.',
+  timing: { prep_time_minutes: 10, cook_time_minutes: 15 },
   ingredients: [
-    { ingredient_id: 1, name: 'Pasta', quantity: 400, unit: 'g' },
-    { ingredient_id: 2, name: 'Eggs', quantity: 4, unit: 'whole' },
-    { ingredient_id: 3, name: 'Bacon', quantity: 200, unit: 'g' },
-    { ingredient_id: 4, name: 'Parmesan', quantity: 100, unit: 'g' },
-  ],
+    { ingredient_id: 1, quantity: 400, unit: 'g' },
+    { ingredient_id: 2, quantity: 4, unit: 'whole' },
+    { ingredient_id: 3, quantity: 200, unit: 'g' },
+    { ingredient_id: 4, quantity: 100, unit: 'g' },
+  ] as any[],
   instructions: '1. Cook pasta\n2. Fry bacon\n3. Mix eggs and cheese\n4. Combine all',
-  prep_time_minutes: 10,
-  cook_time_minutes: 15,
   servings: 4,
-  difficulty: 'easy',
-  cuisine_type: 'Italian',
-  meal_type: 'dinner',
   ...overrides,
 });
 
@@ -46,7 +40,7 @@ export const createMockRecipeDetail = (overrides?: Partial<RecipeDetail>): Recip
   prep_time: 10,
   cook_time: 20,
   servings: 4,
-  difficulty: 'easy',
+  difficulty: null as any,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
   is_deleted: false,
@@ -90,51 +84,12 @@ export const handlers = [
     );
   }),
 
-  // POST /suggestions/accept - Accept and save AI suggestion
-  http.post(`${API_BASE}/suggestions/accept`, async ({ request }) => {
-    const body = (await request.json()) as SuggestionAcceptRequest;
-
-    if (!body.generated_recipe) {
-      return HttpResponse.json({ detail: 'Missing generated_recipe' }, { status: 422 });
-    }
-
-    return HttpResponse.json<RecipeDetail>(
-      createMockRecipeDetail({
-        name: body.generated_recipe.name,
-        description: body.generated_recipe.description,
-        instructions: body.generated_recipe.instructions,
-        prep_time: body.generated_recipe.prep_time_minutes ?? undefined,
-        cook_time: body.generated_recipe.cook_time_minutes ?? undefined,
-        servings: body.generated_recipe.servings ?? undefined,
-        difficulty: (body.generated_recipe.difficulty ?? 'easy') as any,
-      }),
-      { status: 201 }
-    );
-  }),
   // Relative URL handlers matching client
   http.post(`/api/v1/suggestions/recipes`, async ({ request }) => {
     return HttpResponse.json<SuggestionResponse>(
       {
         recipes: [createMockGeneratedRecipe()],
       },
-      { status: 201 }
-    );
-  }),
-  http.post(`/api/v1/suggestions/accept`, async ({ request }) => {
-    const body = (await request.json()) as SuggestionAcceptRequest;
-    if (!body.generated_recipe) {
-      return HttpResponse.json({ detail: 'Missing generated_recipe' }, { status: 422 });
-    }
-    return HttpResponse.json<RecipeDetail>(
-      createMockRecipeDetail({
-        name: body.generated_recipe.name,
-        description: body.generated_recipe.description,
-        instructions: body.generated_recipe.instructions,
-        prep_time: body.generated_recipe.prep_time_minutes ?? undefined,
-        cook_time: body.generated_recipe.cook_time_minutes ?? undefined,
-        servings: body.generated_recipe.servings ?? undefined,
-        difficulty: (body.generated_recipe.difficulty ?? 'easy') as any,
-      }),
       { status: 201 }
     );
   }),
@@ -154,8 +109,8 @@ export const handlers = [
   http.get(`/api/v1/ingredients/`, () => {
     return HttpResponse.json<IngredientRead[]>(
       [
-        createMockIngredient({ id: 1, name: 'flour', quantity: 100 as any }),
-        createMockIngredient({ id: 2, name: 'sugar', quantity: 200 as any }),
+        createMockIngredient({ id: 1, name: 'flour', quantity: 100 }),
+        createMockIngredient({ id: 2, name: 'sugar', quantity: 200 }),
       ],
       { status: 200 }
     );
@@ -181,11 +136,6 @@ export const errorHandlers = {
   suggestionsFetchError: http.post(`${API_BASE}/suggestions/recipes`, () => {
     return HttpResponse.json({ detail: 'Internal server error' }, { status: 500 });
   }),
-
-  suggestionsSaveError: http.post(`${API_BASE}/suggestions/accept`, () => {
-    return HttpResponse.json({ detail: 'Failed to save recipe' }, { status: 500 });
-  }),
-
   networkError: http.post(`${API_BASE}/suggestions/recipes`, () => {
     return HttpResponse.error();
   }),

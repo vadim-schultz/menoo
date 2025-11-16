@@ -1,7 +1,8 @@
 import { Button, Modal } from '../../../shared/components';
 import { Plus } from 'lucide-preact';
 import type { RecipeDetail, RecipeCreate } from '../../../shared/types';
-import { RecipeForm, RecipeTable } from './index';
+import { RecipeForm } from './index';
+import { RecipeList } from './RecipeList';
 
 interface RecipeFormInitialData {
   ingredientIds?: number[];
@@ -52,7 +53,7 @@ export function RecipesContent({
         <Button icon={Plus} onClick={onOpenCreate} aria-label="Add Recipe" />
       </div>
 
-      <RecipeTable recipes={recipes} onEdit={onEdit} onDelete={onDelete} />
+      <RecipeList recipes={recipes} onEdit={onEdit} onDelete={onDelete} />
 
       <Modal isOpen={isModalOpen} onClose={onCloseModal} title={editingRecipe ? 'Edit Recipe' : 'Add Recipe'}>
         <RecipeForm

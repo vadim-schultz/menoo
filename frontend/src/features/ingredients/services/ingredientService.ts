@@ -9,7 +9,12 @@ import type {
 function normalizeIngredient(item: any): IngredientRead {
   return {
     ...item,
-    quantity: typeof item.quantity === 'string' ? parseFloat(item.quantity) : item.quantity,
+    quantity:
+      item.quantity === null || item.quantity === undefined
+        ? null
+        : typeof item.quantity === 'string'
+        ? parseFloat(item.quantity)
+        : item.quantity,
   } as IngredientRead;
 }
 
@@ -35,11 +40,13 @@ export const ingredientService = {
   },
 
   async create(data: IngredientCreate): Promise<IngredientRead> {
-    const res = await apiClient.post<IngredientRead>('/ingredients/', data);
+    // Backend expects wrapper: { ingredient: ... }
+    const res = await apiClient.post<IngredientRead>('/ingredients/', { ingredient: data });
     return normalizeIngredient(res);
   },
 
   async update(id: number, data: IngredientPatch): Promise<IngredientRead> {
+    // Backend accepts IngredientPatch directly
     const res = await apiClient.patch<IngredientRead>(`/ingredients/${id}`, data);
     return normalizeIngredient(res);
   },

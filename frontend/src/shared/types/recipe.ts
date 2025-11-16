@@ -1,3 +1,6 @@
+// UI-friendly recipe types with minimal fields, plus backend-aligned response structures.
+// We keep existing UI fields and map them to backend structures inside services.
+
 export type DifficultyLevel = 'easy' | 'medium' | 'hard';
 
 export interface RecipeIngredientBase {
@@ -5,7 +8,7 @@ export interface RecipeIngredientBase {
   quantity: number;
   unit: string;
   is_optional?: boolean;
-  note?: string | null;
+  note?: string | null; // UI field; maps to backend 'notes'
 }
 
 export interface RecipeIngredientCreate extends RecipeIngredientBase {}
@@ -19,8 +22,8 @@ export interface RecipeBase {
   name: string;
   description?: string | null;
   instructions: string;
-  prep_time?: number | null;
-  cook_time?: number | null;
+  prep_time?: number | null; // UI field; maps to timing.prep_time_minutes
+  cook_time?: number | null; // UI field; maps to timing.cook_time_minutes
   servings?: number;
   difficulty?: DifficultyLevel | null;
 }
@@ -62,21 +65,11 @@ export interface RecipeListResponse {
 }
 
 export interface RecipeFilters {
-  difficulty?: DifficultyLevel;
-  max_prep_time?: number;
-  max_cook_time?: number;
-  name?: string;
+  // Backend filter names
+  cuisine?: string;
+  max_prep_time_minutes?: number;
+  max_cook_time_minutes?: number;
+  name_contains?: string;
   page?: number;
   page_size?: number;
-}
-
-export interface RecipeGenerationRequest {
-  name?: string | null;
-  description?: string | null;
-  ingredients: number[];
-  max_prep_time?: number | null;
-  max_cook_time?: number | null;
-  difficulty?: DifficultyLevel | null;
-  dietary_restrictions?: string[];
-  enhance_existing?: boolean;
 }

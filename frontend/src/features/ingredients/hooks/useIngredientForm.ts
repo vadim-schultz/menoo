@@ -10,15 +10,21 @@ export const useIngredientForm = (
     initialValues: ingredient
       ? {
           name: ingredient.name,
-          quantity: ingredient.quantity,
+          quantity: ingredient.quantity ?? null,
+          unit: ingredient.unit || null,
+          category: ingredient.category,
           storage_location: ingredient.storage_location,
           expiry_date: ingredient.expiry_date,
+          notes: ingredient.notes || null,
         }
       : {
           name: '',
-          quantity: 0,
+          quantity: null,
+          unit: null,
+          category: undefined,
           storage_location: null,
           expiry_date: null,
+          notes: null,
         },
     validate: validateIngredient,
     onSubmit,

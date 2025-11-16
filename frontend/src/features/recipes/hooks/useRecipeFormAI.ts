@@ -1,7 +1,8 @@
 import type { RecipeIngredientCreate } from '../../../shared/types';
 import type { UseFormReturn } from '../../../shared/hooks';
-import type { RecipeCreate, RecipeGenerationRequest } from '../../../shared/types';
+import type { RecipeCreate } from '../../../shared/types';
 import { useRecipeAI } from './useRecipeAI';
+import type { SuggestionRequest } from '../../../shared/types';
 
 export function useRecipeFormAI(
   form: UseFormReturn<RecipeCreate>,
@@ -20,18 +21,31 @@ export function useRecipeFormAI(
       return;
     }
 
-    const request: RecipeGenerationRequest = {
-      name: form.values.name || null,
-      description: form.values.description,
-      ingredients: ingredientIds,
-      max_prep_time: form.values.prep_time || null,
-      max_cook_time: form.values.cook_time || null,
-      difficulty: form.values.difficulty || null,
-      enhance_existing: false,
+    const request: SuggestionRequest = {
+      recipe: {
+        name: form.values.name || null,
+        description: form.values.description || null,
+        instructions: form.values.instructions || null,
+        servings: form.values.servings || null,
+        timing: {
+          prep_time_minutes: form.values.prep_time || null,
+          cook_time_minutes: form.values.cook_time || null,
+        },
+        ingredients: ingredientIds.map((id) => ({
+          ingredient_id: id,
+          quantity: 1,
+          unit: 'unit',
+          is_optional: false,
+          notes: null,
+        })),
+      },
+      n_completions: 1,
     };
 
-    const generated = await generateRecipe(request);
-    const recipeCreate = convertGeneratedToCreate(generated);
+    const response = await generateRecipe(request);
+    const first = (response as any)?.recipes?.[0] || null;
+    if (!first) return;
+    const recipeCreate = convertGeneratedToCreate(first);
 
     form.setValues({
       name: recipeCreate.name,
@@ -61,18 +75,31 @@ export function useRecipeFormAI(
       return;
     }
 
-    const request: RecipeGenerationRequest = {
-      name: form.values.name || null,
-      description: form.values.description,
-      ingredients: ingredientIds,
-      max_prep_time: form.values.prep_time || null,
-      max_cook_time: form.values.cook_time || null,
-      difficulty: form.values.difficulty || null,
-      enhance_existing: true,
+    const request: SuggestionRequest = {
+      recipe: {
+        name: form.values.name || null,
+        description: form.values.description || null,
+        instructions: form.values.instructions || null,
+        servings: form.values.servings || null,
+        timing: {
+          prep_time_minutes: form.values.prep_time || null,
+          cook_time_minutes: form.values.cook_time || null,
+        },
+        ingredients: ingredientIds.map((id) => ({
+          ingredient_id: id,
+          quantity: 1,
+          unit: 'unit',
+          is_optional: false,
+          notes: null,
+        })),
+      },
+      n_completions: 1,
     };
 
-    const generated = await generateRecipe(request);
-    const recipeCreate = convertGeneratedToCreate(generated);
+    const response = await generateRecipe(request);
+    const first = (response as any)?.recipes?.[0] || null;
+    if (!first) return;
+    const recipeCreate = convertGeneratedToCreate(first);
 
     if (!form.values.name && recipeCreate.name) {
       form.handleChange('name', recipeCreate.name);
@@ -92,9 +119,7 @@ export function useRecipeFormAI(
     if (!form.values.servings && recipeCreate.servings) {
       form.handleChange('servings', recipeCreate.servings);
     }
-    if (!form.values.difficulty && recipeCreate.difficulty) {
-      form.handleChange('difficulty', recipeCreate.difficulty);
-    }
+    // difficulty is not provided by backend; leave unchanged
 
     if (recipeCreate.ingredients && recipeCreate.ingredients.length > 0) {
       setIngredients(recipeCreate.ingredients);

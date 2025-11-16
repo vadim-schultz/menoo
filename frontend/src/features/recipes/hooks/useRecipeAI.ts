@@ -1,22 +1,23 @@
 import { useApiMutation } from '../../../shared/hooks';
-import { recipeService } from '../../../shared/services';
-import type { RecipeGenerationRequest, RecipeCreate, RecipeIngredientCreate } from '../../../shared/types';
-import type { GeneratedRecipe } from '../../../shared/types/suggestion';
+import { suggestionService } from '../../../shared/services';
+import type { RecipeCreate, RecipeIngredientCreate } from '../../../shared/types';
+import type { SuggestionRequest, SuggestionResponse } from '../../../shared/types';
 
 export function useRecipeAI() {
-  const { mutate: generateRecipe, loading: generating, error: generationError } =
-    useApiMutation((request: RecipeGenerationRequest) => recipeService.generateRecipe(request));
+  const { mutate: generateRecipe, loading: generating, error: generationError } = useApiMutation(
+    (request: SuggestionRequest) => suggestionService.getSuggestions(request)
+  );
 
-  const convertGeneratedToCreate = (generated: GeneratedRecipe): RecipeCreate => {
+  const convertGeneratedToCreate = (generated: any): RecipeCreate => {
     return {
       name: generated.name,
       description: generated.description || null,
       instructions: generated.instructions,
-      prep_time: generated.prep_time_minutes || null,
-      cook_time: generated.cook_time_minutes || null,
+      prep_time: generated?.timing?.prep_time_minutes ?? null,
+      cook_time: generated?.timing?.cook_time_minutes ?? null,
       servings: generated.servings || 4,
-      difficulty: (generated.difficulty as 'easy' | 'medium' | 'hard') || null,
-      ingredients: generated.ingredients
+      difficulty: null,
+      ingredients: (generated.ingredients || [])
         .filter((ing) => ing.ingredient_id > 0)
         .map(
           (ing): RecipeIngredientCreate => ({

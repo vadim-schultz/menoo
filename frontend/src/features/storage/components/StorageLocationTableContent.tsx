@@ -25,7 +25,10 @@ export function StorageLocationTableContent({ ingredients, onEdit, onDelete }: S
           {ingredients.map((ingredient) => (
             <tr key={ingredient.id}>
               <td>{ingredient.name}</td>
-              <td>{ingredient.quantity}g</td>
+              <td>
+                {ingredient.quantity ?? '-'}
+                {ingredient.unit ? ` ${ingredient.unit}` : ''}
+              </td>
               <td>{formatDate(ingredient.expiry_date)}</td>
               <td>
                 <div style={{ display: 'flex', gap: '0.25rem' }}>

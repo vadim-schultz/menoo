@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import type { IngredientFilters, StorageLocation } from '../../../shared/types/ingredient';
+import type { IngredientFilters } from '../../../shared/types/ingredient';
 
 export type SortColumn = 'name' | 'quantity' | 'storage_location' | 'expiry_date' | null;
 export type SortDirection = 'asc' | 'desc';
@@ -7,7 +7,7 @@ export type SortDirection = 'asc' | 'desc';
 export interface UseIngredientFiltersReturn {
   // state
   nameContains: string;
-  storageLocation: StorageLocation | '';
+  storageLocation: string | '';
   expiringBefore: string;
   page: number;
   sortColumn: SortColumn;
@@ -15,7 +15,7 @@ export interface UseIngredientFiltersReturn {
   appliedFilters: IngredientFilters;
   // handlers
   setNameContains: (v: string) => void;
-  setStorageLocation: (v: StorageLocation | '') => void;
+  setStorageLocation: (v: string | '') => void;
   setExpiringBefore: (v: string) => void;
   setPage: (p: number) => void;
   handleSortChange: (column: Exclude<SortColumn, null> | null) => void;
@@ -23,7 +23,7 @@ export interface UseIngredientFiltersReturn {
 
 export function useIngredientFilters(): UseIngredientFiltersReturn {
   const [nameContains, setNameContains] = useState<string>('');
-  const [storageLocation, setStorageLocation] = useState<StorageLocation | ''>('');
+  const [storageLocation, setStorageLocation] = useState<string | ''>('');
   const [expiringBefore, setExpiringBefore] = useState<string>('');
   const [page, setPage] = useState<number>(1);
   const [sortColumn, setSortColumn] = useState<SortColumn>(null);
@@ -37,7 +37,7 @@ export function useIngredientFilters(): UseIngredientFiltersReturn {
         page: 1,
         page_size: 100,
         name_contains: nameContains || undefined,
-        storage_location: (storageLocation as StorageLocation) || undefined,
+        storage_location: storageLocation || undefined,
         expiring_before: expiringBefore || undefined,
       };
       setAppliedFilters(nextFilters);

@@ -5,15 +5,13 @@ import type {
   RecipeDetail,
   RecipeListResponse,
   RecipeFilters,
-  RecipeGenerationRequest,
   RecipeIngredientCreate,
   RecipeIngredientRead,
 } from '../types';
-import type { GeneratedRecipe } from '../types/suggestion';
 
 export const recipeService = {
   async list(filters?: RecipeFilters): Promise<RecipeListResponse> {
-    return apiClient.get<RecipeListResponse>('/recipes', filters);
+    return apiClient.get<RecipeListResponse>('/recipes/', filters);
   },
 
   async get(id: number): Promise<RecipeDetail> {
@@ -21,11 +19,51 @@ export const recipeService = {
   },
 
   async create(data: RecipeCreate): Promise<RecipeDetail> {
-    return apiClient.post<RecipeDetail>('/recipes', data);
+    // Map UI fields to backend Recipe model wrapped in { recipe }
+    const payload = {
+      recipe: {
+        name: data.name,
+        description: data.description ?? null,
+        instructions: data.instructions,
+        servings: data.servings ?? 1,
+        timing: {
+          prep_time_minutes: data.prep_time ?? null,
+          cook_time_minutes: data.cook_time ?? null,
+        },
+        ingredients: (data.ingredients || []).map((ing: RecipeIngredientCreate) => ({
+          ingredient_id: ing.ingredient_id,
+          quantity: ing.quantity,
+          unit: ing.unit,
+          is_optional: ing.is_optional ?? false,
+          notes: ing.note ?? null,
+        })),
+      },
+    };
+    return apiClient.post<RecipeDetail>('/recipes/', payload);
   },
 
   async update(id: number, data: RecipeUpdate): Promise<RecipeDetail> {
-    return apiClient.patch<RecipeDetail>(`/recipes/${id}`, data);
+    const payload = {
+      recipe: {
+        name: data.name,
+        description: data.description,
+        instructions: data.instructions,
+        servings: data.servings,
+        timing: {
+          prep_time_minutes: data.prep_time ?? null,
+          cook_time_minutes: data.cook_time ?? null,
+        },
+        ingredients:
+          data.ingredients?.map((ing: RecipeIngredientCreate) => ({
+            ingredient_id: ing.ingredient_id,
+            quantity: ing.quantity,
+            unit: ing.unit,
+            is_optional: ing.is_optional ?? false,
+            notes: ing.note ?? null,
+          })) ?? undefined,
+      },
+    };
+    return apiClient.patch<RecipeDetail>(`/recipes/${id}`, payload);
   },
 
   async delete(id: number): Promise<{ message: string }> {
@@ -41,13 +79,5 @@ export const recipeService = {
     ingredients: RecipeIngredientCreate[]
   ): Promise<RecipeIngredientRead[]> {
     return apiClient.post<RecipeIngredientRead[]>(`/recipes/${id}/ingredients`, ingredients);
-  },
-
-  async generateRecipe(request: RecipeGenerationRequest): Promise<GeneratedRecipe> {
-    return apiClient.post<GeneratedRecipe>('/recipes/generate', request);
-  },
-
-  async suggestRecipe(request: RecipeGenerationRequest): Promise<GeneratedRecipe> {
-    return apiClient.post<GeneratedRecipe>('/recipes/suggest', request);
   },
 };
