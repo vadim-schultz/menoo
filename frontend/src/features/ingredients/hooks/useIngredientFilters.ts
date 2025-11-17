@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 import type { IngredientFilters } from '../../../shared/types/ingredient';
 
 export type SortColumn = 'name' | 'quantity' | 'storage_location' | 'expiry_date' | null;
@@ -22,14 +22,21 @@ export interface UseIngredientFiltersReturn {
 }
 
 export function useIngredientFilters(): UseIngredientFiltersReturn {
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const initialStorageLocation = searchParams?.get('storage_location') ?? '';
+
   const [nameContains, setNameContains] = useState<string>('');
-  const [storageLocation, setStorageLocation] = useState<string | ''>('');
+  const [storageLocation, setStorageLocation] = useState<string | ''>(initialStorageLocation);
   const [expiringBefore, setExpiringBefore] = useState<string>('');
   const [page, setPage] = useState<number>(1);
   const [sortColumn, setSortColumn] = useState<SortColumn>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
-  const [appliedFilters, setAppliedFilters] = useState<IngredientFilters>({ page: 1, page_size: 100 });
+  const [appliedFilters, setAppliedFilters] = useState<IngredientFilters>({
+    page: 1,
+    page_size: 100,
+    storage_location: initialStorageLocation || undefined,
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {

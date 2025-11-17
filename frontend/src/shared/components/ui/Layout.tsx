@@ -14,13 +14,13 @@ import {
 export type { StackProps, FlexProps, GridProps, SimpleGridProps };
 
 export function Stack(props: StackProps) {
-	return <CStack spacing={2} {...props} />;
+	return <CStack gap={2} {...props} />;
 }
 export function HStack(props: StackProps) {
-	return <CHStack spacing={2} {...props} />;
+	return <CHStack gap={2} {...props} />;
 }
 export function VStack(props: StackProps) {
-	return <CVStack spacing={2} {...props} />;
+	return <CVStack gap={2} {...props} />;
 }
 export function Flex(props: FlexProps) {
 	return <CFlex {...props} />;
@@ -29,7 +29,7 @@ export function Grid(props: GridProps) {
 	return <CGrid {...props} />;
 }
 export function SimpleGrid(props: SimpleGridProps) {
-	return <CSimpleGrid spacing={2} {...props} />;
+	return <CSimpleGrid gap={2} {...props} />;
 }
 
 

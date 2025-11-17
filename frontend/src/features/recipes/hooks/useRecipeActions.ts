@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'preact/hooks';
+import { useState, useCallback } from 'react';
 import type { RecipeDetail, RecipeCreate } from '../../../shared/types';
 import { loadRecipeForEdit, saveRecipe, confirmAndDeleteRecipe } from '../services/recipeActions';
 

@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import { renderHook, act } from '@testing-library/preact-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useIngredientForm } from './useIngredientForm';
 
 describe('useIngredientForm', () => {

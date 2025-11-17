@@ -1,7 +1,6 @@
 import { FormField } from './ui/FormField';
-import { Input as UIInput } from './ui/Input';
-import { Textarea as UITextarea } from './ui/Textarea';
-import { Select as UISelect } from './ui/Select';
+import { Input as ChakraInput, Textarea as ChakraTextarea, NativeSelectRoot, NativeSelectField } from '@chakra-ui/react';
+import type { ChangeEvent } from 'react';
 
 interface BaseFieldProps {
 	name: string;
@@ -34,16 +33,16 @@ export function Input({
 	className = '',
 }: InputProps) {
 	return (
-		<FormField label={label} error={error} htmlFor={name} isRequired={required} className={className}>
-			<UIInput
+		<FormField label={label} error={error} htmlFor={name} required={required} className={className}>
+			<ChakraInput
 				id={name}
 				name={name}
 				type={type}
-				value={value as any}
-				onChange={(e: any) => onChange(e.target.value)}
-				onBlur={onBlur as any}
+				value={value}
+				onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
+				onBlur={onBlur}
 				placeholder={placeholder}
-				isDisabled={disabled}
+				disabled={disabled}
 			/>
 		</FormField>
 	);
@@ -69,15 +68,15 @@ export function Textarea({
 	className = '',
 }: TextareaProps) {
 	return (
-		<FormField label={label} error={error} htmlFor={name} isRequired={required} className={className}>
-			<UITextarea
+		<FormField label={label} error={error} htmlFor={name} required={required} className={className}>
+			<ChakraTextarea
 				id={name}
 				name={name}
-				value={value as any}
-				onChange={(e: any) => onChange(e.target.value)}
-				onBlur={onBlur as any}
+				value={value}
+				onChange={(e: ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value)}
+				onBlur={onBlur}
 				placeholder={placeholder}
-				isDisabled={disabled}
+				disabled={disabled}
 				rows={rows}
 			/>
 		</FormField>
@@ -104,22 +103,25 @@ export function Select({
 	className = '',
 }: SelectProps) {
 	return (
-		<FormField label={label} error={error} htmlFor={name} isRequired={required} className={className}>
-			<UISelect
-				id={name}
-				name={name}
-				value={value}
-				onChange={(e: any) => onChange(e.target.value)}
-				onBlur={onBlur as any}
-				placeholder={placeholder}
-				isDisabled={disabled}
-			>
-				{options.map((option) => (
-					<option key={option.value} value={option.value}>
-						{option.label}
-					</option>
-				))}
-			</UISelect>
+		<FormField label={label} error={error} htmlFor={name} required={required} className={className}>
+			<NativeSelectRoot>
+				<NativeSelectField
+					id={name}
+					name={name}
+					value={value}
+					onChange={(e: ChangeEvent<HTMLSelectElement>) => onChange(e.target.value)}
+					onBlur={onBlur}
+					disabled={disabled}
+					placeholder={placeholder}
+				>
+					{placeholder && <option value="">{placeholder}</option>}
+					{options.map((option) => (
+						<option key={option.value} value={option.value}>
+							{option.label}
+						</option>
+					))}
+				</NativeSelectField>
+			</NativeSelectRoot>
 		</FormField>
 	);
 }

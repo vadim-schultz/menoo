@@ -1,8 +1,8 @@
-import type { ComponentChildren } from 'preact';
 import { Container } from '@chakra-ui/react';
+import type { ReactNode } from 'react';
 
 interface LayoutProps {
-  children: ComponentChildren;
+  children: ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {

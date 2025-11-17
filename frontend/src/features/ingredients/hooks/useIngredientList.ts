@@ -1,4 +1,4 @@
-import { useMemo } from 'preact/hooks';
+import { useMemo } from 'react';
 import type { IngredientFilters, IngredientRead } from '../../../shared/types/ingredient';
 import { useIngredients } from './useIngredients';
 import type { SortColumn, SortDirection } from './useIngredientFilters';

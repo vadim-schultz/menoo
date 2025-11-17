@@ -1,4 +1,4 @@
-import { useCallback } from 'preact/hooks';
+import { useCallback } from 'react';
 
 type Column = 'name' | 'quantity' | 'storage_location' | 'expiry_date';
 

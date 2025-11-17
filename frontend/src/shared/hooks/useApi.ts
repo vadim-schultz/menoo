@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect } from 'react';
 import type { ApiError } from '../types';
 
 export interface UseApiState<T> {

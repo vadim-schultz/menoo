@@ -1,4 +1,4 @@
-import { useMemo } from 'preact/hooks';
+import { useMemo } from 'react';
 import type { LocationToIngredientsMap, StorageLocationKey } from '../types';
 import { getOrderedLocations } from '../services';
 

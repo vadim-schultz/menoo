@@ -1,6 +1,6 @@
 import type { RecipeDetail } from '../../../shared/types';
 import { Button } from '../../../shared/components';
-import { Pencil, Trash2 } from 'lucide-preact';
+import { Pencil, Trash2 } from 'lucide-react';
 import { formatTime } from '../services/recipeFormatting';
 import { Card, CardBody, CardHeader } from '../../../shared/components/ui/Card';
 import { Heading, Text } from '../../../shared/components/ui/Typography';
@@ -30,11 +30,11 @@ export function RecipeCard({ recipe, onEdit, onDelete }: RecipeCardProps) {
               {recipe.name}
             </Heading>
             {recipe.description && (
-              <Text mt={1} color="gray.600" noOfLines={2} fontSize="sm">
+              <Text mt={1} color="gray.600" fontSize="sm" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {recipe.description}
               </Text>
             )}
-            <HStack spacing={3} flexWrap="wrap" mt={1}>
+            <HStack gap={3} flexWrap="wrap" mt={1}>
               {recipe.author && (
                 <Text color="gray.600" fontSize="xs">
                   By {recipe.author}
@@ -47,14 +47,14 @@ export function RecipeCard({ recipe, onEdit, onDelete }: RecipeCardProps) {
               )}
             </HStack>
           </Box>
-          <HStack spacing={2}>
+          <HStack gap={2}>
             <Button icon={Pencil} variant="secondary" onClick={() => onEdit(recipe)} aria-label="Edit recipe" />
             <Button icon={Trash2} variant="danger" onClick={() => onDelete(recipe.id)} aria-label="Delete recipe" />
           </HStack>
         </HStack>
       </CardHeader>
       <CardBody pt={0}>
-        <SimpleGrid columns={{ base: 2, sm: 3, md: 4 }} spacing={3} mt={2}>
+        <SimpleGrid columns={{ base: 2, sm: 3, md: 4 }} gap={3} mt={2}>
           <Box>
             <Text color="gray.600" fontSize="xs">
               Prep
@@ -110,7 +110,7 @@ export function RecipeCard({ recipe, onEdit, onDelete }: RecipeCardProps) {
             <Heading as="h4" size="sm" mb={2}>
               Ingredients
             </Heading>
-            <Stack as="ul" m={0} pl={4} spacing={1}>
+            <Stack as="ul" m={0} pl={4} gap={1}>
               {recipe.ingredients.map((ing) => (
                 <Box as="li" key={ing.id}>
                   {ing.ingredient_name}: {ing.quantity} {ing.unit}
@@ -134,7 +134,7 @@ export function RecipeCard({ recipe, onEdit, onDelete }: RecipeCardProps) {
             <Heading as="h4" size="sm" mb={2}>
               Allergens
             </Heading>
-            <Stack spacing={1}>
+            <Stack gap={1}>
               {allergens && (
                 <Text>
                   <Text as="span" fontWeight="semibold">
@@ -156,7 +156,7 @@ export function RecipeCard({ recipe, onEdit, onDelete }: RecipeCardProps) {
         )}
 
         {recipe.tags && recipe.tags.length > 0 && (
-          <HStack mt={3} spacing={2} wrap="wrap">
+          <HStack mt={3} gap={2} wrap="wrap">
             {recipe.tags.map((t) => (
               <Badge key={t} colorScheme="gray" variant="subtle">
                 {t}

@@ -4,14 +4,21 @@
  * Provides common testing patterns and utilities for component tests.
  */
 
-import { render, RenderResult } from '@testing-library/preact';
-import { ComponentChildren } from 'preact';
+import { render, RenderResult } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { ChakraProvider } from '@chakra-ui/react';
+import system from '../theme';
 
 /**
- * Render a component (basic wrapper for common options)
+ * Render a component with Chakra UI provider (basic wrapper for common options)
  */
-export function renderComponent(ui: ComponentChildren, renderOptions = {}): RenderResult {
-  return render(ui as any, renderOptions);
+export function renderComponent(ui: ReactElement, renderOptions = {}): RenderResult {
+  return render(
+    <ChakraProvider value={system}>
+      {ui}
+    </ChakraProvider>,
+    renderOptions
+  );
 }
 
 /**

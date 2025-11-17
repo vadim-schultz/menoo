@@ -1,4 +1,4 @@
-import { useEffect } from 'preact/hooks';
+import { useEffect } from 'react';
 import { useApi, useApiMutation } from '../../../shared/hooks';
 import { recipeService } from '../../../shared/services';
 import type { RecipeDetail } from '../../../shared/types';

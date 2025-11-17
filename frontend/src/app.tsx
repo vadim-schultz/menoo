@@ -1,4 +1,4 @@
-import Router, { Route } from 'preact-router';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Layout } from './shared/components/Layout';
 import { Navigation } from './shared/components/Navigation';
 
@@ -9,13 +9,15 @@ import { StorageContainer } from './features/storage/containers/StorageContainer
 
 export function App() {
   return (
-    <Layout>
-      <Navigation />
-      <Router>
-        <Route path="/" component={StorageContainer} />
-        <Route path="/ingredients" component={IngredientsContainer} />
-        <Route path="/recipes" component={RecipesContainer} />
-      </Router>
-    </Layout>
+    <BrowserRouter>
+      <Layout>
+        <Navigation />
+        <Routes>
+          <Route path="/" element={<StorageContainer />} />
+          <Route path="/ingredients" element={<IngredientsContainer />} />
+          <Route path="/recipes" element={<RecipesContainer />} />
+        </Routes>
+      </Layout>
+    </BrowserRouter>
   );
 }

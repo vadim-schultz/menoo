@@ -1,5 +1,6 @@
+import { useState } from 'react';
+
 export type UseFormReturn<T extends Record<string, any>> = ReturnType<typeof useForm<T>>;
-import { useState } from 'preact/hooks';
 
 export interface UseFormOptions<T> {
   initialValues: T;
@@ -45,7 +46,7 @@ export function useForm<T extends Record<string, any>>({
     }
   };
 
-  const handleSubmit = async (e?: Event) => {
+  const handleSubmit = async (e?: React.FormEvent) => {
     if (e) {
       e.preventDefault();
     }

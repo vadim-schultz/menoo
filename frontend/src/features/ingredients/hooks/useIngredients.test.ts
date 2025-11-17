@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 import { useIngredients } from './useIngredients';
-import { renderHook, act } from '@testing-library/preact-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 // Mock ingredientService
 vi.mock('../services/ingredientService', () => ({
@@ -43,9 +43,10 @@ vi.mock('../services/ingredientService', () => ({
 
 describe('useIngredients', () => {
   it('should fetch ingredients', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useIngredients());
-    await waitForNextUpdate();
-    expect(result.current).toBeDefined();
+    const { result } = renderHook(() => useIngredients());
+    await waitFor(() => {
+      expect(result.current).toBeDefined();
+    });
     expect(result.current?.ingredients.length).toBe(1);
     expect(result.current?.ingredients[0].name).toBe('Apple');
   });

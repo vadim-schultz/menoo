@@ -1,10 +1,10 @@
 import { Button } from '../../../shared/components';
-import { Plus } from 'lucide-preact';
+import { Plus } from 'lucide-react';
 import type { RecipeDetail, RecipeCreate } from '../../../shared/types';
 import { RecipeForm } from './index';
 import { RecipeList } from './RecipeList';
 import { Card, CardBody, CardHeader } from '../../../shared/components/ui/Card';
-import { Heading, Flex } from '@chakra-ui/react';
+import { Heading, Flex, Box } from '@chakra-ui/react';
 
 interface RecipeFormInitialData {
   ingredientIds?: number[];
@@ -42,7 +42,7 @@ export function RecipesContent({
   updating,
 }: RecipesContentProps) {
   return (
-    <div>
+    <Box>
       <Flex align="center" justify="space-between" mb={6}>
         <Heading as="h1" size="lg">Recipes</Heading>
         <Button icon={Plus} onClick={onOpenCreate} aria-label="Add Recipe" />
@@ -69,7 +69,7 @@ export function RecipesContent({
           </CardBody>
         </Card>
       )}
-    </div>
+    </Box>
   );
 }
 

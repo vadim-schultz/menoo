@@ -1,5 +1,5 @@
 import type { RecipeDetail } from '../../../shared/types';
-import { Pencil, Trash2 } from 'lucide-preact';
+import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '../../../shared/components';
 import { formatDifficulty, formatTime, truncateText } from '../services/recipeFormatting';
 import { Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '../../../shared/components/ui/Table';

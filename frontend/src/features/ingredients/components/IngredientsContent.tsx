@@ -1,8 +1,14 @@
-import { Button } from '../../../shared/components';
-import { Plus } from 'lucide-preact';
-import type { IngredientRead, IngredientCreate, StorageLocation } from '../../../shared/types/ingredient';
+import { Input } from '../../../shared/components';
+import { CirclePlus } from 'lucide-react';
+import type { IngredientRead, IngredientCreate } from '../../../shared/types/ingredient';
+
+type StorageLocation = string;
 import { IngredientTable, IngredientPagination, IngredientModal } from '.';
 import type { SortColumn, SortDirection } from '../hooks/useIngredientFilters';
+import { Box } from '../../../shared/components/ui/Box';
+import { Heading } from '../../../shared/components/ui/Typography';
+import { HStack, Stack } from '../../../shared/components/ui/Layout';
+import { IconButton } from '@chakra-ui/react';
 
 interface IngredientsContentProps {
   title?: string;
@@ -55,24 +61,63 @@ export function IngredientsContent({
   isSubmitting,
 }: IngredientsContentProps) {
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-        <h1>{title}</h1>
-        <Button icon={Plus} onClick={onAdd}>
-          Add Ingredient
-        </Button>
-      </div>
+    <Box>
+      <HStack justify="space-between" mb={4}>
+        <Heading as="h1" size="lg">
+          {title}
+        </Heading>
+        <IconButton
+          aria-label="Add ingredient"
+          size="sm"
+          variant="ghost"
+          onClick={onAdd}
+        >
+          <CirclePlus size={18} />
+        </IconButton>
+      </HStack>
+
+      {/* Action Bar - visible filters above the table */}
+      <Box
+        bg="gray.50"
+        borderRadius="md"
+        p={4}
+        mb={4}
+        borderWidth="1px"
+        borderColor="gray.200"
+      >
+        <Stack
+          direction={{ base: 'column', md: 'row' } as any}
+          gap={4}
+          align={{ base: 'stretch', md: 'flex-end' } as any}
+        >
+          <Input
+            name="name_filter"
+            label="Name"
+            value={nameContains}
+            onChange={onNameContainsChange}
+            placeholder="Filter by name..."
+          />
+          <Input
+            name="storage_filter"
+            label="Storage location"
+            value={storageLocation}
+            onChange={onStorageLocationChange as any}
+            placeholder="Filter by location..."
+          />
+          <Input
+            name="expiry_filter"
+            label="Expiry before"
+            type="date"
+            value={expiringBefore}
+            onChange={onExpiringBeforeChange}
+          />
+        </Stack>
+      </Box>
 
       <IngredientTable
         ingredients={ingredients}
         onEdit={onEdit}
         onDelete={onDelete}
-        nameContains={nameContains}
-        storageLocation={storageLocation}
-        expiringBefore={expiringBefore}
-        onNameContainsChange={onNameContainsChange}
-        onStorageLocationChange={onStorageLocationChange}
-        onExpiringBeforeChange={onExpiringBeforeChange}
         sortColumn={sortColumn}
         sortDirection={sortDirection}
         onSortChange={onSortChange}
@@ -87,7 +132,7 @@ export function IngredientsContent({
         onSubmit={onSubmit}
         loading={isSubmitting}
       />
-    </div>
+    </Box>
   );
 }
 

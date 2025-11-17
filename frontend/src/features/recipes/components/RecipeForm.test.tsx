@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/preact';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import { RecipeForm } from './RecipeForm';
 import type { RecipeDetail } from '../../../shared/types';
+import { renderComponent } from '../../../test/utils';
 
 // Mock the useRecipeAI hook
 vi.mock('../hooks/useRecipeAI', () => ({
@@ -33,7 +34,7 @@ describe('RecipeForm', () => {
       // This test verifies that the component can be imported and rendered
       // without TypeScript/Babel errors like "Identifier 'X' has already been declared"
       expect(() => {
-        render(
+        renderComponent(
           <RecipeForm
             onSubmit={mockOnSubmit}
             onCancel={mockOnCancel}
@@ -44,7 +45,7 @@ describe('RecipeForm', () => {
     });
 
     it('should render without errors', () => {
-      render(
+      renderComponent(
         <RecipeForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} loading={false} />
       );
 
@@ -55,7 +56,7 @@ describe('RecipeForm', () => {
 
   describe('Rendering', () => {
     it('should render form fields correctly', () => {
-      render(
+      renderComponent(
         <RecipeForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} loading={false} />
       );
 
@@ -74,7 +75,7 @@ describe('RecipeForm', () => {
         description: 'Test Description',
       };
 
-      render(
+      renderComponent(
         <RecipeForm
           onSubmit={mockOnSubmit}
           onCancel={mockOnCancel}
@@ -104,7 +105,7 @@ describe('RecipeForm', () => {
         missing_ingredients: [],
       };
 
-      render(
+      renderComponent(
         <RecipeForm
           recipe={recipe}
           onSubmit={mockOnSubmit}
@@ -121,7 +122,7 @@ describe('RecipeForm', () => {
   describe('Form Interaction', () => {
     it('should call onSubmit when form is submitted with valid data', async () => {
       const user = userEvent.setup();
-      render(
+      renderComponent(
         <RecipeForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} loading={false} />
       );
 
@@ -144,7 +145,7 @@ describe('RecipeForm', () => {
 
     it('should call onCancel when cancel button is clicked', async () => {
       const user = userEvent.setup();
-      render(
+      renderComponent(
         <RecipeForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} loading={false} />
       );
 

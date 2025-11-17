@@ -1,5 +1,7 @@
+import { Box, Text } from '@chakra-ui/react';
+
 export const EmptyState = () => (
-  <article style={{ textAlign: 'center', padding: '1rem' }}>
-    <p>No ingredients yet. Add your first ingredient to get started!</p>
-  </article>
+  <Box textAlign="center" p={4}>
+    <Text>No ingredients yet. Add your first ingredient to get started!</Text>
+  </Box>
 );

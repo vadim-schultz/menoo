@@ -1,20 +1,21 @@
-import { Button as UIButton, type ButtonProps as UIButtonProps } from '../components/ui/Button';
-import type { ComponentChildren } from 'preact';
+import { Button as ChakraButton, type ButtonProps as ChakraButtonProps } from '@chakra-ui/react';
+import type { ReactNode, MouseEvent } from 'react';
 
 type Variant = 'primary' | 'secondary' | 'danger';
 
 interface ButtonProps {
-	children?: ComponentChildren;
-	onClick?: (e: Event) => void;
+	children?: ReactNode;
+	onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
 	type?: 'button' | 'submit' | 'reset';
 	variant?: Variant;
 	disabled?: boolean;
 	className?: string;
-	icon?: any;
+	icon?: React.ComponentType<{ size?: number }>;
 	iconPosition?: 'left' | 'right';
+	'aria-label'?: string;
 }
 
-function mapVariant(variant: Variant | undefined): Pick<UIButtonProps, 'variant' | 'colorScheme'> {
+function mapVariant(variant: Variant | undefined): Pick<ChakraButtonProps, 'variant' | 'colorScheme'> {
 	if (variant === 'secondary') return { variant: 'outline', colorScheme: 'gray' };
 	if (variant === 'danger') return { variant: 'solid', colorScheme: 'red' };
 	return { variant: 'solid', colorScheme: 'teal' };
@@ -29,21 +30,23 @@ export function Button({
 	className = '',
 	icon: Icon,
 	iconPosition = 'left',
+	'aria-label': ariaLabel,
 }: ButtonProps) {
-	const leftIcon = Icon && iconPosition === 'left' ? <Icon size={16} /> : undefined;
-	const rightIcon = Icon && iconPosition === 'right' ? <Icon size={16} /> : undefined;
 	const mapped = mapVariant(variant);
+	const iconElement = Icon ? <Icon size={16} /> : null;
+	
 	return (
-		<UIButton
-			type={type as UIButtonProps['type']}
-			onClick={onClick as any}
-			isDisabled={disabled}
+		<ChakraButton
+			type={type}
+			onClick={onClick}
+			disabled={disabled}
 			className={className}
-			leftIcon={leftIcon as any}
-			rightIcon={rightIcon as any}
+			aria-label={ariaLabel}
 			{...mapped}
 		>
+			{iconPosition === 'left' && iconElement}
 			{children}
-		</UIButton>
+			{iconPosition === 'right' && iconElement}
+		</ChakraButton>
 	);
 }

@@ -1,6 +1,6 @@
 import type { IngredientRead } from '../../../shared/types/ingredient';
-import { Pencil, Trash2, ChevronUp, ChevronDown } from 'lucide-preact';
-import { Button, Input } from '../../../shared/components';
+import { SquarePen, Trash, ChevronUp, ChevronDown } from 'lucide-react';
+import { IconButton, HStack, Flex, Text } from '@chakra-ui/react';
 import { EmptyState } from './EmptyState';
 import { formatDate, formatStorageLocation } from '../services/formatting';
 import { useTableSort } from '../hooks/useTableSort';
@@ -10,13 +10,6 @@ interface IngredientTableProps {
   ingredients: IngredientRead[];
   onEdit: (ingredient: IngredientRead) => void;
   onDelete: (id: number) => void;
-  // Filter props
-  nameContains: string;
-  storageLocation: string | '';
-  expiringBefore: string;
-  onNameContainsChange: (value: string) => void;
-  onStorageLocationChange: (value: string | '') => void;
-  onExpiringBeforeChange: (value: string) => void;
   // Sort props
   sortColumn?: 'name' | 'quantity' | 'storage_location' | 'expiry_date' | null;
   sortDirection?: 'asc' | 'desc';
@@ -27,12 +20,6 @@ export const IngredientTable = ({
   ingredients,
   onEdit,
   onDelete,
-  nameContains,
-  storageLocation,
-  expiringBefore,
-  onNameContainsChange,
-  onStorageLocationChange,
-  onExpiringBeforeChange,
   sortColumn,
   sortDirection,
   onSortChange,
@@ -45,22 +32,16 @@ export const IngredientTable = ({
     const isDesc = isActive && sortDirection === 'desc';
 
     return (
-      <button
+      <IconButton
         type="button"
         onClick={() => handleSort(column)}
-        style={{
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          padding: '0.25rem',
-          display: 'inline-flex',
-          alignItems: 'center',
-          marginLeft: '0.5rem',
-        }}
         aria-label={`Sort by ${column}`}
+        variant="ghost"
+        size="xs"
+        ml={2}
       >
         {isDesc ? <ChevronDown size={14} /> : isAsc ? <ChevronUp size={14} /> : <ChevronUp size={14} style={{ opacity: 0.3 }} />}
-      </button>
+      </IconButton>
     );
   };
 
@@ -73,32 +54,29 @@ export const IngredientTable = ({
       <Table>
         <Thead>
           <Tr>
-            <Th scope="col" style={{ verticalAlign: 'bottom' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span>Name</span>
+            <Th scope="col">
+              <Flex align="center" justify="space-between">
+                <Text>Name</Text>
                 <SortButton column="name" />
-              </div>
-              <Input name="name_filter" value={nameContains} onChange={onNameContainsChange} placeholder="Filter by name..." />
+              </Flex>
             </Th>
-            <Th scope="col" style={{ verticalAlign: 'bottom' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span>Quantity</span>
+            <Th scope="col">
+              <Flex align="center" justify="space-between">
+                <Text>Quantity</Text>
                 <SortButton column="quantity" />
-              </div>
+              </Flex>
             </Th>
-            <Th scope="col" style={{ verticalAlign: 'bottom' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span>Storage Location</span>
+            <Th scope="col">
+              <Flex align="center" justify="space-between">
+                <Text>Storage Location</Text>
                 <SortButton column="storage_location" />
-              </div>
-              <Input name="storage_filter" value={storageLocation} onChange={(v) => onStorageLocationChange(v)} placeholder="Filter by location..." />
+              </Flex>
             </Th>
-            <Th scope="col" style={{ verticalAlign: 'bottom' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span>Expiry Date</span>
+            <Th scope="col">
+              <Flex align="center" justify="space-between">
+                <Text>Expiry Date</Text>
                 <SortButton column="expiry_date" />
-              </div>
-              <Input name="expiry_filter" type="date" value={expiringBefore} onChange={onExpiringBeforeChange} placeholder="Expiring before..." />
+              </Flex>
             </Th>
             <Th scope="col">Actions</Th>
           </Tr>
@@ -114,22 +92,25 @@ export const IngredientTable = ({
               <Td>{formatStorageLocation(ingredient.storage_location)}</Td>
               <Td>{formatDate(ingredient.expiry_date)}</Td>
               <Td>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <Button
-                    icon={Pencil}
-                    variant="secondary"
-                    onClick={() => onEdit(ingredient)}
-                    type="button"
+                <HStack gap={1}>
+                  <IconButton
                     aria-label="Edit ingredient"
-                  />
-                  <Button
-                    icon={Trash2}
-                    variant="danger"
-                    onClick={() => onDelete(ingredient.id)}
-                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onEdit(ingredient)}
+                  >
+                    <SquarePen size={16} />
+                  </IconButton>
+                  <IconButton
                     aria-label="Delete ingredient"
-                  />
-                </div>
+                    size="sm"
+                    variant="ghost"
+                    colorScheme="red"
+                    onClick={() => onDelete(ingredient.id)}
+                  >
+                    <Trash size={16} />
+                  </IconButton>
+                </HStack>
               </Td>
             </Tr>
           ))}

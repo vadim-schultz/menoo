@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useState } from 'react';
 import { useForm } from '../../../shared/hooks';
 import type { RecipeCreate, RecipeDetail, RecipeIngredientCreate } from '../../../shared/types';
 import { Button, Input, Select } from '../../../shared/components';
@@ -8,6 +8,8 @@ import { RecipeIngredientInput } from './RecipeIngredientInput';
 import { useRecipeFormAI } from '../hooks/useRecipeFormAI';
 import { difficultyOptions } from '../services/recipeOptions';
 import { validateRecipe } from '../services/recipeValidation';
+import { Box, Stack, SimpleGrid, Heading, Flex, IconButton, Text, FieldsetRoot, FieldsetLegend } from '@chakra-ui/react';
+import { Sparkles } from 'lucide-react';
 
 interface RecipeFormInitialData {
   ingredientIds?: number[];
@@ -111,272 +113,290 @@ export function RecipeForm({
 
   return (
     <form onSubmit={form.handleSubmit}>
-      {/* Ingredient selection moved to top */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <RecipeIngredientInput ingredients={ingredients} onChange={setIngredients} />
-      </div>
+      <Stack gap={6}>
+        {/* Ingredient selection moved to top */}
+        <Box>
+          <RecipeIngredientInput ingredients={ingredients} onChange={setIngredients} />
+        </Box>
 
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <label style={{ fontWeight: 500 }}>Recipe Name</label>
-          <button type="button" onClick={handleEnhanceRecipe} aria-label="Generate recipe with AI" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-            ✨
-          </button>
-        </div>
-        {generating && (
-          <div style={{ margin: '0.25rem 0', color: '#4A5568' }}>
-            loading ...
-          </div>
-        )}
-        <Input
-          name="name"
-          value={form.values.name}
-          onChange={(value) => form.handleChange('name', value)}
-          onBlur={() => form.handleBlur('name')}
-          error={form.touched.name ? form.errors.name : undefined}
-          placeholder="e.g., Spaghetti Carbonara"
-          required
-        />
-      </div>
-
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <label style={{ fontWeight: 500 }}>Description</label>
-          <button type="button" onClick={handleEnhanceRecipe} aria-label="Generate description with AI" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-            ✨
-          </button>
-        </div>
-        <Textarea
-          name="description"
-          value={form.values.description || ''}
-          onChange={(value) => form.handleChange('description', value || null)}
-          onBlur={() => form.handleBlur('description')}
-          placeholder="Brief description of the recipe (optional)"
-          rows={2}
-        />
-      </div>
-
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <label style={{ fontWeight: 500 }}>Instructions</label>
-          <button type="button" onClick={handleEnhanceRecipe} aria-label="Generate instructions with AI" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-            ✨
-          </button>
-        </div>
-        <Textarea
-          name="instructions"
-          value={form.values.instructions}
-          onChange={(value) => form.handleChange('instructions', value)}
-          onBlur={() => form.handleBlur('instructions')}
-          error={form.touched.instructions ? form.errors.instructions : undefined}
-          placeholder="Step-by-step cooking instructions"
-          rows={6}
-          required
-        />
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-        <Input
-          label="Prep Time (minutes)"
-          name="prep_time"
-          type="number"
-          value={form.values.prep_time || ''}
-          onChange={(value) => form.handleChange('prep_time', value ? parseInt(value) : null)}
-          onBlur={() => form.handleBlur('prep_time')}
-          error={form.touched.prep_time ? form.errors.prep_time : undefined}
-          placeholder="0"
-        />
-
-        <Input
-          label="Cook Time (minutes)"
-          name="cook_time"
-          type="number"
-          value={form.values.cook_time || ''}
-          onChange={(value) => form.handleChange('cook_time', value ? parseInt(value) : null)}
-          onBlur={() => form.handleBlur('cook_time')}
-          error={form.touched.cook_time ? form.errors.cook_time : undefined}
-          placeholder="0"
-        />
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-        <Input
-          label="Servings"
-          name="servings"
-          type="number"
-          value={form.values.servings || ''}
-          onChange={(value) => form.handleChange('servings', value ? parseInt(value) : undefined)}
-          onBlur={() => form.handleBlur('servings')}
-          error={form.touched.servings ? form.errors.servings : undefined}
-          placeholder="4"
-        />
-
-        <Select
-          label="Difficulty"
-          name="difficulty"
-          value={form.values.difficulty || ''}
-          onChange={(value) => form.handleChange('difficulty', value || null)}
-          options={difficultyOptions}
-          placeholder="Select difficulty (optional)"
-        />
-      </div>
-
-      {/* Dietary */}
-      <section style={{ marginTop: '1.5rem' }}>
-        <h4 style={{ margin: '0 0 0.5rem 0' }}>Dietary</h4>
-        <div style={{ display: 'grid', gap: '1rem' }}>
+        <Box>
+          <Flex align="center" justify="space-between" mb={2}>
+            <Text fontWeight={500}>Recipe Name</Text>
+            <IconButton
+              type="button"
+              onClick={handleEnhanceRecipe}
+              aria-label="Generate recipe with AI"
+              variant="ghost"
+              size="sm"
+            >
+              <Sparkles size={16} />
+            </IconButton>
+          </Flex>
+          {generating && (
+            <Text mb={2} color="gray.600" fontSize="sm">
+              loading ...
+            </Text>
+          )}
           <Input
-            label="Dietary Requirements (comma-separated)"
-            name="dietary_requirements"
-            value={(form.values.dietary_requirements || []).join(', ')}
-            onChange={(value) =>
-              form.handleChange(
-                'dietary_requirements',
-                value
-                  .split(',')
-                  .map((s) => s.trim())
-                  .filter(Boolean)
-              )
-            }
-            placeholder="vegetarian, gluten_free"
+            name="name"
+            value={form.values.name}
+            onChange={(value) => form.handleChange('name', value)}
+            onBlur={() => form.handleBlur('name')}
+            error={form.touched.name ? form.errors.name : undefined}
+            placeholder="e.g., Spaghetti Carbonara"
+            required
           />
-          <Input
-            label="Contains Allergens (comma-separated)"
-            name="contains_allergens"
-            value={(form.values.contains_allergens || []).join(', ')}
-            onChange={(value) =>
-              form.handleChange(
-                'contains_allergens',
-                value
-                  .split(',')
-                  .map((s) => s.trim())
-                  .filter(Boolean)
-              )
-            }
-            placeholder="nuts, dairy"
-          />
+        </Box>
+
+        <Box>
+          <Flex align="center" justify="space-between" mb={2}>
+            <Text fontWeight={500}>Description</Text>
+            <IconButton
+              type="button"
+              onClick={handleEnhanceRecipe}
+              aria-label="Generate description with AI"
+              variant="ghost"
+              size="sm"
+            >
+              <Sparkles size={16} />
+            </IconButton>
+          </Flex>
           <Textarea
-            label="Allergen Warnings"
-            name="allergen_warnings"
-            value={form.values.allergen_warnings || ''}
-            onChange={(value) => form.handleChange('allergen_warnings', value || null)}
+            name="description"
+            value={form.values.description || ''}
+            onChange={(value) => form.handleChange('description', value || null)}
+            onBlur={() => form.handleBlur('description')}
+            placeholder="Brief description of the recipe (optional)"
             rows={2}
-            placeholder="Cross-contamination warnings, etc."
           />
-        </div>
-      </section>
+        </Box>
 
-      {/* Equipment */}
-      <section style={{ marginTop: '1.5rem' }}>
-        <h4 style={{ margin: '0 0 0.5rem 0' }}>Equipment</h4>
-        <EquipmentEditor
-          items={(form.values as any).equipment_requirements || []}
-          onChange={(items) => form.handleChange('equipment_requirements', items)}
-        />
-      </section>
-
-      {/* Storage */}
-      <section style={{ marginTop: '1.5rem' }}>
-        <h4 style={{ margin: '0 0 0.5rem 0' }}>Storage</h4>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <Input
-            label="Storage Type"
-            name="storage_type"
-            value={(form.values.storage_instructions?.storage_type as any) || ''}
-            onChange={(value) =>
-              form.handleChange('storage_instructions', {
-                ...(form.values.storage_instructions || {}),
-                storage_type: value || null,
-              })
-            }
-            placeholder="refrigerated, frozen, room_temperature"
+        <Box>
+          <Flex align="center" justify="space-between" mb={2}>
+            <Text fontWeight={500}>Instructions</Text>
+            <IconButton
+              type="button"
+              onClick={handleEnhanceRecipe}
+              aria-label="Generate instructions with AI"
+              variant="ghost"
+              size="sm"
+            >
+              <Sparkles size={16} />
+            </IconButton>
+          </Flex>
+          <Textarea
+            name="instructions"
+            value={form.values.instructions}
+            onChange={(value) => form.handleChange('instructions', value)}
+            onBlur={() => form.handleBlur('instructions')}
+            error={form.touched.instructions ? form.errors.instructions : undefined}
+            placeholder="Step-by-step cooking instructions"
+            rows={6}
+            required
           />
+        </Box>
+
+        <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
           <Input
-            label="Shelf Life (days)"
-            name="shelf_life_days"
+            label="Prep Time (minutes)"
+            name="prep_time"
             type="number"
-            value={(form.values.storage_instructions?.shelf_life_days as any) || ''}
-            onChange={(value) =>
-              form.handleChange('storage_instructions', {
-                ...(form.values.storage_instructions || {}),
-                shelf_life_days: value ? parseInt(value) : null,
-              })
-            }
-            placeholder="3"
+            value={form.values.prep_time || ''}
+            onChange={(value) => form.handleChange('prep_time', value ? parseInt(value) : null)}
+            onBlur={() => form.handleBlur('prep_time')}
+            error={form.touched.prep_time ? form.errors.prep_time : undefined}
+            placeholder="0"
           />
-        </div>
-        <div style={{ display: 'grid', gap: '1rem', marginTop: '0.75rem' }}>
-          <Textarea
-            label="Reheating Instructions"
-            name="reheating_instructions"
-            value={(form.values.storage_instructions?.reheating_instructions as any) || ''}
-            onChange={(value) =>
-              form.handleChange('storage_instructions', {
-                ...(form.values.storage_instructions || {}),
-                reheating_instructions: value || null,
-              })
-            }
-            rows={2}
-          />
-          <Textarea
-            label="Freezing Instructions"
-            name="freezing_instructions"
-            value={(form.values.storage_instructions?.freezing_instructions as any) || ''}
-            onChange={(value) =>
-              form.handleChange('storage_instructions', {
-                ...(form.values.storage_instructions || {}),
-                freezing_instructions: value || null,
-              })
-            }
-            rows={2}
-          />
-        </div>
-      </section>
 
-      {/* Nutrition */}
-      <section style={{ marginTop: '1.5rem' }}>
-        <h4 style={{ margin: '0 0 0.5rem 0' }}>Nutrition (per serving)</h4>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
-          {[
-            { key: 'calories', label: 'Calories' },
-            { key: 'protein_grams', label: 'Protein (g)' },
-            { key: 'carbohydrates_grams', label: 'Carbs (g)' },
-            { key: 'fat_grams', label: 'Fat (g)' },
-            { key: 'saturated_fat_grams', label: 'Saturated Fat (g)' },
-            { key: 'fiber_grams', label: 'Fiber (g)' },
-            { key: 'sugar_grams', label: 'Sugar (g)' },
-            { key: 'sodium_mg', label: 'Sodium (mg)' },
-          ].map((f) => (
+          <Input
+            label="Cook Time (minutes)"
+            name="cook_time"
+            type="number"
+            value={form.values.cook_time || ''}
+            onChange={(value) => form.handleChange('cook_time', value ? parseInt(value) : null)}
+            onBlur={() => form.handleBlur('cook_time')}
+            error={form.touched.cook_time ? form.errors.cook_time : undefined}
+            placeholder="0"
+          />
+        </SimpleGrid>
+
+        <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+          <Input
+            label="Servings"
+            name="servings"
+            type="number"
+            value={form.values.servings || ''}
+            onChange={(value) => form.handleChange('servings', value ? parseInt(value) : undefined)}
+            onBlur={() => form.handleBlur('servings')}
+            error={form.touched.servings ? form.errors.servings : undefined}
+            placeholder="4"
+          />
+
+          <Select
+            label="Difficulty"
+            name="difficulty"
+            value={form.values.difficulty || ''}
+            onChange={(value) => form.handleChange('difficulty', value || null)}
+            options={difficultyOptions}
+            placeholder="Select difficulty (optional)"
+          />
+        </SimpleGrid>
+
+        {/* Dietary */}
+        <FieldsetRoot>
+          <FieldsetLegend>Dietary</FieldsetLegend>
+          <Stack gap={4}>
             <Input
-              key={f.key}
-              label={f.label}
-              name={`nutrition_${f.key}`}
-              type="number"
-              value={((form.values.nutrition_info as any)?.[f.key] as any) || ''}
+              label="Dietary Requirements (comma-separated)"
+              name="dietary_requirements"
+              value={(form.values.dietary_requirements || []).join(', ')}
               onChange={(value) =>
-                form.handleChange('nutrition_info', {
-                  ...(form.values.nutrition_info || {}),
-                  [f.key]: value === '' ? null : parseFloat(value),
+                form.handleChange(
+                  'dietary_requirements',
+                  value
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                )
+              }
+              placeholder="vegetarian, gluten_free"
+            />
+            <Input
+              label="Contains Allergens (comma-separated)"
+              name="contains_allergens"
+              value={(form.values.contains_allergens || []).join(', ')}
+              onChange={(value) =>
+                form.handleChange(
+                  'contains_allergens',
+                  value
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                )
+              }
+              placeholder="nuts, dairy"
+            />
+            <Textarea
+              label="Allergen Warnings"
+              name="allergen_warnings"
+              value={form.values.allergen_warnings || ''}
+              onChange={(value) => form.handleChange('allergen_warnings', value || null)}
+              rows={2}
+              placeholder="Cross-contamination warnings, etc."
+            />
+          </Stack>
+        </FieldsetRoot>
+
+        {/* Equipment */}
+        <FieldsetRoot>
+          <FieldsetLegend>Equipment</FieldsetLegend>
+          <EquipmentEditor
+            items={(form.values as any).equipment_requirements || []}
+            onChange={(items) => form.handleChange('equipment_requirements', items)}
+          />
+        </FieldsetRoot>
+
+        {/* Storage */}
+        <FieldsetRoot>
+          <FieldsetLegend>Storage</FieldsetLegend>
+          <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+            <Input
+              label="Storage Type"
+              name="storage_type"
+              value={(form.values.storage_instructions?.storage_type as any) || ''}
+              onChange={(value) =>
+                form.handleChange('storage_instructions', {
+                  ...(form.values.storage_instructions || {}),
+                  storage_type: value || null,
                 })
               }
-              placeholder="0"
+              placeholder="refrigerated, frozen, room_temperature"
             />
-          ))}
-        </div>
-      </section>
+            <Input
+              label="Shelf Life (days)"
+              name="shelf_life_days"
+              type="number"
+              value={(form.values.storage_instructions?.shelf_life_days as any) || ''}
+              onChange={(value) =>
+                form.handleChange('storage_instructions', {
+                  ...(form.values.storage_instructions || {}),
+                  shelf_life_days: value ? parseInt(value) : null,
+                })
+              }
+              placeholder="3"
+            />
+          </SimpleGrid>
+          <Stack gap={4} mt={3}>
+            <Textarea
+              label="Reheating Instructions"
+              name="reheating_instructions"
+              value={(form.values.storage_instructions?.reheating_instructions as any) || ''}
+              onChange={(value) =>
+                form.handleChange('storage_instructions', {
+                  ...(form.values.storage_instructions || {}),
+                  reheating_instructions: value || null,
+                })
+              }
+              rows={2}
+            />
+            <Textarea
+              label="Freezing Instructions"
+              name="freezing_instructions"
+              value={(form.values.storage_instructions?.freezing_instructions as any) || ''}
+              onChange={(value) =>
+                form.handleChange('storage_instructions', {
+                  ...(form.values.storage_instructions || {}),
+                  freezing_instructions: value || null,
+                })
+              }
+              rows={2}
+            />
+          </Stack>
+        </FieldsetRoot>
 
-      {/* Removed RecipeAIAssistant; generation is triggered via ✨ buttons above */}
+        {/* Nutrition */}
+        <FieldsetRoot>
+          <FieldsetLegend>Nutrition (per serving)</FieldsetLegend>
+          <SimpleGrid columns={{ base: 2, md: 4 }} gap={4}>
+            {[
+              { key: 'calories', label: 'Calories' },
+              { key: 'protein_grams', label: 'Protein (g)' },
+              { key: 'carbohydrates_grams', label: 'Carbs (g)' },
+              { key: 'fat_grams', label: 'Fat (g)' },
+              { key: 'saturated_fat_grams', label: 'Saturated Fat (g)' },
+              { key: 'fiber_grams', label: 'Fiber (g)' },
+              { key: 'sugar_grams', label: 'Sugar (g)' },
+              { key: 'sodium_mg', label: 'Sodium (mg)' },
+            ].map((f) => (
+              <Input
+                key={f.key}
+                label={f.label}
+                name={`nutrition_${f.key}`}
+                type="number"
+                value={((form.values.nutrition_info as any)?.[f.key] as any) || ''}
+                onChange={(value) =>
+                  form.handleChange('nutrition_info', {
+                    ...(form.values.nutrition_info || {}),
+                    [f.key]: value === '' ? null : parseFloat(value),
+                  })
+                }
+                placeholder="0"
+              />
+            ))}
+          </SimpleGrid>
+        </FieldsetRoot>
 
-      <div
-        style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}
-      >
-        <Button variant="secondary" onClick={onCancel} disabled={loading} type="button">
-          Cancel
-        </Button>
-        <Button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : recipe ? 'Update Recipe' : 'Create Recipe'}
-        </Button>
-      </div>
+        {/* Removed RecipeAIAssistant; generation is triggered via ✨ buttons above */}
+
+        <Flex gap={2} justify="flex-end" mt={6}>
+          <Button variant="secondary" onClick={onCancel} disabled={loading} type="button">
+            Cancel
+          </Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? 'Saving...' : recipe ? 'Update Recipe' : 'Create Recipe'}
+          </Button>
+        </Flex>
+      </Stack>
     </form>
   );
 }
@@ -405,21 +425,18 @@ function EquipmentEditor({
     onChange((items || []).filter((_, i) => i !== index));
   };
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.5rem' }}>
+    <Box>
+      <Flex justify="flex-end" mb={2}>
         <Button type="button" onClick={addItem}>
           Add equipment
         </Button>
-      </div>
+      </Flex>
       {(items || []).length === 0 ? (
-        <p style={{ color: '#4A5568' }}>No equipment listed.</p>
+        <Text color="gray.600">No equipment listed.</Text>
       ) : (
-        <div style={{ display: 'grid', gap: '0.75rem' }}>
+        <Stack gap={3}>
           {(items || []).map((it, idx) => (
-            <div
-              key={idx}
-              style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr auto', gap: '0.5rem', alignItems: 'end' }}
-            >
+            <SimpleGrid key={idx} columns={{ base: 1, md: 4 }} gap={2} alignItems="end">
               <Input
                 name={`equipment-name-${idx}`}
                 label="Name"
@@ -444,15 +461,15 @@ function EquipmentEditor({
                 onChange={(v) => updateItem(idx, 'notes', v || null)}
                 placeholder="Optional notes"
               />
-              <div>
+              <Box>
                 <Button type="button" variant="secondary" onClick={() => removeItem(idx)}>
                   Remove
                 </Button>
-              </div>
-            </div>
+              </Box>
+            </SimpleGrid>
           ))}
-        </div>
+        </Stack>
       )}
-    </div>
+    </Box>
   );
 }

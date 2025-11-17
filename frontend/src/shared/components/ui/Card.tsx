@@ -1,19 +1,14 @@
 import {
-	Card as CCard,
-	CardHeader as CCardHeader,
-	CardBody as CCardBody,
-	CardFooter as CCardFooter,
-	type CardProps,
-	type CardHeaderProps,
-	type CardBodyProps,
-	type CardFooterProps,
+	CardRoot,
+	CardHeader,
+	CardBody,
+	CardFooter,
+	type CardRootProps,
 } from '@chakra-ui/react';
 
-export type { CardProps, CardHeaderProps, CardBodyProps, CardFooterProps };
+export type { CardRootProps as CardProps };
 
-export const Card = CCard;
-export const CardHeader = CCardHeader;
-export const CardBody = CCardBody;
-export const CardFooter = CCardFooter;
+export const Card = CardRoot;
+export { CardHeader, CardBody, CardFooter };
 
 

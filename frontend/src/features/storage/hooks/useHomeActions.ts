@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'preact/hooks';
+import { useState, useCallback } from 'react';
 import type { IngredientCreate, IngredientRead } from '../../../shared/types/ingredient';
 import type { CreateIngredientFn, UpdateIngredientFn, RemoveIngredientFn } from '../services/homeActions';
 import { saveIngredient, confirmAndDelete } from '../services/homeActions';

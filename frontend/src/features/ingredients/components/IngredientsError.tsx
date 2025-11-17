@@ -1,19 +1,17 @@
+import { AlertRoot, AlertTitle, AlertDescription, AlertContent } from '@chakra-ui/react';
+
 interface IngredientsErrorProps {
   message?: string;
 }
 
 export function IngredientsError({ message }: IngredientsErrorProps) {
   return (
-    <article
-      style={{
-        padding: '1rem',
-        backgroundColor: '#FFF5F5',
-        color: '#C53030',
-        borderRadius: '0.5rem',
-      }}
-    >
-      Error: {message || 'An error occurred'}
-    </article>
+    <AlertRoot status="error" borderRadius="md">
+      <AlertContent>
+        <AlertTitle>Error:</AlertTitle>
+        <AlertDescription>{message || 'An error occurred'}</AlertDescription>
+      </AlertContent>
+    </AlertRoot>
   );
 }
 

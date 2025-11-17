@@ -2,6 +2,9 @@ import type { IngredientRead } from '../../../shared/types/ingredient';
 import type { LocationToIngredientsMap } from '../types';
 import { StorageLocationGrid } from './StorageLocationGrid';
 import { IngredientModal } from '../../ingredients/components';
+import { Box } from '../../../shared/components/ui/Box';
+import { Heading, Text } from '../../../shared/components/ui/Typography';
+import { Stack } from '../../../shared/components/ui/Layout';
 
 interface IngredientsByStorageLocationProps {
   grouped: LocationToIngredientsMap;
@@ -25,14 +28,15 @@ export function IngredientsByStorageLocation({
   loadingSubmit = false,
 }: IngredientsByStorageLocationProps) {
   return (
-    <div>
-      <header style={{ marginBottom: '1rem' }}>
-        <h1>Ingredients by Storage Location</h1>
-        <p style={{ color: '#4A5568' }}>
-          View and manage your ingredients organized by where they're stored.
-        </p>
-      </header>
+    <Box>
+      <Stack gap={1} mb={4}>
+        <Heading as="h1" size="lg">
+          Storage
+        </Heading>
+      </Stack>
+
       <StorageLocationGrid grouped={grouped} onEdit={onEdit} onDelete={onDelete} />
+
       <IngredientModal
         isOpen={isModalOpen}
         ingredient={editing}
@@ -40,7 +44,7 @@ export function IngredientsByStorageLocation({
         onSubmit={onSubmit}
         loading={loadingSubmit}
       />
-    </div>
+    </Box>
   );
 }
 

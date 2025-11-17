@@ -1,5 +1,6 @@
 import type { RecipeDetail } from '../../../shared/types';
 import { RecipeCard } from './RecipeCard';
+import { Text, SimpleGrid } from '@chakra-ui/react';
 
 interface RecipeListProps {
   recipes: RecipeDetail[];
@@ -9,14 +10,14 @@ interface RecipeListProps {
 
 export function RecipeList({ recipes, onEdit, onDelete }: RecipeListProps) {
   if (!recipes || recipes.length === 0) {
-    return <p style={{ color: '#4A5568' }}>No recipes yet.</p>;
+    return <Text color="gray.600">No recipes yet.</Text>;
   }
   return (
-    <div style={{ display: 'grid', gap: '1rem' }}>
+    <SimpleGrid columns={{ base: 1 }} gap={4}>
       {recipes.map((r) => (
         <RecipeCard key={r.id} recipe={r} onEdit={onEdit} onDelete={onDelete} />
       ))}
-    </div>
+    </SimpleGrid>
   );
 }
 

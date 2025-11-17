@@ -1,36 +1,45 @@
-import type { ComponentChildren } from 'preact';
 import {
-	Modal as UIModal,
-	ModalOverlay,
-	ModalContent,
-	ModalHeader,
-	ModalFooter,
-	ModalBody,
-	ModalCloseButton,
-} from './ui/Modal';
+	DialogRoot,
+	DialogBackdrop,
+	DialogContent,
+	DialogHeader,
+	DialogFooter,
+	DialogBody,
+	DialogCloseTrigger,
+	DialogTitle,
+} from '@chakra-ui/react';
+import type { ReactNode } from 'react';
 
 interface ModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	title?: string;
-	children: ComponentChildren;
-	footer?: ComponentChildren;
+	children: ReactNode;
+	footer?: ReactNode;
 }
 
 export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) {
 	return (
-		<UIModal isOpen={isOpen} onClose={onClose} isCentered size="lg">
-			<ModalOverlay />
-			<ModalContent>
+		<DialogRoot 
+			open={isOpen} 
+			onOpenChange={(details) => {
+				if (!details.open) {
+					onClose();
+				}
+			}} 
+			size="lg"
+		>
+			<DialogBackdrop />
+			<DialogContent>
 				{title ? (
-					<>
-						<ModalHeader>{title}</ModalHeader>
-						<ModalCloseButton />
-					</>
+					<DialogHeader>
+						<DialogTitle>{title}</DialogTitle>
+						<DialogCloseTrigger />
+					</DialogHeader>
 				) : null}
-				<ModalBody>{children}</ModalBody>
-				{footer ? <ModalFooter>{footer}</ModalFooter> : null}
-			</ModalContent>
-		</UIModal>
+				<DialogBody>{children}</DialogBody>
+				{footer ? <DialogFooter>{footer}</DialogFooter> : null}
+			</DialogContent>
+		</DialogRoot>
 	);
 }

@@ -1,8 +1,10 @@
+import { Box, Text } from '@chakra-ui/react';
+
 export function StorageLocationListEmpty() {
   return (
-    <article style={{ textAlign: 'center', padding: '1rem' }}>
-      <p>No ingredients found. Add some ingredients to get started!</p>
-    </article>
+    <Box textAlign="center" p={4}>
+      <Text>No ingredients found. Add some ingredients to get started!</Text>
+    </Box>
   );
 }
 

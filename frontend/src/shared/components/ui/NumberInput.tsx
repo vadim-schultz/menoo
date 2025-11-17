@@ -1,24 +1,16 @@
 import {
-	NumberInput as CNumberInput,
-	NumberInputField,
-	NumberInputStepper,
-	NumberIncrementStepper,
-	NumberDecrementStepper,
-	type NumberInputProps,
+	NumberInputRoot,
+	NumberInputInput,
+	NumberInputIncrementTrigger,
+	NumberInputDecrementTrigger,
+	NumberInputControl,
+	type NumberInputRootProps,
 } from '@chakra-ui/react';
 
-export type { NumberInputProps };
-
-export function NumberInput(props: NumberInputProps) {
-	return (
-		<CNumberInput {...props}>
-			<NumberInputField />
-			<NumberInputStepper>
-				<NumberIncrementStepper />
-				<NumberDecrementStepper />
-			</NumberInputStepper>
-		</CNumberInput>
-	);
-}
+export const NumberInput = NumberInputRoot;
+export const NumberInputField = NumberInputInput;
+export const NumberInputStepper = NumberInputControl;
+export const NumberIncrementStepper = NumberInputIncrementTrigger;
+export const NumberDecrementStepper = NumberInputDecrementTrigger;
 
 

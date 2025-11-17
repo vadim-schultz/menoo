@@ -1,26 +1,28 @@
 import {
-	Modal as CModal,
-	ModalOverlay,
-	ModalContent,
-	ModalHeader,
-	ModalFooter,
-	ModalBody,
-	ModalCloseButton,
-	type ModalProps,
+	DialogRoot,
+	DialogBackdrop,
+	DialogContent,
+	DialogHeader,
+	DialogFooter,
+	DialogBody,
+	DialogCloseTrigger,
+	DialogTitle,
+	type DialogRootProps,
 	useDisclosure,
 } from '@chakra-ui/react';
 
 export {
-	ModalOverlay,
-	ModalContent,
-	ModalHeader,
-	ModalFooter,
-	ModalBody,
-	ModalCloseButton,
+	DialogBackdrop as ModalOverlay,
+	DialogContent as ModalContent,
+	DialogHeader as ModalHeader,
+	DialogFooter as ModalFooter,
+	DialogBody as ModalBody,
+	DialogCloseTrigger as ModalCloseButton,
+	DialogTitle as ModalTitle,
 	useDisclosure,
 };
-export type { ModalProps };
+export type { DialogRootProps as ModalProps };
 
-export const Modal = CModal;
+export const Modal = DialogRoot;
 
 

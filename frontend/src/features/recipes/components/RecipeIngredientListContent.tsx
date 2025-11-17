@@ -1,6 +1,7 @@
 import type { RecipeIngredientCreate } from '../../../shared/types';
 import { Button, Input, Select } from '../../../shared/components';
-import { Trash2 } from 'lucide-preact';
+import { Trash2 } from 'lucide-react';
+import { Stack, Box, SimpleGrid } from '@chakra-ui/react';
 
 interface Props {
   ingredients: RecipeIngredientCreate[];
@@ -11,25 +12,17 @@ interface Props {
 
 export function RecipeIngredientListContent({ ingredients, ingredientOptions, onUpdate, onRemove }: Props) {
   return (
-    <div style={{ display: 'grid', gap: '0.75rem' }}>
+    <Stack gap={3}>
       {ingredients.map((ingredient, index) => (
-        <div
+        <Box
           key={index}
-          style={{
-            border: '1px solid #E2E8F0',
-            borderRadius: '0.5rem',
-            padding: '0.75rem',
-            backgroundColor: 'transparent',
-          }}
+          borderWidth="1px"
+          borderColor="gray.200"
+          borderRadius="md"
+          p={3}
+          bg="transparent"
         >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '2fr 1fr auto',
-              gap: '0.5rem',
-              alignItems: 'end',
-            }}
-          >
+          <SimpleGrid columns={{ base: 1, md: 3 }} gap={2} alignItems="end">
             <Select
               name={`ingredient-${index}`}
               value={String(ingredient.ingredient_id || '')}
@@ -46,7 +39,7 @@ export function RecipeIngredientListContent({ ingredients, ingredientOptions, on
               placeholder="Qty"
             />
 
-            <div>
+            <Box>
               <Button
                 icon={Trash2}
                 variant="danger"
@@ -54,11 +47,11 @@ export function RecipeIngredientListContent({ ingredients, ingredientOptions, on
                 type="button"
                 aria-label="Remove ingredient"
               />
-            </div>
-          </div>
-        </div>
+            </Box>
+          </SimpleGrid>
+        </Box>
       ))}
-    </div>
+    </Stack>
   );
 }
 

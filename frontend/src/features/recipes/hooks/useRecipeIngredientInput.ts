@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'preact/hooks';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import type { IngredientRead } from '../../../shared/types/ingredient';
 import type { RecipeIngredientCreate } from '../../../shared/types';
 import { ingredientService } from '../../ingredients/services/ingredientService';

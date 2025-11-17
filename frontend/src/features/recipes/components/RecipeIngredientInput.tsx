@@ -1,9 +1,10 @@
 import type { RecipeIngredientCreate } from '../../../shared/types';
 import { Button, Input, Select } from '../../../shared/components';
-import { Check } from 'lucide-preact';
+import { Check } from 'lucide-react';
 import { useRecipeIngredientInput } from '../hooks/useRecipeIngredientInput';
 import { RecipeIngredientListEmpty } from './RecipeIngredientListEmpty';
 import { RecipeIngredientListContent } from './RecipeIngredientListContent';
+import { Box, Text, SimpleGrid } from '@chakra-ui/react';
 
 interface RecipeIngredientInputProps {
   ingredients: RecipeIngredientCreate[];
@@ -26,21 +27,13 @@ export function RecipeIngredientInput({ ingredients, onChange }: RecipeIngredien
   } = useRecipeIngredientInput();
 
   return (
-    <div>
-      <div style={{ marginBottom: '0.75rem' }}>
-        <label style={{ fontWeight: 500 }}>Ingredients</label>
-      </div>
+    <Box>
+      <Text fontWeight={500} mb={3}>
+        Ingredients
+      </Text>
 
       {/* Entry form row (select existing or type a new name) */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '2fr 2fr 1fr auto',
-          gap: '0.5rem',
-          alignItems: 'end',
-          marginBottom: '1rem',
-        }}
-      >
+      <SimpleGrid columns={{ base: 1, md: 4 }} gap={2} alignItems="end" mb={4}>
         <Select
           name={`entry-ingredient`}
           value={String(entryIngredientId || '')}
@@ -64,7 +57,7 @@ export function RecipeIngredientInput({ ingredients, onChange }: RecipeIngredien
           placeholder="Qty"
         />
 
-        <div>
+        <Box>
           <Button
             icon={Check}
             type="button"
@@ -72,8 +65,8 @@ export function RecipeIngredientInput({ ingredients, onChange }: RecipeIngredien
             aria-label="Add ingredient"
             disabled={loading}
           />
-        </div>
-      </div>
+        </Box>
+      </SimpleGrid>
 
       {ingredients.length === 0 ? (
         <RecipeIngredientListEmpty />
@@ -85,6 +78,6 @@ export function RecipeIngredientInput({ ingredients, onChange }: RecipeIngredien
           onRemove={(idx) => removeIngredient(ingredients, idx, onChange)}
         />
       )}
-    </div>
+    </Box>
   );
 }

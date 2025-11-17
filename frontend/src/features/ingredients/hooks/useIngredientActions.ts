@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'preact/hooks';
+import { useCallback, useState } from 'react';
 import type { IngredientCreate, IngredientRead } from '../../../shared/types/ingredient';
 import type {
   CreateIngredientFn,
