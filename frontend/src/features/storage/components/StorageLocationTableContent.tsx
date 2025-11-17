@@ -33,7 +33,7 @@ export function StorageLocationTableContent({ ingredients, onEdit, onDelete }: S
               </Td>
               <Td>{formatDate(ingredient.expiry_date)}</Td>
               <Td>
-                <HStack gap={1}>
+                <HStack gap={2}>
                   <Button
                     icon={Pencil}
                     variant="secondary"

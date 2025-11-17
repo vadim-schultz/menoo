@@ -38,7 +38,6 @@ export const IngredientTable = ({
         aria-label={`Sort by ${column}`}
         variant="ghost"
         size="xs"
-        ml={2}
       >
         {isDesc ? <ChevronDown size={14} /> : isAsc ? <ChevronUp size={14} /> : <ChevronUp size={14} style={{ opacity: 0.3 }} />}
       </IconButton>
@@ -92,7 +91,7 @@ export const IngredientTable = ({
               <Td>{formatStorageLocation(ingredient.storage_location)}</Td>
               <Td>{formatDate(ingredient.expiry_date)}</Td>
               <Td>
-                <HStack gap={1}>
+                <HStack>
                   <IconButton
                     aria-label="Edit ingredient"
                     size="sm"

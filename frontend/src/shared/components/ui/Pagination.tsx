@@ -11,7 +11,7 @@ export interface PaginationProps {
 
 export function Pagination({ page, canPrevious = true, canNext = true, onPrevious, onNext }: PaginationProps) {
   return (
-    <HStack gap={3} justify="center" align="center" py={4} mt={4}>
+    <HStack justify="center" align="center" gap={2}>
       <IconButton
         aria-label="Previous page"
         size="sm"

@@ -23,7 +23,7 @@ export function StorageLocationMiniTable({ ingredients }: StorageLocationMiniTab
 
   return (
     <TableContainer>
-      <Table size="sm">
+      <Table>
         <Thead>
           <Tr>
             <Th scope="col">Name</Th>

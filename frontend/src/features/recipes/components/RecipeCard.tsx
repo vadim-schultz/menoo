@@ -4,7 +4,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { formatTime } from '../services/recipeFormatting';
 import { Card, CardBody, CardHeader } from '../../../shared/components/ui/Card';
 import { Heading, Text } from '../../../shared/components/ui/Typography';
-import { SimpleGrid, HStack } from '../../../shared/components/ui/Layout';
+import { SimpleGrid, HStack, VStack } from '../../../shared/components/ui/Layout';
 import { Box } from '../../../shared/components/ui/Box';
 import { Stack } from '../../../shared/components/ui/Layout';
 import { Badge } from '../../../shared/components/ui/Badge';
@@ -23,18 +23,18 @@ export function RecipeCard({ recipe, onEdit, onDelete }: RecipeCardProps) {
 
   return (
     <Card>
-      <CardHeader pb={2}>
+      <CardHeader p={6}>
         <HStack justify="space-between" align="center">
           <Box>
             <Heading as="h3" size="md">
               {recipe.name}
             </Heading>
             {recipe.description && (
-              <Text mt={1} color="gray.600" fontSize="sm" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              <Text color="gray.600" fontSize="sm" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {recipe.description}
               </Text>
             )}
-            <HStack gap={3} flexWrap="wrap" mt={1}>
+            <HStack flexWrap="wrap" gap={2} mt={2}>
               {recipe.author && (
                 <Text color="gray.600" fontSize="xs">
                   By {recipe.author}
@@ -53,117 +53,119 @@ export function RecipeCard({ recipe, onEdit, onDelete }: RecipeCardProps) {
           </HStack>
         </HStack>
       </CardHeader>
-      <CardBody pt={0}>
-        <SimpleGrid columns={{ base: 2, sm: 3, md: 4 }} gap={3} mt={2}>
-          <Box>
-            <Text color="gray.600" fontSize="xs">
-              Prep
-            </Text>
-            <Text>{formatTime((recipe as any).prep_time ?? recipe.timing_full?.prep_time_minutes)}</Text>
-          </Box>
-          <Box>
-            <Text color="gray.600" fontSize="xs">
-              Cook
-            </Text>
-            <Text>{formatTime((recipe as any).cook_time ?? recipe.timing_full?.cook_time_minutes)}</Text>
-          </Box>
-          <Box>
-            <Text color="gray.600" fontSize="xs">
-              Servings
-            </Text>
-            <Text>{recipe.servings || '-'}</Text>
-          </Box>
-          <Box>
-            <Text color="gray.600" fontSize="xs">
-              Ingredients
-            </Text>
-            <Text>{totalIngredients}</Text>
-          </Box>
-          {recipe.cooking_method && (
+      <CardBody p={6}>
+        <VStack align="stretch" gap={4}>
+          <SimpleGrid columns={{ base: 2, sm: 3, md: 4 }} gap={4}>
             <Box>
               <Text color="gray.600" fontSize="xs">
-                Method
+                Prep
               </Text>
-              <Text>{recipe.cooking_method}</Text>
+              <Text>{formatTime((recipe as any).prep_time ?? recipe.timing_full?.prep_time_minutes)}</Text>
             </Box>
-          )}
-          {cuisines && (
             <Box>
               <Text color="gray.600" fontSize="xs">
-                Cuisine
+                Cook
               </Text>
-              <Text>{cuisines}</Text>
+              <Text>{formatTime((recipe as any).cook_time ?? recipe.timing_full?.cook_time_minutes)}</Text>
             </Box>
-          )}
-          {meals && (
             <Box>
               <Text color="gray.600" fontSize="xs">
-                Meal
+                Servings
               </Text>
-              <Text>{meals}</Text>
+              <Text>{recipe.servings || '-'}</Text>
             </Box>
-          )}
-        </SimpleGrid>
+            <Box>
+              <Text color="gray.600" fontSize="xs">
+                Ingredients
+              </Text>
+              <Text>{totalIngredients}</Text>
+            </Box>
+            {recipe.cooking_method && (
+              <Box>
+                <Text color="gray.600" fontSize="xs">
+                  Method
+                </Text>
+                <Text>{recipe.cooking_method}</Text>
+              </Box>
+            )}
+            {cuisines && (
+              <Box>
+                <Text color="gray.600" fontSize="xs">
+                  Cuisine
+                </Text>
+                <Text>{cuisines}</Text>
+              </Box>
+            )}
+            {meals && (
+              <Box>
+                <Text color="gray.600" fontSize="xs">
+                  Meal
+                </Text>
+                <Text>{meals}</Text>
+              </Box>
+            )}
+          </SimpleGrid>
 
-        {recipe.ingredients && recipe.ingredients.length > 0 && (
-          <Box mt={3}>
+          {recipe.ingredients && recipe.ingredients.length > 0 && (
+            <Box>
+              <Heading as="h4" size="sm" mb={2}>
+                Ingredients
+              </Heading>
+              <Stack as="ul" gap={1}>
+                {recipe.ingredients.map((ing) => (
+                  <Box as="li" key={ing.id}>
+                    {ing.ingredient_name}: {ing.quantity} {ing.unit}
+                  </Box>
+                ))}
+              </Stack>
+            </Box>
+          )}
+
+          <Box>
             <Heading as="h4" size="sm" mb={2}>
-              Ingredients
+              Preparation
             </Heading>
-            <Stack as="ul" m={0} pl={4} gap={1}>
-              {recipe.ingredients.map((ing) => (
-                <Box as="li" key={ing.id}>
-                  {ing.ingredient_name}: {ing.quantity} {ing.unit}
-                </Box>
+            <Text whiteSpace="pre-wrap" fontFamily="inherit">
+              {recipe.instructions}
+            </Text>
+          </Box>
+
+          {(allergens || (recipe.allergen_warnings || '')).length > 0 && (
+            <Box>
+              <Heading as="h4" size="sm" mb={2}>
+                Allergens
+              </Heading>
+              <Stack gap={1}>
+                {allergens && (
+                  <Text>
+                    <Text as="span" fontWeight="semibold">
+                      Contains:
+                    </Text>{' '}
+                    {allergens}
+                  </Text>
+                )}
+                {recipe.allergen_warnings && (
+                  <Text>
+                    <Text as="span" fontWeight="semibold">
+                      Warnings:
+                    </Text>{' '}
+                    {recipe.allergen_warnings}
+                  </Text>
+                )}
+              </Stack>
+            </Box>
+          )}
+
+          {recipe.tags && recipe.tags.length > 0 && (
+            <HStack wrap="wrap" gap={2}>
+              {recipe.tags.map((t) => (
+                <Badge key={t} colorScheme="gray" variant="subtle">
+                  {t}
+                </Badge>
               ))}
-            </Stack>
-          </Box>
-        )}
-
-        <Box mt={3}>
-          <Heading as="h4" size="sm" mb={2}>
-            Preparation
-          </Heading>
-          <Text whiteSpace="pre-wrap" fontFamily="inherit" m={0}>
-            {recipe.instructions}
-          </Text>
-        </Box>
-
-        {(allergens || (recipe.allergen_warnings || '')).length > 0 && (
-          <Box mt={3}>
-            <Heading as="h4" size="sm" mb={2}>
-              Allergens
-            </Heading>
-            <Stack gap={1}>
-              {allergens && (
-                <Text>
-                  <Text as="span" fontWeight="semibold">
-                    Contains:
-                  </Text>{' '}
-                  {allergens}
-                </Text>
-              )}
-              {recipe.allergen_warnings && (
-                <Text>
-                  <Text as="span" fontWeight="semibold">
-                    Warnings:
-                  </Text>{' '}
-                  {recipe.allergen_warnings}
-                </Text>
-              )}
-            </Stack>
-          </Box>
-        )}
-
-        {recipe.tags && recipe.tags.length > 0 && (
-          <HStack mt={3} gap={2} wrap="wrap">
-            {recipe.tags.map((t) => (
-              <Badge key={t} colorScheme="gray" variant="subtle">
-                {t}
-              </Badge>
-            ))}
-          </HStack>
-        )}
+            </HStack>
+          )}
+        </VStack>
       </CardBody>
     </Card>
   );

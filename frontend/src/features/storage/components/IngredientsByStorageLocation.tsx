@@ -4,7 +4,7 @@ import { StorageLocationGrid } from './StorageLocationGrid';
 import { IngredientModal } from '../../ingredients/components';
 import { Box } from '../../../shared/components/ui/Box';
 import { Heading, Text } from '../../../shared/components/ui/Typography';
-import { Stack } from '../../../shared/components/ui/Layout';
+import { Stack, VStack } from '../../../shared/components/ui/Layout';
 
 interface IngredientsByStorageLocationProps {
   grouped: LocationToIngredientsMap;
@@ -28,12 +28,10 @@ export function IngredientsByStorageLocation({
   loadingSubmit = false,
 }: IngredientsByStorageLocationProps) {
   return (
-    <Box>
-      <Stack gap={1} mb={4}>
-        <Heading as="h1" size="lg">
-          Storage
-        </Heading>
-      </Stack>
+    <VStack align="stretch" gap={6}>
+      <Heading as="h1" size="lg">
+        Storage
+      </Heading>
 
       <StorageLocationGrid grouped={grouped} onEdit={onEdit} onDelete={onDelete} />
 
@@ -44,7 +42,7 @@ export function IngredientsByStorageLocation({
         onSubmit={onSubmit}
         loading={loadingSubmit}
       />
-    </Box>
+    </VStack>
   );
 }
 

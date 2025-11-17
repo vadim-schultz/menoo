@@ -17,7 +17,7 @@ export function StorageLocationListContent({
   onDelete,
 }: StorageLocationListContentProps) {
   return (
-    <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} gap={4}>
+    <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} gap={6}>
       {orderedLocations.map((location) => (
         <StorageLocationCard
           key={location}

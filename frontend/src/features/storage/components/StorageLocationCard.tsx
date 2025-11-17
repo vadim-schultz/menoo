@@ -24,22 +24,22 @@ export function StorageLocationCard({ location, ingredients, onEdit, onDelete }:
 
   return (
     <Card>
-      <CardHeader pb={2}>
+      <CardHeader p={6}>
         <HStack justify="space-between" align="center">
           <Box>
             <Heading as="h3" size="md">
               {formatLocationName(location)}
             </Heading>
-            <Text fontSize="sm" color="gray.600">
+            <Text fontSize="sm" color="gray.600" mt={1}>
               {ingredients.length} items
             </Text>
           </Box>
         </HStack>
       </CardHeader>
-      <CardBody pt={0}>
+      <CardBody p={6}>
         <StorageLocationMiniTable ingredients={ingredients} />
       </CardBody>
-      <CardFooter pt={2} justifyContent="flex-end">
+      <CardFooter justifyContent="flex-end" p={6}>
         <IconButton
           aria-label="View in ingredients"
           size="sm"

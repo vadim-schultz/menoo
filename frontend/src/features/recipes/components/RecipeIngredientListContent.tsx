@@ -12,17 +12,17 @@ interface Props {
 
 export function RecipeIngredientListContent({ ingredients, ingredientOptions, onUpdate, onRemove }: Props) {
   return (
-    <Stack gap={3}>
+    <Stack gap={2}>
       {ingredients.map((ingredient, index) => (
         <Box
           key={index}
           borderWidth="1px"
           borderColor="gray.200"
           borderRadius="md"
-          p={3}
           bg="transparent"
+          p={4}
         >
-          <SimpleGrid columns={{ base: 1, md: 3 }} gap={2} alignItems="end">
+          <SimpleGrid columns={{ base: 1, md: 3 }} alignItems="end" gap={4}>
             <Select
               name={`ingredient-${index}`}
               value={String(ingredient.ingredient_id || '')}

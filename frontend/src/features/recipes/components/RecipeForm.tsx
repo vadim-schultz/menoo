@@ -113,14 +113,14 @@ export function RecipeForm({
 
   return (
     <form onSubmit={form.handleSubmit}>
-      <Stack gap={6}>
+      <Stack gap={4}>
         {/* Ingredient selection moved to top */}
         <Box>
           <RecipeIngredientInput ingredients={ingredients} onChange={setIngredients} />
         </Box>
 
         <Box>
-          <Flex align="center" justify="space-between" mb={2}>
+          <Flex align="center" justify="space-between">
             <Text fontWeight={500}>Recipe Name</Text>
             <IconButton
               type="button"
@@ -133,7 +133,7 @@ export function RecipeForm({
             </IconButton>
           </Flex>
           {generating && (
-            <Text mb={2} color="gray.600" fontSize="sm">
+            <Text color="gray.600" fontSize="sm">
               loading ...
             </Text>
           )}
@@ -149,7 +149,7 @@ export function RecipeForm({
         </Box>
 
         <Box>
-          <Flex align="center" justify="space-between" mb={2}>
+          <Flex align="center" justify="space-between">
             <Text fontWeight={500}>Description</Text>
             <IconButton
               type="button"
@@ -172,7 +172,7 @@ export function RecipeForm({
         </Box>
 
         <Box>
-          <Flex align="center" justify="space-between" mb={2}>
+          <Flex align="center" justify="space-between">
             <Text fontWeight={500}>Instructions</Text>
             <IconButton
               type="button"
@@ -196,7 +196,7 @@ export function RecipeForm({
           />
         </Box>
 
-        <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+        <SimpleGrid columns={{ base: 1, md: 2 }}>
           <Input
             label="Prep Time (minutes)"
             name="prep_time"
@@ -220,7 +220,7 @@ export function RecipeForm({
           />
         </SimpleGrid>
 
-        <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+        <SimpleGrid columns={{ base: 1, md: 2 }}>
           <Input
             label="Servings"
             name="servings"
@@ -245,7 +245,7 @@ export function RecipeForm({
         {/* Dietary */}
         <FieldsetRoot>
           <FieldsetLegend>Dietary</FieldsetLegend>
-          <Stack gap={4}>
+          <Stack>
             <Input
               label="Dietary Requirements (comma-separated)"
               name="dietary_requirements"
@@ -299,7 +299,7 @@ export function RecipeForm({
         {/* Storage */}
         <FieldsetRoot>
           <FieldsetLegend>Storage</FieldsetLegend>
-          <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+          <SimpleGrid columns={{ base: 1, md: 2 }}>
             <Input
               label="Storage Type"
               name="storage_type"
@@ -326,7 +326,7 @@ export function RecipeForm({
               placeholder="3"
             />
           </SimpleGrid>
-          <Stack gap={4} mt={3}>
+          <Stack>
             <Textarea
               label="Reheating Instructions"
               name="reheating_instructions"
@@ -357,7 +357,7 @@ export function RecipeForm({
         {/* Nutrition */}
         <FieldsetRoot>
           <FieldsetLegend>Nutrition (per serving)</FieldsetLegend>
-          <SimpleGrid columns={{ base: 2, md: 4 }} gap={4}>
+          <SimpleGrid columns={{ base: 2, md: 4 }}>
             {[
               { key: 'calories', label: 'Calories' },
               { key: 'protein_grams', label: 'Protein (g)' },
@@ -388,7 +388,7 @@ export function RecipeForm({
 
         {/* Removed RecipeAIAssistant; generation is triggered via ✨ buttons above */}
 
-        <Flex gap={2} justify="flex-end" mt={6}>
+        <Flex justify="flex-end" gap={2}>
           <Button variant="secondary" onClick={onCancel} disabled={loading} type="button">
             Cancel
           </Button>
@@ -426,7 +426,7 @@ function EquipmentEditor({
   };
   return (
     <Box>
-      <Flex justify="flex-end" mb={2}>
+      <Flex justify="flex-end">
         <Button type="button" onClick={addItem}>
           Add equipment
         </Button>
@@ -434,9 +434,9 @@ function EquipmentEditor({
       {(items || []).length === 0 ? (
         <Text color="gray.600">No equipment listed.</Text>
       ) : (
-        <Stack gap={3}>
+        <Stack>
           {(items || []).map((it, idx) => (
-            <SimpleGrid key={idx} columns={{ base: 1, md: 4 }} gap={2} alignItems="end">
+            <SimpleGrid key={idx} columns={{ base: 1, md: 4 }} alignItems="end">
               <Input
                 name={`equipment-name-${idx}`}
                 label="Name"

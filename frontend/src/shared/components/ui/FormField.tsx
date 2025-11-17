@@ -15,16 +15,16 @@ export interface FormFieldProps {
 
 export function FormField({ label, error, children, htmlFor, required, className }: FormFieldProps) {
 	return (
-		<Box className={className} mb={4}>
+		<Box className={className}>
 			{label ? (
-				<Text as="label" htmlFor={htmlFor} mb={1} display="block" fontWeight="medium">
+				<Text as="label" htmlFor={htmlFor} display="block" fontWeight="medium">
 					{label}
-					{required && <Text as="span" color="red.500" ml={1}>*</Text>}
+					{required && <Text as="span" color="red.500">*</Text>}
 				</Text>
 			) : null}
 			{children}
 			{error ? (
-				<Text color="red.500" fontSize="sm" mt={1}>
+				<Text color="red.500" fontSize="sm">
 					{error}
 				</Text>
 			) : null}

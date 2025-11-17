@@ -54,7 +54,7 @@ export const IngredientPagination = ({ page, onPageChange }: IngredientPaginatio
   const pageNumbers = getPageNumbers();
 
   return (
-    <HStack justify="center" gap={2} mt={4}>
+    <HStack justify="center" gap={2}>
       <Button size="sm" variant="ghost" disabled={page === 1} onClick={() => onPageChange(page - 1)}>
         Previous
       </Button>

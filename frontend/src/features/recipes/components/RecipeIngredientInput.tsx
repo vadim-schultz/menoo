@@ -28,12 +28,12 @@ export function RecipeIngredientInput({ ingredients, onChange }: RecipeIngredien
 
   return (
     <Box>
-      <Text fontWeight={500} mb={3}>
+      <Text fontWeight={500} mb={2}>
         Ingredients
       </Text>
 
       {/* Entry form row (select existing or type a new name) */}
-      <SimpleGrid columns={{ base: 1, md: 4 }} gap={2} alignItems="end" mb={4}>
+      <SimpleGrid columns={{ base: 1, md: 4 }} alignItems="end" gap={4} mb={4}>
         <Select
           name={`entry-ingredient`}
           value={String(entryIngredientId || '')}

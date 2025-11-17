@@ -5,6 +5,7 @@ import { RecipeForm } from './index';
 import { RecipeList } from './RecipeList';
 import { Card, CardBody, CardHeader } from '../../../shared/components/ui/Card';
 import { Heading, Flex, Box } from '@chakra-ui/react';
+import { VStack } from '../../../shared/components/ui/Layout';
 
 interface RecipeFormInitialData {
   ingredientIds?: number[];
@@ -42,8 +43,8 @@ export function RecipesContent({
   updating,
 }: RecipesContentProps) {
   return (
-    <Box>
-      <Flex align="center" justify="space-between" mb={6}>
+    <VStack align="stretch" gap={6}>
+      <Flex align="center" justify="space-between">
         <Heading as="h1" size="lg">Recipes</Heading>
         <Button icon={Plus} onClick={onOpenCreate} aria-label="Add Recipe" />
       </Flex>
@@ -51,14 +52,14 @@ export function RecipesContent({
       <RecipeList recipes={recipes} onEdit={onEdit} onDelete={onDelete} />
 
       {(isModalOpen || editingRecipe) && (
-        <Card aria-label={editingRecipe ? 'Edit Recipe' : 'Add Recipe'} mt={8}>
-          <CardHeader display="flex" alignItems="center" justifyContent="space-between" pb={2}>
-            <Heading as="h2" size="md" m={0}>
+        <Card aria-label={editingRecipe ? 'Edit Recipe' : 'Add Recipe'}>
+          <CardHeader display="flex" alignItems="center" justifyContent="space-between" p={6}>
+            <Heading as="h2" size="md">
               {editingRecipe ? 'Edit Recipe' : 'Add Recipe'}
             </Heading>
             <Button variant="secondary" onClick={onCloseModal}>Close</Button>
           </CardHeader>
-          <CardBody pt={0}>
+          <CardBody p={6}>
             <RecipeForm
               recipe={editingRecipe}
               onSubmit={(data) => (editingRecipe ? onUpdate(editingRecipe.id, data) : onCreate(data))}
@@ -69,7 +70,7 @@ export function RecipesContent({
           </CardBody>
         </Card>
       )}
-    </Box>
+    </VStack>
   );
 }
 

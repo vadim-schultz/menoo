@@ -7,7 +7,7 @@ import { IngredientTable, IngredientPagination, IngredientModal } from '.';
 import type { SortColumn, SortDirection } from '../hooks/useIngredientFilters';
 import { Box } from '../../../shared/components/ui/Box';
 import { Heading } from '../../../shared/components/ui/Typography';
-import { HStack, Stack } from '../../../shared/components/ui/Layout';
+import { HStack, Stack, VStack } from '../../../shared/components/ui/Layout';
 import { IconButton } from '@chakra-ui/react';
 
 interface IngredientsContentProps {
@@ -61,8 +61,8 @@ export function IngredientsContent({
   isSubmitting,
 }: IngredientsContentProps) {
   return (
-    <Box>
-      <HStack justify="space-between" mb={4}>
+    <VStack align="stretch" gap={6}>
+      <HStack justify="space-between">
         <Heading as="h1" size="lg">
           {title}
         </Heading>
@@ -80,15 +80,14 @@ export function IngredientsContent({
       <Box
         bg="gray.50"
         borderRadius="md"
-        p={4}
-        mb={4}
         borderWidth="1px"
         borderColor="gray.200"
+        p={6}
       >
         <Stack
           direction={{ base: 'column', md: 'row' } as any}
-          gap={4}
           align={{ base: 'stretch', md: 'flex-end' } as any}
+          gap={4}
         >
           <Input
             name="name_filter"
@@ -132,7 +131,7 @@ export function IngredientsContent({
         onSubmit={onSubmit}
         loading={isSubmitting}
       />
-    </Box>
+    </VStack>
   );
 }
 

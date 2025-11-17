@@ -3,6 +3,7 @@ import type { IngredientRead, IngredientCreate } from '../../../shared/types/ing
 import { useIngredientForm } from '../hooks/useIngredientForm';
 import { IngredientFormFields } from './IngredientFormFields';
 import { Box } from '@chakra-ui/react';
+import { VStack } from '../../../shared/components/ui/Layout';
 
 interface Props {
   isOpen: boolean;
@@ -22,20 +23,21 @@ export const IngredientModal = ({ isOpen, ingredient, onClose, onSubmit, loading
       title={ingredient ? 'Edit Ingredient' : 'Add Ingredient'}
     >
       <form onSubmit={form.handleSubmit}>
-        <IngredientFormFields form={form} />
-        <Box
-          display="flex"
-          gap={2}
-          justifyContent="flex-end"
-          mt={6}
-        >
-          <Button variant="secondary" onClick={onClose} disabled={loading}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={loading}>
-            {loading ? 'Saving...' : ingredient ? 'Update' : 'Create'}
-          </Button>
-        </Box>
+        <VStack align="stretch" gap={4}>
+          <IngredientFormFields form={form} />
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            gap={2}
+          >
+            <Button variant="secondary" onClick={onClose} disabled={loading}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Saving...' : ingredient ? 'Update' : 'Create'}
+            </Button>
+          </Box>
+        </VStack>
       </form>
     </Modal>
   );
