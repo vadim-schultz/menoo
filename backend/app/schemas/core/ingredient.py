@@ -20,8 +20,7 @@ class Ingredient(BaseModel):
     name: str = Field(..., min_length=1, max_length=100, description="Ingredient name")
     category: IngredientCategory = Field(..., description="Ingredient category")
     storage_location: str | None = Field(None, description="Storage location")
-    quantity: Decimal | None = Field(None, ge=0, description="Current quantity in stock")
-    unit: str | None = Field(None, description="Unit for current quantity")
+    quantity: Decimal | None = Field(None, ge=0, description="Current quantity in stock (grams)")
     expiry_date: date | None = Field(None, description="Expiration date")
     notes: str | None = Field(None, description="Additional notes about ingredient")
 

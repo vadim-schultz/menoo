@@ -11,13 +11,17 @@ from app.schemas.requests.recipe import (
     RecipeListRequest,
     RecipeUpdateRequest,
 )
-from app.schemas.requests.suggestion import SuggestionRequest
+from app.schemas.requests.suggestion import (
+    IngredientSuggestionRequest,
+    SuggestionRequest,
+)
 
 __all__ = [
     "IngredientCreateRequest",
     "IngredientListRequest",
     "IngredientPatch",
     "IngredientUpdateRequest",
+    "IngredientSuggestionRequest",
     "RecipeCreateRequest",
     "RecipeListRequest",
     "RecipeUpdateRequest",

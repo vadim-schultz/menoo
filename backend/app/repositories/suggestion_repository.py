@@ -6,6 +6,7 @@ import marvin
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.marvin_config import configure_marvin
+from app.schemas.core.ingredient import Ingredient
 from app.schemas.core.recipe import Recipe
 
 
@@ -25,6 +26,22 @@ class SuggestionRepository:
         """
         return await marvin.generate_async(
             target=Recipe,
+            n=n_completions,
+            instructions=prompt,
+            context=draft.model_dump(),
+        )
+
+    async def generate_ingredient(
+        self, prompt: str, n_completions: int, draft: Ingredient
+    ) -> list[Ingredient]:
+        """Generate ingredient completions using Marvin API.
+
+        Accepts a partial Ingredient model and returns completed Ingredient instances populated by Marvin.
+        The same Ingredient model is used for both partial (draft) and complete (populated) data.
+        Only name and quantity fields are populated - no additional hydration.
+        """
+        return await marvin.generate_async(
+            target=Ingredient,
             n=n_completions,
             instructions=prompt,
             context=draft.model_dump(),

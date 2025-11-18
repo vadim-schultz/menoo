@@ -46,7 +46,6 @@ def ingredient_factory(**overrides: Any) -> dict[str, Any]:
         "category": fake.random_element(list(IngredientCategory)).value,
         "storage_location": fake.random_element(["fridge", "cupboard", "pantry", "counter"]),
         "quantity": Decimal(str(round(fake.random.uniform(10, 1000), 2))),
-        "unit": fake.random_element(["g", "kg", "ml", "l", "cup", "tbsp", "tsp"]),
         "expiry_date": fake.date_between(start_date="today", end_date="+30d"),
         "notes": fake.sentence(nb_words=6) if fake.boolean(chance_of_getting_true=25) else None,
     }

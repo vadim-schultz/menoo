@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
+from app.schemas.core.ingredient import Ingredient
 from app.schemas.core.recipe import Recipe
 
 
@@ -16,4 +17,16 @@ class SuggestionResponse(BaseModel):
     recipes: list[Recipe] = Field(
         ...,
         description="AI-completed recipes returned by Marvin",
+    )
+
+
+class IngredientSuggestionResponse(BaseModel):
+    """Response with ingredient suggestions.
+
+    Contains a list of core Ingredient models (completed by Marvin).
+    """
+
+    ingredients: list[Ingredient] = Field(
+        ...,
+        description="AI-completed ingredients returned by Marvin",
     )

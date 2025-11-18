@@ -5,11 +5,15 @@ from app.schemas.responses.ingredient import (
     IngredientResponse,
 )
 from app.schemas.responses.recipe import RecipeDetail, RecipeListResponse, RecipeResponse
-from app.schemas.responses.suggestion import SuggestionResponse
+from app.schemas.responses.suggestion import (
+    IngredientSuggestionResponse,
+    SuggestionResponse,
+)
 
 __all__ = [
     "IngredientResponse",
     "IngredientListResponse",
+    "IngredientSuggestionResponse",
     "RecipeResponse",
     "RecipeDetail",
     "RecipeListResponse",

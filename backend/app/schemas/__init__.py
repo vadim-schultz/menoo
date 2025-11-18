@@ -16,6 +16,7 @@ from app.schemas.requests import (
     IngredientCreateRequest,
     IngredientListRequest,
     IngredientPatch,
+    IngredientSuggestionRequest,
     IngredientUpdateRequest,
     RecipeCreateRequest,
     RecipeListRequest,
@@ -27,6 +28,7 @@ from app.schemas.requests import (
 from app.schemas.responses import (
     IngredientListResponse,
     IngredientResponse,
+    IngredientSuggestionResponse,
     RecipeDetail,
     RecipeListResponse,
     RecipeResponse,
@@ -50,6 +52,7 @@ __all__ = [
     "IngredientCreateRequest",
     "IngredientListRequest",
     "IngredientPatch",
+    "IngredientSuggestionRequest",
     "IngredientUpdateRequest",
     "RecipeCreateRequest",
     "RecipeListRequest",
@@ -58,6 +61,7 @@ __all__ = [
     # Response schemas
     "IngredientResponse",
     "IngredientListResponse",
+    "IngredientSuggestionResponse",
     "RecipeResponse",
     "RecipeDetail",
     "RecipeListResponse",

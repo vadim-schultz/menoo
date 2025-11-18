@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from litestar import Controller, post
 
-from app.schemas import SuggestionRequest, SuggestionResponse
+from app.schemas import (
+    IngredientSuggestionRequest,
+    IngredientSuggestionResponse,
+    SuggestionRequest,
+    SuggestionResponse,
+)
 from app.services import SuggestionService
 
 
@@ -23,3 +28,13 @@ class SuggestionController(Controller):
         """Get recipe suggestions based on available ingredients."""
         recipes = await suggestion_service.complete_recipe(data)
         return SuggestionResponse(recipes=recipes)
+
+    @post("/ingredient")
+    async def get_ingredient_suggestions(
+        self,
+        suggestion_service: SuggestionService,
+        data: IngredientSuggestionRequest,
+    ) -> IngredientSuggestionResponse:
+        """Get ingredient suggestions based on prompt."""
+        ingredients = await suggestion_service.complete_ingredient(data)
+        return IngredientSuggestionResponse(ingredients=ingredients)

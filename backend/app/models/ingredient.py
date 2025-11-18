@@ -24,7 +24,6 @@ class Ingredient(Base, IDMixin, TimestampMixin, SoftDeleteMixin):
     category: Mapped[IngredientCategory] = mapped_column(String(30), nullable=False, index=True)
     storage_location: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
     quantity: Mapped[float | None] = mapped_column(Numeric(12, 3), nullable=True)
-    unit: Mapped[str | None] = mapped_column(String(50), nullable=True)
     expiry_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 

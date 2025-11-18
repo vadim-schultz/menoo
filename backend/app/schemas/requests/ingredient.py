@@ -40,8 +40,7 @@ class IngredientPatch(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=100)
     category: IngredientCategory | None = None
     storage_location: str | None = None
-    quantity: Decimal | None = Field(None, ge=0, description="Current quantity in stock")
-    unit: str | None = None
+    quantity: Decimal | None = Field(None, ge=0, description="Current quantity in stock (grams)")
     expiry_date: date | None = None
     notes: str | None = None
 
