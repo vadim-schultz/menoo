@@ -1,6 +1,6 @@
 import { Input } from '../../../shared/components';
 import { CirclePlus } from 'lucide-react';
-import type { IngredientRead, IngredientCreate } from '../../../shared/types/ingredient';
+import type { IngredientRead } from '../../../shared/types/ingredient';
 
 type StorageLocation = string;
 import { IngredientTable, IngredientPagination, IngredientModal } from '.';
@@ -10,11 +10,15 @@ import { Heading } from '../../../shared/components/ui/Typography';
 import { HStack, Stack, VStack } from '../../../shared/components/ui/Layout';
 import { IconButton } from '@chakra-ui/react';
 
+interface IngredientDraft {
+  name: string;
+  quantity: number;
+}
+
 interface IngredientsContentProps {
   title?: string;
   ingredients: IngredientRead[];
   onAdd: () => void;
-  onEdit: (ingredient: IngredientRead) => void;
   onDelete: (id: number) => void;
   // Filters & sorting
   nameContains: string;
@@ -31,9 +35,8 @@ interface IngredientsContentProps {
   onPageChange: (p: number) => void;
   // Modal
   isModalOpen: boolean;
-  editing: IngredientRead | null;
   onCloseModal: () => void;
-  onSubmit: (data: IngredientCreate) => Promise<void>;
+  onSubmit: (data: IngredientDraft) => Promise<void>;
   isSubmitting: boolean;
 }
 
@@ -41,7 +44,6 @@ export function IngredientsContent({
   title = 'Ingredients',
   ingredients,
   onAdd,
-  onEdit,
   onDelete,
   nameContains,
   storageLocation,
@@ -55,7 +57,6 @@ export function IngredientsContent({
   page,
   onPageChange,
   isModalOpen,
-  editing,
   onCloseModal,
   onSubmit,
   isSubmitting,
@@ -115,7 +116,6 @@ export function IngredientsContent({
 
       <IngredientTable
         ingredients={ingredients}
-        onEdit={onEdit}
         onDelete={onDelete}
         sortColumn={sortColumn}
         sortDirection={sortDirection}
@@ -126,7 +126,6 @@ export function IngredientsContent({
 
       <IngredientModal
         isOpen={isModalOpen}
-        ingredient={editing}
         onClose={onCloseModal}
         onSubmit={onSubmit}
         loading={isSubmitting}

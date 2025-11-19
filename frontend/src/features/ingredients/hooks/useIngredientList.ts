@@ -9,7 +9,6 @@ export interface UseIngredientListReturn {
   loading: boolean;
   error: any;
   create: ReturnType<typeof useIngredients>['create'];
-  update: ReturnType<typeof useIngredients>['update'];
   remove: ReturnType<typeof useIngredients>['remove'];
   isSubmitting: boolean;
 }
@@ -19,7 +18,7 @@ export function useIngredientList(
   sortColumn: SortColumn,
   sortDirection: SortDirection
 ): UseIngredientListReturn {
-  const { ingredients: rawIngredients, loading, error, create, update, remove, isSubmitting } =
+  const { ingredients: rawIngredients, loading, error, create, remove, isSubmitting } =
     useIngredients(appliedFilters);
 
   const ingredients = useMemo(
@@ -27,7 +26,7 @@ export function useIngredientList(
     [rawIngredients, sortColumn, sortDirection]
   );
 
-  return { ingredients, loading, error, create, update, remove, isSubmitting };
+  return { ingredients, loading, error, create, remove, isSubmitting };
 }
 
 

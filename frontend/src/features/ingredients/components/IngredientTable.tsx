@@ -1,6 +1,6 @@
 import type { IngredientRead } from '../../../shared/types/ingredient';
-import { SquarePen, Trash, ChevronUp, ChevronDown } from 'lucide-react';
-import { IconButton, HStack, Flex, Text } from '@chakra-ui/react';
+import { Trash, ChevronUp, ChevronDown } from 'lucide-react';
+import { IconButton, Flex, Text } from '@chakra-ui/react';
 import { EmptyState } from './EmptyState';
 import { formatDate, formatStorageLocation } from '../services/formatting';
 import { useTableSort } from '../hooks/useTableSort';
@@ -8,7 +8,6 @@ import { Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '../../../shared
 
 interface IngredientTableProps {
   ingredients: IngredientRead[];
-  onEdit: (ingredient: IngredientRead) => void;
   onDelete: (id: number) => void;
   // Sort props
   sortColumn?: 'name' | 'quantity' | 'storage_location' | 'expiry_date' | null;
@@ -18,7 +17,6 @@ interface IngredientTableProps {
 
 export const IngredientTable = ({
   ingredients,
-  onEdit,
   onDelete,
   sortColumn,
   sortDirection,
@@ -91,25 +89,15 @@ export const IngredientTable = ({
               <Td>{formatStorageLocation(ingredient.storage_location)}</Td>
               <Td>{formatDate(ingredient.expiry_date)}</Td>
               <Td>
-                <HStack>
-                  <IconButton
-                    aria-label="Edit ingredient"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => onEdit(ingredient)}
-                  >
-                    <SquarePen size={16} />
-                  </IconButton>
-                  <IconButton
-                    aria-label="Delete ingredient"
-                    size="sm"
-                    variant="ghost"
-                    colorScheme="red"
-                    onClick={() => onDelete(ingredient.id)}
-                  >
-                    <Trash size={16} />
-                  </IconButton>
-                </HStack>
+                <IconButton
+                  aria-label="Delete ingredient"
+                  size="sm"
+                  variant="ghost"
+                  colorScheme="red"
+                  onClick={() => onDelete(ingredient.id)}
+                >
+                  <Trash size={16} />
+                </IconButton>
               </Td>
             </Tr>
           ))}

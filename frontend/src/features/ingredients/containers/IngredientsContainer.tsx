@@ -19,16 +19,15 @@ export const IngredientsContainer = () => {
     handleSortChange,
   } = useIngredientFilters();
 
-  const { ingredients, loading, error, create, update, remove, isSubmitting } = useIngredientList(
+  const { ingredients, loading, error, create, remove, isSubmitting } = useIngredientList(
     appliedFilters,
     sortColumn,
     sortDirection
   );
 
-  const { isModalOpen, editing, openEditModal, openCreateModal, closeModal, handleSubmit, handleDelete } =
+  const { isModalOpen, openCreateModal, closeModal, handleSubmit, handleDelete } =
     useIngredientActions({
       create,
-      update,
       remove,
     });
 
@@ -39,7 +38,6 @@ export const IngredientsContainer = () => {
     <IngredientsContent
       ingredients={ingredients}
       onAdd={openCreateModal}
-      onEdit={openEditModal}
       onDelete={handleDelete}
       nameContains={nameContains}
       storageLocation={storageLocation}
@@ -53,7 +51,6 @@ export const IngredientsContainer = () => {
       page={page}
       onPageChange={setPage}
       isModalOpen={isModalOpen}
-      editing={editing}
       onCloseModal={closeModal}
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting}

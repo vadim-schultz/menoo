@@ -5,13 +5,16 @@ from __future__ import annotations
 from litestar import Controller, Request, delete, get, patch, post
 from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
+from app.enums import IngredientCategory
+from app.schemas.core.ingredient import Ingredient
 from app.schemas.requests.ingredient import (
     IngredientCreateRequest,
     IngredientListRequest,
     IngredientPatch,
 )
+from app.schemas.requests.suggestion import IngredientSuggestionRequest
 from app.schemas.responses.ingredient import IngredientResponse
-from app.services import IngredientService
+from app.services import IngredientService, SuggestionService
 
 
 class IngredientController(Controller):
@@ -44,10 +47,43 @@ class IngredientController(Controller):
     async def create_ingredient(
         self,
         ingredient_service: IngredientService,
+        suggestion_service: SuggestionService,
         data: IngredientCreateRequest,
     ) -> IngredientResponse:
-        """Create a new ingredient or add quantity to existing one."""
-        ingredient = await ingredient_service.create_ingredient(data.ingredient)
+        """Create a new ingredient or add quantity to existing one.
+        
+        Accepts a partially populated Ingredient (only name and quantity required).
+        Uses AI suggestion service to populate remaining fields (category, storage_location, etc.)
+        before saving to database.
+        """
+        # Extract draft ingredient (should only have name and quantity)
+        draft = data.ingredient
+        
+        # Use suggestion service to complete the ingredient with AI
+        suggestion_request = IngredientSuggestionRequest(
+            ingredient=draft,
+            prompt=(
+                "Complete this ingredient with appropriate category, storage location, "
+                "expiry date based on the storage location (must be in the future), "
+                "and any relevant notes. Ensure the information is accurate and useful."
+            ),
+            n_completions=1,
+        )
+        
+        completed_ingredients = await suggestion_service.complete_ingredient(suggestion_request)
+        if not completed_ingredients:
+            # Fallback: use draft as-is if AI fails, but ensure category is set
+            completed_ingredient = draft
+            if completed_ingredient.category is None:
+                completed_ingredient.category = IngredientCategory.OTHER
+        else:
+            completed_ingredient = completed_ingredients[0]
+            # Ensure category is populated (required by database)
+            if completed_ingredient.category is None:
+                completed_ingredient.category = IngredientCategory.OTHER
+        
+        # Save the completed ingredient to database
+        ingredient = await ingredient_service.create_ingredient(completed_ingredient)
         return IngredientResponse.model_validate(ingredient)
 
     @get("/{ingredient_id:int}")

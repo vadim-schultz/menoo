@@ -123,6 +123,24 @@ def suggestion_service(suggestion_repository):
 
 
 @pytest.fixture
+def live_suggestion_service(db_session):
+    """Create suggestion service for live Marvin tests with API key validation.
+
+    Skips test if OPENAI_API_KEY is not configured.
+    """
+    from app.repositories import SuggestionRepository
+    from app.services import SuggestionService
+
+    try:
+        suggestion_repo = SuggestionRepository(db_session)
+    except ValueError as e:
+        if "OpenAI API key" in str(e):
+            pytest.skip("OPENAI_API_KEY is not configured; skipping live Marvin test.")
+        raise
+    return SuggestionService(suggestion_repo)
+
+
+@pytest.fixture
 def recipe_service(
     recipe_repository,
     recipe_ingredient_repository,

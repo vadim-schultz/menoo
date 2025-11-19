@@ -1,41 +1,115 @@
-import { Modal, Button } from '../../../shared/components';
-import type { IngredientRead, IngredientCreate } from '../../../shared/types/ingredient';
-import { useIngredientForm } from '../hooks/useIngredientForm';
-import { IngredientFormFields } from './IngredientFormFields';
-import { Box } from '@chakra-ui/react';
+import React from 'react';
+import { Modal, Input } from '../../../shared/components';
+import { Box, IconButton } from '@chakra-ui/react';
 import { VStack } from '../../../shared/components/ui/Layout';
+import { CircleCheckBig, CircleX } from 'lucide-react';
+
+interface IngredientDraft {
+  name: string;
+  quantity: number;
+}
 
 interface Props {
   isOpen: boolean;
-  ingredient: IngredientRead | null;
   onClose: () => void;
-  onSubmit: (data: IngredientCreate) => Promise<void>;
+  onSubmit: (data: IngredientDraft) => Promise<void>;
   loading: boolean;
 }
 
-export const IngredientModal = ({ isOpen, ingredient, onClose, onSubmit, loading }: Props) => {
-  const form = useIngredientForm(ingredient, onSubmit);
+export const IngredientModal = ({ isOpen, onClose, onSubmit, loading }: Props) => {
+  const [name, setName] = React.useState('');
+  const [quantity, setQuantity] = React.useState<number | ''>('');
+  const [errors, setErrors] = React.useState<{ name?: string; quantity?: string }>({});
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      // Reset form when modal closes
+      setName('');
+      setQuantity('');
+      setErrors({});
+    }
+  }, [isOpen]);
+
+  const validate = (): boolean => {
+    const newErrors: { name?: string; quantity?: string } = {};
+    
+    if (!name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+    
+    if (quantity === '' || quantity === null || quantity === undefined) {
+      newErrors.quantity = 'Quantity is required';
+    } else if (typeof quantity === 'number' && quantity < 0) {
+      newErrors.quantity = 'Quantity must be non-negative';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validate()) {
+      return;
+    }
+
+    await onSubmit({
+      name: name.trim(),
+      quantity: typeof quantity === 'number' ? quantity : 0,
+    });
+  };
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={ingredient ? 'Edit Ingredient' : 'Add Ingredient'}
+      title="Add Ingredient"
     >
-      <form onSubmit={form.handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <VStack align="stretch" gap={4}>
-          <IngredientFormFields form={form} />
+          <Input
+            label="Name"
+            name="name"
+            value={name}
+            onChange={setName}
+            error={errors.name}
+            required
+            placeholder="e.g., Fresh Basil"
+          />
+
+          <Input
+            label="Quantity (grams)"
+            name="quantity"
+            type="number"
+            value={quantity === '' ? '' : String(quantity)}
+            onChange={(value) => setQuantity(value === '' ? '' : parseFloat(value) || '')}
+            error={errors.quantity}
+            required
+            placeholder="e.g., 100"
+          />
+
           <Box
             display="flex"
             justifyContent="flex-end"
             gap={2}
           >
-            <Button variant="secondary" onClick={onClose} disabled={loading}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : ingredient ? 'Update' : 'Create'}
-            </Button>
+            <IconButton
+              aria-label="Cancel"
+              variant="ghost"
+              onClick={onClose}
+              disabled={loading}
+            >
+              <CircleX size={16} />
+            </IconButton>
+            <IconButton
+              aria-label={loading ? 'Adding...' : 'Add Ingredient'}
+              variant="ghost"
+              type="submit"
+              disabled={loading}
+            >
+              <CircleCheckBig size={16} />
+            </IconButton>
           </Box>
         </VStack>
       </form>
