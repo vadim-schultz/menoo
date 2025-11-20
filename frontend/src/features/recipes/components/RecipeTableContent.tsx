@@ -1,7 +1,7 @@
 import type { RecipeDetail } from '../../../shared/types';
 import { Pencil, Trash2 } from 'lucide-react';
-import { Button } from '../../../shared/components';
-import { formatDifficulty, formatTime, truncateText } from '../services/recipeFormatting';
+import { IconButton, Text } from '@chakra-ui/react';
+import { formatDifficulty } from '../services/recipeFormatting';
 import { Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '../../../shared/components/ui/Table';
 
 interface RecipeTableContentProps {
@@ -11,18 +11,41 @@ interface RecipeTableContentProps {
 }
 
 export function RecipeTableContent({ recipes, onEdit, onDelete }: RecipeTableContentProps) {
+  const formatMealTypes = (mealTypes?: string[]): string => {
+    if (!mealTypes || mealTypes.length === 0) return '-';
+    return mealTypes.join(', ');
+  };
+
+  const formatDietaryRequirements = (dietary?: string[]): string => {
+    if (!dietary || dietary.length === 0) return '-';
+    return dietary.join(', ');
+  };
+
+  const formatCuisine = (cuisineTypes?: string[]): string => {
+    if (!cuisineTypes || cuisineTypes.length === 0) return '-';
+    return cuisineTypes.join(', ');
+  };
+
   return (
     <TableContainer>
       <Table>
         <Thead>
           <Tr>
-            <Th scope="col">Name</Th>
-            <Th scope="col">Description</Th>
-            <Th scope="col">Difficulty</Th>
-            <Th scope="col">Prep Time</Th>
-            <Th scope="col">Cook Time</Th>
-            <Th scope="col">Servings</Th>
-            <Th scope="col">Ingredients</Th>
+            <Th scope="col">
+              <Text>Name</Text>
+            </Th>
+            <Th scope="col">
+              <Text>Meal Type</Text>
+            </Th>
+            <Th scope="col">
+              <Text>Dietary Preference</Text>
+            </Th>
+            <Th scope="col">
+              <Text>Cuisine</Text>
+            </Th>
+            <Th scope="col">
+              <Text>Difficulty</Text>
+            </Th>
             <Th scope="col">Actions</Th>
           </Tr>
         </Thead>
@@ -30,29 +53,28 @@ export function RecipeTableContent({ recipes, onEdit, onDelete }: RecipeTableCon
           {recipes.map((recipe) => (
             <Tr key={recipe.id}>
               <Td>{recipe.name}</Td>
-              <Td>{truncateText(recipe.description)}</Td>
+              <Td>{formatMealTypes(recipe.meal_types)}</Td>
+              <Td>{formatDietaryRequirements(recipe.dietary_requirements)}</Td>
+              <Td>{formatCuisine(recipe.cuisine_types)}</Td>
               <Td>{formatDifficulty(recipe.difficulty)}</Td>
-              <Td>{formatTime(recipe.prep_time)}</Td>
-              <Td>{formatTime(recipe.cook_time)}</Td>
-              <Td>{recipe.servings || '-'}</Td>
-              <Td>{recipe.ingredients?.length || 0}</Td>
               <Td>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <Button
-                    icon={Pencil}
-                    variant="secondary"
-                    onClick={() => onEdit(recipe)}
-                    type="button"
-                    aria-label="Edit recipe"
-                  />
-                  <Button
-                    icon={Trash2}
-                    variant="danger"
-                    onClick={() => onDelete(recipe.id)}
-                    type="button"
-                    aria-label="Delete recipe"
-                  />
-                </div>
+                <IconButton
+                  aria-label="Edit recipe"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onEdit(recipe)}
+                >
+                  <Pencil size={16} />
+                </IconButton>
+                <IconButton
+                  aria-label="Delete recipe"
+                  size="sm"
+                  variant="ghost"
+                  colorScheme="red"
+                  onClick={() => onDelete(recipe.id)}
+                >
+                  <Trash2 size={16} />
+                </IconButton>
               </Td>
             </Tr>
           ))}

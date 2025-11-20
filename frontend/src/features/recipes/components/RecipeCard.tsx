@@ -1,6 +1,6 @@
 import type { RecipeDetail } from '../../../shared/types';
 import { Button } from '../../../shared/components';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Eye } from 'lucide-react';
 import { formatTime } from '../services/recipeFormatting';
 import { Card, CardBody, CardHeader } from '../../../shared/components/ui/Card';
 import { Heading, Text } from '../../../shared/components/ui/Typography';
@@ -8,6 +8,7 @@ import { SimpleGrid, HStack, VStack } from '../../../shared/components/ui/Layout
 import { Box } from '../../../shared/components/ui/Box';
 import { Stack } from '../../../shared/components/ui/Layout';
 import { Badge } from '../../../shared/components/ui/Badge';
+import { useNavigate } from 'react-router-dom';
 
 interface RecipeCardProps {
   recipe: RecipeDetail;
@@ -16,6 +17,7 @@ interface RecipeCardProps {
 }
 
 export function RecipeCard({ recipe, onEdit, onDelete }: RecipeCardProps) {
+  const navigate = useNavigate();
   const totalIngredients = recipe.ingredients?.length || 0;
   const cuisines = (recipe.cuisine_types || []).join(', ');
   const meals = (recipe.meal_types || []).join(', ');
@@ -48,6 +50,7 @@ export function RecipeCard({ recipe, onEdit, onDelete }: RecipeCardProps) {
             </HStack>
           </Box>
           <HStack gap={2}>
+            <Button icon={Eye} variant="secondary" onClick={() => navigate(`/recipes/${recipe.id}`)} aria-label="View recipe" />
             <Button icon={Pencil} variant="secondary" onClick={() => onEdit(recipe)} aria-label="Edit recipe" />
             <Button icon={Trash2} variant="danger" onClick={() => onDelete(recipe.id)} aria-label="Delete recipe" />
           </HStack>

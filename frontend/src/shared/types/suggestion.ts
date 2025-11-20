@@ -18,6 +18,8 @@ export interface Recipe {
   timing?: RecipeTiming;
   servings?: number | null;
   ingredients?: RecipeIngredient[];
+  cuisine_types?: string[];
+  dietary_requirements?: string[];
 }
 export interface SuggestionRequest {
   recipe?: Recipe; // partial Recipe allowed

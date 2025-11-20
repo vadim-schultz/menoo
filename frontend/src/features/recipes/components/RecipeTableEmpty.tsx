@@ -1,8 +1,10 @@
+import { Box, Text } from '@chakra-ui/react';
+
 export function RecipeTableEmpty() {
   return (
-    <article style={{ textAlign: 'center', padding: '1rem' }}>
-      <p>No recipes yet. Add your first recipe to get started!</p>
-    </article>
+    <Box textAlign="center" py={8}>
+      <Text>No recipes yet. Add your first recipe to get started!</Text>
+    </Box>
   );
 }
 

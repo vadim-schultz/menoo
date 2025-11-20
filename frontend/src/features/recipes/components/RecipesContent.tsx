@@ -1,11 +1,14 @@
 import { Button } from '../../../shared/components';
 import { Plus } from 'lucide-react';
 import type { RecipeDetail, RecipeCreate } from '../../../shared/types';
-import { RecipeForm } from './index';
 import { RecipeList } from './RecipeList';
-import { Card, CardBody, CardHeader } from '../../../shared/components/ui/Card';
-import { Heading, Flex, Box } from '@chakra-ui/react';
+import { RecipeCreationDialog } from './RecipeCreationDialog';
+import { RecipeViewModal } from './RecipeViewModal';
+import { RecipeEditModal } from './RecipeEditModal';
+import { Heading, Flex } from '@chakra-ui/react';
 import { VStack } from '../../../shared/components/ui/Layout';
+import { useRecipeCreation } from '../hooks/useRecipeCreation';
+import { useState } from 'react';
 
 interface RecipeFormInitialData {
   ingredientIds?: number[];
@@ -42,33 +45,90 @@ export function RecipesContent({
   creating,
   updating,
 }: RecipesContentProps) {
+  const { generateFromPayload, suggestion, generating, clearSuggestion } = useRecipeCreation();
+  const [showCreationDialog, setShowCreationDialog] = useState(false);
+  const [showSuggestionModal, setShowSuggestionModal] = useState(false);
+
+  const handleOpenCreate = () => {
+    setShowCreationDialog(true);
+    onOpenCreate();
+  };
+
+  const handleCloseCreationDialog = () => {
+    setShowCreationDialog(false);
+    onCloseModal();
+    clearSuggestion();
+  };
+
+  const handleGenerate = async (payload: {
+    ingredientIds: number[];
+    cuisine?: string;
+    dietaryRequirements: string[];
+  }) => {
+    const result = await generateFromPayload(payload);
+    if (result) {
+      setShowCreationDialog(false);
+      setShowSuggestionModal(true);
+    }
+  };
+
+  const handleAcceptSuggestion = async () => {
+    if (suggestion) {
+      await onCreate(suggestion);
+      setShowSuggestionModal(false);
+      clearSuggestion();
+    }
+  };
+
+  const handleCancelSuggestion = () => {
+    setShowSuggestionModal(false);
+    clearSuggestion();
+    // Optionally reopen creation dialog
+    // setShowCreationDialog(true);
+  };
+
   return (
     <VStack align="stretch" gap={6}>
       <Flex align="center" justify="space-between">
         <Heading as="h1" size="lg">Recipes</Heading>
-        <Button icon={Plus} onClick={onOpenCreate} aria-label="Add Recipe" />
+        <Button icon={Plus} onClick={handleOpenCreate} aria-label="Add Recipe" />
       </Flex>
 
       <RecipeList recipes={recipes} onEdit={onEdit} onDelete={onDelete} />
 
-      {(isModalOpen || editingRecipe) && (
-        <Card aria-label={editingRecipe ? 'Edit Recipe' : 'Add Recipe'}>
-          <CardHeader display="flex" alignItems="center" justifyContent="space-between" p={6}>
-            <Heading as="h2" size="md">
-              {editingRecipe ? 'Edit Recipe' : 'Add Recipe'}
-            </Heading>
-            <Button variant="secondary" onClick={onCloseModal}>Close</Button>
-          </CardHeader>
-          <CardBody p={6}>
-            <RecipeForm
-              recipe={editingRecipe}
-              onSubmit={(data) => (editingRecipe ? onUpdate(editingRecipe.id, data) : onCreate(data))}
-              onCancel={onCloseModal}
-              loading={creating || updating}
-              initialData={initialData}
-            />
-          </CardBody>
-        </Card>
+      {/* Show creation dialog when creating (not editing) */}
+      {showCreationDialog && !editingRecipe && (
+        <RecipeCreationDialog
+          isOpen={showCreationDialog}
+          onClose={handleCloseCreationDialog}
+          onGenerate={handleGenerate}
+          loading={generating}
+        />
+      )}
+
+      {/* Show edit modal when editing */}
+      {editingRecipe && (
+        <RecipeEditModal
+          isOpen={!!editingRecipe}
+          onClose={onCloseModal}
+          recipe={editingRecipe}
+          onSubmit={(data) => onUpdate(editingRecipe.id, data)}
+          onCancel={onCloseModal}
+          loading={updating}
+          initialData={initialData}
+        />
+      )}
+
+      {/* Show suggestion modal when recipe is generated */}
+      {suggestion && showSuggestionModal && (
+        <RecipeViewModal
+          isOpen={showSuggestionModal}
+          onClose={handleCancelSuggestion}
+          recipe={suggestion}
+          onAccept={handleAcceptSuggestion}
+          onCancel={handleCancelSuggestion}
+          loading={creating}
+        />
       )}
     </VStack>
   );
