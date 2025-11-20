@@ -4,7 +4,7 @@ import { recipeService } from '../../../shared/services';
 import { RecipesLoading, RecipesError } from '../components';
 import { RecipeView } from '../components/RecipeView';
 import { Button } from '../../../shared/components';
-import { VStack } from '../../../shared/components/ui/Layout';
+import { VStack } from '@chakra-ui/react';
 import { ArrowLeft } from 'lucide-react';
 
 export function RecipeDetailContainer() {

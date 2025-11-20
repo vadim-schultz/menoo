@@ -1,12 +1,32 @@
 import { useState, useEffect } from 'react';
-import { Modal } from '../../../shared/components';
+import {
+  DialogRoot,
+  DialogBackdrop,
+  DialogContent,
+  DialogHeader,
+  DialogBody,
+  DialogTitle,
+  IconButton,
+  AccordionRoot,
+  AccordionItem,
+  AccordionItemTrigger,
+  AccordionItemContent,
+  Flex,
+  HStack,
+  Text,
+  Box,
+  VStack,
+  TableRoot as Table,
+  TableHeader as Thead,
+  TableBody as Tbody,
+  TableRow as Tr,
+  TableColumnHeader as Th,
+  TableCell as Td,
+} from '@chakra-ui/react';
 import { ingredientService } from '../../ingredients/services/ingredientService';
 import type { IngredientRead } from '../../../shared/types/ingredient';
-import { Box, IconButton, AccordionRoot, AccordionItem, AccordionItemTrigger, AccordionItemContent, Flex, HStack, Text } from '@chakra-ui/react';
 import { Sparkles, CircleX, Leaf, Fish, WheatOff, Milk, Nut, Bean, Egg, Beef, Apple } from 'lucide-react';
 import { Select } from '../../../shared/components';
-import { VStack } from '../../../shared/components/ui/Layout';
-import { Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '../../../shared/components/ui/Table';
 
 interface RecipeCreationDialogProps {
   isOpen: boolean;
@@ -124,8 +144,43 @@ export function RecipeCreationDialog({ isOpen, onClose, onGenerate, loading }: R
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create Recipe">
-      <VStack align="stretch" gap={4}>
+    <DialogRoot
+      open={isOpen}
+      onOpenChange={(details) => {
+        if (!details.open) {
+          onClose();
+        }
+      }}
+      size="lg"
+    >
+      <DialogBackdrop />
+      <DialogContent
+        position="fixed"
+        top="50%"
+        left="50%"
+        transform="translate(-50%, -50%)"
+        maxW="lg"
+        w="90%"
+        maxH="90vh"
+      >
+        <DialogHeader p={6}>
+          <DialogTitle>Create Recipe</DialogTitle>
+        </DialogHeader>
+        <IconButton
+          aria-label="Close"
+          variant="ghost"
+          size="sm"
+          onClick={onClose}
+          position="absolute"
+          top={3}
+          right={3}
+          zIndex={1}
+          disabled={loading}
+        >
+          <CircleX size={16} />
+        </IconButton>
+        <DialogBody p={6}>
+          <VStack align="stretch" gap={4}>
         {/* Cuisine Selection */}
         <Box>
           <Select
@@ -176,7 +231,7 @@ export function RecipeCreationDialog({ isOpen, onClose, onGenerate, loading }: R
               ) : ingredients.length === 0 ? (
                 <Text color="gray.600">No ingredients available.</Text>
               ) : (
-                <TableContainer>
+                <Box overflowX="auto">
                   <Table>
                     <Thead>
                       <Tr>
@@ -204,7 +259,7 @@ export function RecipeCreationDialog({ isOpen, onClose, onGenerate, loading }: R
                       ))}
                     </Tbody>
                   </Table>
-                </TableContainer>
+                </Box>
               )}
             </AccordionItemContent>
           </AccordionItem>
@@ -229,8 +284,10 @@ export function RecipeCreationDialog({ isOpen, onClose, onGenerate, loading }: R
             <Sparkles size={16} />
           </IconButton>
         </Flex>
-      </VStack>
-    </Modal>
+          </VStack>
+        </DialogBody>
+      </DialogContent>
+    </DialogRoot>
   );
 }
 

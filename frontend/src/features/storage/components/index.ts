@@ -1,6 +1,5 @@
 export { StorageLocationGrid } from './StorageLocationGrid';
 export { StorageLocationCard } from './StorageLocationCard';
-export { StorageLocationTable } from './StorageLocationTable';
 export { StorageLocationTableEmpty } from './StorageLocationTableEmpty';
 export { StorageLocationTableContent } from './StorageLocationTableContent';
 export { HomeLoading } from './HomeLoading';

@@ -5,9 +5,7 @@ import type { IngredientRead } from '../../../shared/types/ingredient';
 type StorageLocation = string;
 import { IngredientTable, IngredientPagination, IngredientModal } from '.';
 import type { SortColumn, SortDirection } from '../hooks/useIngredientFilters';
-import { Box } from '../../../shared/components/ui/Box';
-import { Heading } from '../../../shared/components/ui/Typography';
-import { HStack, Stack, VStack } from '../../../shared/components/ui/Layout';
+import { Box, Heading, HStack, Stack, VStack } from '@chakra-ui/react';
 import { IconButton } from '@chakra-ui/react';
 
 interface IngredientDraft {

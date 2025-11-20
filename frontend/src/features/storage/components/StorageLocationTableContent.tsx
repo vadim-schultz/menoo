@@ -2,8 +2,7 @@ import type { IngredientRead } from '../../../shared/types/ingredient';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '../../../shared/components';
 import { formatDate } from '../services';
-import { Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '../../../shared/components/ui/Table';
-import { HStack } from '../../../shared/components/ui/Layout';
+import { TableRoot as Table, TableHeader as Thead, TableBody as Tbody, TableRow as Tr, TableColumnHeader as Th, TableCell as Td, HStack, Box } from '@chakra-ui/react';
 
 interface StorageLocationTableContentProps {
   ingredients: IngredientRead[];
@@ -13,7 +12,7 @@ interface StorageLocationTableContentProps {
 
 export function StorageLocationTableContent({ ingredients, onEdit, onDelete }: StorageLocationTableContentProps) {
   return (
-    <TableContainer>
+    <Box overflowX="auto">
       <Table>
         <Thead>
           <Tr>
@@ -54,7 +53,7 @@ export function StorageLocationTableContent({ ingredients, onEdit, onDelete }: S
           ))}
         </Tbody>
       </Table>
-    </TableContainer>
+    </Box>
   );
 }
 

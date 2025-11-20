@@ -1,6 +1,6 @@
 import type { IngredientRead } from '../../../shared/types/ingredient';
 import { StorageLocationTableEmpty } from './StorageLocationTableEmpty';
-import { Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '../../../shared/components/ui/Table';
+import { TableRoot as Table, TableHeader as Thead, TableBody as Tbody, TableRow as Tr, TableColumnHeader as Th, TableCell as Td, Box } from '@chakra-ui/react';
 
 interface StorageLocationMiniTableProps {
   ingredients: IngredientRead[];
@@ -22,7 +22,7 @@ export function StorageLocationMiniTable({ ingredients }: StorageLocationMiniTab
   const sorted = sortByExpiryDate(ingredients);
 
   return (
-    <TableContainer>
+    <Box overflowX="auto">
       <Table>
         <Thead>
           <Tr>
@@ -42,7 +42,7 @@ export function StorageLocationMiniTable({ ingredients }: StorageLocationMiniTab
           ))}
         </Tbody>
       </Table>
-    </TableContainer>
+    </Box>
   );
 }
 

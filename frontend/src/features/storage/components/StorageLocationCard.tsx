@@ -4,9 +4,7 @@ import { CircleArrowRight } from 'lucide-react';
 import { IconButton, Box } from '@chakra-ui/react';
 import { StorageLocationMiniTable } from './StorageLocationMiniTable';
 import { formatLocationName } from '../services';
-import { Card, CardHeader, CardBody, CardFooter } from '../../../shared/components/ui/Card';
-import { Heading, Text } from '../../../shared/components/ui/Typography';
-import { HStack } from '../../../shared/components/ui/Layout';
+import { CardRoot as Card, CardHeader, CardBody, CardFooter, Heading, Text, HStack } from '@chakra-ui/react';
 
 interface StorageLocationCardProps {
   location: string;

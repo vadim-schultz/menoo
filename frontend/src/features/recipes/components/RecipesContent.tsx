@@ -6,7 +6,7 @@ import { RecipeCreationDialog } from './RecipeCreationDialog';
 import { RecipeViewModal } from './RecipeViewModal';
 import { RecipeEditModal } from './RecipeEditModal';
 import { Heading, Flex } from '@chakra-ui/react';
-import { VStack } from '../../../shared/components/ui/Layout';
+import { VStack } from '@chakra-ui/react';
 import { useRecipeCreation } from '../hooks/useRecipeCreation';
 import { useState } from 'react';
 

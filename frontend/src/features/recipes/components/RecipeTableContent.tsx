@@ -2,7 +2,7 @@ import type { RecipeDetail } from '../../../shared/types';
 import { Pencil, Trash2 } from 'lucide-react';
 import { IconButton, Text } from '@chakra-ui/react';
 import { formatDifficulty } from '../services/recipeFormatting';
-import { Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '../../../shared/components/ui/Table';
+import { TableRoot as Table, TableHeader as Thead, TableBody as Tbody, TableRow as Tr, TableColumnHeader as Th, TableCell as Td, Box } from '@chakra-ui/react';
 
 interface RecipeTableContentProps {
   recipes: RecipeDetail[];
@@ -27,7 +27,7 @@ export function RecipeTableContent({ recipes, onEdit, onDelete }: RecipeTableCon
   };
 
   return (
-    <TableContainer>
+    <Box overflowX="auto">
       <Table>
         <Thead>
           <Tr>
@@ -80,7 +80,7 @@ export function RecipeTableContent({ recipes, onEdit, onDelete }: RecipeTableCon
           ))}
         </Tbody>
       </Table>
-    </TableContainer>
+    </Box>
   );
 }
 

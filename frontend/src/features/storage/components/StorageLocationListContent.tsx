@@ -1,7 +1,7 @@
 import type { IngredientRead } from '../../../shared/types/ingredient';
 import type { LocationToIngredientsMap } from '../types';
 import { StorageLocationCard } from './StorageLocationCard';
-import { SimpleGrid } from '../../../shared/components/ui/Layout';
+import { SimpleGrid } from '@chakra-ui/react';
 
 interface StorageLocationListContentProps {
   orderedLocations: string[];
