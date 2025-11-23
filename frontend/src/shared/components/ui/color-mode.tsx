@@ -1,61 +1,73 @@
-"use client"
-
 import { ClientOnly, IconButton, Skeleton } from '@chakra-ui/react'
-import { ThemeProvider, useTheme, type ThemeProviderProps } from 'next-themes'
 import { type ReactNode, useEffect, useState } from 'react'
 import { Moon, Sun } from 'lucide-react'
 
-export type ColorModeProviderProps = Omit<ThemeProviderProps, 'children'> & {
-  children: ReactNode
+const COLOR_MODE_STORAGE_KEY = 'chakra-ui-color-mode'
+
+function getColorMode(): 'light' | 'dark' {
+  if (typeof window === 'undefined') return 'light'
+  const stored = localStorage.getItem(COLOR_MODE_STORAGE_KEY)
+  if (stored === 'dark' || stored === 'light') return stored
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
-export function ColorModeProvider({
-  children,
-  attribute = 'class',
-  defaultTheme = 'light',
-  storageKey = 'chakra-ui-color-mode',
-  forcedTheme,
-  enableSystem = true,
-  disableTransitionOnChange = false,
-}: ColorModeProviderProps) {
-  return (
-    <ThemeProvider
-      attribute={attribute}
-      defaultTheme={defaultTheme}
-      storageKey={storageKey}
-      forcedTheme={forcedTheme}
-      enableSystem={enableSystem}
-      disableTransitionOnChange={disableTransitionOnChange}
-    >
-      {children}
-    </ThemeProvider>
-  )
+function setColorMode(mode: 'light' | 'dark') {
+  localStorage.setItem(COLOR_MODE_STORAGE_KEY, mode)
+  // Chakra UI v3 uses data-theme attribute for color mode
+  document.documentElement.setAttribute('data-theme', mode)
+  document.documentElement.classList.toggle('dark', mode === 'dark')
+  document.documentElement.classList.toggle('light', mode === 'light')
+}
+
+export function ColorModeProvider({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    const mode = getColorMode()
+    setColorMode(mode)
+  }, [])
+  return <>{children}</>
 }
 
 export function useColorMode() {
-  const { theme, setTheme, resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const [colorMode, setColorModeState] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'light'
+    return getColorMode()
+  })
 
   useEffect(() => {
-    setMounted(true)
+    const mode = getColorMode()
+    setColorModeState(mode)
+    setColorMode(mode)
+
+    // Listen for system preference changes only if no explicit preference is set
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleChange = () => {
+      const stored = localStorage.getItem(COLOR_MODE_STORAGE_KEY)
+      if (!stored) {
+        const newMode = mediaQuery.matches ? 'dark' : 'light'
+        setColorModeState(newMode)
+        setColorMode(newMode)
+      }
+    }
+
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
   }, [])
 
-  const colorMode = mounted ? (resolvedTheme || theme) : undefined
   const toggleColorMode = () => {
-    const currentResolved = resolvedTheme || theme
-    if (currentResolved === 'dark') {
-      setTheme('light')
-    } else {
-      setTheme('dark')
-    }
+    const newMode = colorMode === 'dark' ? 'light' : 'dark'
+    setColorModeState(newMode)
+    setColorMode(newMode)
+  }
+
+  const setColorModeValue = (mode: 'light' | 'dark') => {
+    setColorModeState(mode)
+    setColorMode(mode)
   }
 
   return {
-    colorMode: colorMode as 'light' | 'dark' | undefined,
-    theme: theme as 'light' | 'dark' | 'system' | undefined,
-    resolvedTheme: resolvedTheme as 'light' | 'dark' | undefined,
-    setColorMode: setTheme,
+    colorMode,
     toggleColorMode,
+    setColorMode: setColorModeValue,
   }
 }
 
@@ -69,10 +81,7 @@ export function ColorModeButton() {
 
   return (
     <ClientOnly fallback={<Skeleton boxSize="8" />}>
-      <IconButton
-        onClick={toggleColorMode}
-        aria-label="Toggle color mode"
-      >
+      <IconButton onClick={toggleColorMode} aria-label="Toggle color mode">
         {colorMode === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
       </IconButton>
     </ClientOnly>

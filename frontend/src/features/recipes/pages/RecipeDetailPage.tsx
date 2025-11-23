@@ -1,5 +1,5 @@
-import { Box, Heading, Text, Spinner } from '@chakra-ui/react'
-import { useParams, Link } from 'react-router-dom'
+import { Box, Heading, Text, Spinner, Link as ChakraLink } from '@chakra-ui/react'
+import { useParams, Link as RouterLink } from 'react-router-dom'
 import { useRecipeDetail } from '../hooks/useRecipeDetail'
 import { RecipeDetailAccordion } from '../components/RecipeDetailAccordion'
 
@@ -20,7 +20,9 @@ export function RecipeDetailPage() {
     return (
       <Box>
         <Text>Recipe not found.</Text>
-        <Link to="/recipes">Back to Recipes</Link>
+        <ChakraLink asChild>
+          <RouterLink to="/recipes">Back to Recipes</RouterLink>
+        </ChakraLink>
       </Box>
     )
   }

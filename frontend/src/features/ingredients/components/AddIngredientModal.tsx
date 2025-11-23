@@ -91,25 +91,29 @@ export function AddIngredientModal({ isOpen, onClose }: AddIngredientModalProps)
     <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && handleClose()}>
       <Dialog.Backdrop />
       <Dialog.Positioner>
-        <Dialog.Content>
-          <Dialog.Header>Add Ingredient</Dialog.Header>
-          <Dialog.Body>
-            <Field.Root mb={4}>
-              <Field.Label>Name</Field.Label>
+        <Dialog.Content maxW="md" bg="bg" borderRadius="lg" boxShadow="xl">
+          <Dialog.Header pb={4} borderBottomWidth="1px" borderColor="border">
+            <Text fontSize="xl" fontWeight="semibold">Add Ingredient</Text>
+          </Dialog.Header>
+          <Dialog.Body pt={6}>
+            <Field.Root mb={6}>
+              <Field.Label mb={2} fontWeight="medium">Name</Field.Label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter ingredient name"
+                size="md"
               />
             </Field.Root>
 
-            <Field.Root mb={4}>
-              <Field.Label>Quantity (grams)</Field.Label>
+            <Field.Root mb={6}>
+              <Field.Label mb={2} fontWeight="medium">Quantity (grams)</Field.Label>
               <NumberInput.Root
                 value={quantity.toString()}
                 onValueChange={(e) => setQuantity(Number(e.value) || 0)}
                 min={0}
                 step={1}
+                size="md"
               >
                 <NumberInput.Control />
                 <NumberInput.Input />
@@ -117,23 +121,33 @@ export function AddIngredientModal({ isOpen, onClose }: AddIngredientModalProps)
             </Field.Root>
 
             {suggestedIngredient && (
-              <Box mb={4} p={4} bg="bg.muted" borderRadius="md">
-                <Text fontWeight="semibold" mb={2}>
+              <Box mb={6} p={4} bg="bg.muted" borderRadius="md" borderWidth="1px" borderColor="border">
+                <Text fontWeight="semibold" mb={3} fontSize="md">
                   Suggested Details:
                 </Text>
-                <Text>Category: {suggestedIngredient.category || '-'}</Text>
-                <Text>Storage: {suggestedIngredient.storage_location || '-'}</Text>
-                {suggestedIngredient.expiry_date && (
-                  <Text>Expiry: {suggestedIngredient.expiry_date}</Text>
-                )}
-                {suggestedIngredient.notes && (
-                  <Text>Notes: {suggestedIngredient.notes}</Text>
-                )}
+                <Box as="dl" display="grid" gridTemplateColumns="auto 1fr" gap={2}>
+                  <Text as="dt" fontWeight="medium" color="fg.muted">Category:</Text>
+                  <Text as="dd">{suggestedIngredient.category || '-'}</Text>
+                  <Text as="dt" fontWeight="medium" color="fg.muted">Storage:</Text>
+                  <Text as="dd">{suggestedIngredient.storage_location || '-'}</Text>
+                  {suggestedIngredient.expiry_date && (
+                    <>
+                      <Text as="dt" fontWeight="medium" color="fg.muted">Expiry:</Text>
+                      <Text as="dd">{suggestedIngredient.expiry_date}</Text>
+                    </>
+                  )}
+                  {suggestedIngredient.notes && (
+                    <>
+                      <Text as="dt" fontWeight="medium" color="fg.muted">Notes:</Text>
+                      <Text as="dd">{suggestedIngredient.notes}</Text>
+                    </>
+                  )}
+                </Box>
               </Box>
             )}
 
-            <Flex gap={2} justify="flex-end">
-              <Button onClick={handleClose}>Cancel</Button>
+            <Flex gap={3} justify="flex-end" pt={4} borderTopWidth="1px" borderColor="border">
+              <Button onClick={handleClose} variant="ghost">Cancel</Button>
               {!suggestedIngredient && (
                 <Button
                   onClick={handleSuggest}

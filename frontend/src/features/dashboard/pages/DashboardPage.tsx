@@ -11,36 +11,36 @@ export function DashboardPage() {
         Dashboard
       </Heading>
       <SimpleGrid columns={{ base: 1, md: 2 }} gap={6}>
-        <Card.Root>
-          <Card.Header>
+        <Card.Root p={6}>
+          <Card.Header pb={4}>
             <Heading size="md">Ingredients</Heading>
           </Card.Header>
           <Card.Body>
-            <Text fontSize="2xl" fontWeight="bold" mb={4}>
+            <Text fontSize="2xl" fontWeight="bold" mb={2}>
               {isLoading ? '...' : ingredientsCount}
             </Text>
-            <Text color="fg.muted" mb={4}>
+            <Text color="fg.muted" mb={4} fontSize="sm">
               Total ingredients in your inventory
             </Text>
             <Link to="/ingredients">
-              <Button colorPalette="blue">View Ingredients</Button>
+              <Button colorPalette="blue" size="sm">View Ingredients</Button>
             </Link>
           </Card.Body>
         </Card.Root>
 
-        <Card.Root>
-          <Card.Header>
+        <Card.Root p={6}>
+          <Card.Header pb={4}>
             <Heading size="md">Recipes</Heading>
           </Card.Header>
           <Card.Body>
-            <Text fontSize="2xl" fontWeight="bold" mb={4}>
+            <Text fontSize="2xl" fontWeight="bold" mb={2}>
               {isLoading ? '...' : recipesCount}
             </Text>
-            <Text color="fg.muted" mb={4}>
+            <Text color="fg.muted" mb={4} fontSize="sm">
               Total recipes in your collection
             </Text>
             <Link to="/recipes">
-              <Button colorPalette="blue">View Recipes</Button>
+              <Button colorPalette="blue" size="sm">View Recipes</Button>
             </Link>
           </Card.Body>
         </Card.Root>

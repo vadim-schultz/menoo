@@ -176,17 +176,20 @@ export function AddRecipeModal({ isOpen, onClose }: AddRecipeModalProps) {
     <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && handleClose()}>
       <Dialog.Backdrop />
       <Dialog.Positioner>
-        <Dialog.Content maxW="4xl">
-          <Dialog.Header>Add Recipe</Dialog.Header>
-          <Dialog.Body>
+        <Dialog.Content maxW="4xl" bg="bg" borderRadius="lg" boxShadow="xl">
+          <Dialog.Header pb={4} borderBottomWidth="1px" borderColor="border">
+            <Text fontSize="xl" fontWeight="semibold">Add Recipe</Text>
+          </Dialog.Header>
+          <Dialog.Body pt={6}>
             {!suggestedRecipe ? (
               <>
-                <Field.Root mb={4}>
-                  <Field.Label>Cuisine</Field.Label>
+                <Field.Root mb={6}>
+                  <Field.Label mb={2} fontWeight="medium">Cuisine</Field.Label>
                   <Select.Root
                     collection={cuisineCollection}
                     value={cuisine ? [cuisine] : []}
                     onValueChange={(e) => setCuisine((e.value[0] as CuisineType) || '')}
+                    size="md"
                   >
                     <Select.Trigger>
                       <Select.ValueText placeholder="Select cuisine" />
@@ -201,12 +204,13 @@ export function AddRecipeModal({ isOpen, onClose }: AddRecipeModalProps) {
                   </Select.Root>
                 </Field.Root>
 
-                <Field.Root mb={4}>
-                  <Field.Label>Dietary Preference</Field.Label>
+                <Field.Root mb={6}>
+                  <Field.Label mb={2} fontWeight="medium">Dietary Preference</Field.Label>
                   <Select.Root
                     collection={dietaryCollection}
                     value={dietaryPreference ? [dietaryPreference] : []}
                     onValueChange={(e) => setDietaryPreference((e.value[0] as DietaryRequirement) || '')}
+                    size="md"
                   >
                     <Select.Trigger>
                       <Select.ValueText placeholder="Select dietary preference" />
@@ -221,12 +225,13 @@ export function AddRecipeModal({ isOpen, onClose }: AddRecipeModalProps) {
                   </Select.Root>
                 </Field.Root>
 
-                <Field.Root mb={4}>
-                  <Field.Label>Mealtime</Field.Label>
+                <Field.Root mb={6}>
+                  <Field.Label mb={2} fontWeight="medium">Mealtime</Field.Label>
                   <Select.Root
                     collection={mealtimeCollection}
                     value={mealtime ? [mealtime] : []}
                     onValueChange={(e) => setMealtime((e.value[0] as MealType) || '')}
+                    size="md"
                   >
                     <Select.Trigger>
                       <Select.ValueText placeholder="Select mealtime" />
@@ -241,25 +246,31 @@ export function AddRecipeModal({ isOpen, onClose }: AddRecipeModalProps) {
                   </Select.Root>
                 </Field.Root>
 
-                <Accordion.Root mb={4}>
+                <Accordion.Root mb={6}>
                   <Accordion.Item value="ingredients">
-                    <Accordion.ItemTrigger>
-                      <Text>Available Ingredients ({ingredients.length})</Text>
+                    <Accordion.ItemTrigger py={3}>
+                      <Text fontWeight="medium">Available Ingredients ({ingredients.length})</Text>
                     </Accordion.ItemTrigger>
-                    <Accordion.ItemContent>
-                      <Box maxH="300px" overflowY="auto">
-                        <Table.Root>
+                    <Accordion.ItemContent pt={4}>
+                      <Box maxH="300px" overflowY="auto" borderRadius="md" borderWidth="1px" borderColor="border">
+                        <Table.Root variant="outline" size="sm">
                           <Table.Header>
                             <Table.Row>
-                              <Table.ColumnHeader>Select</Table.ColumnHeader>
-                              <Table.ColumnHeader>Name</Table.ColumnHeader>
-                              <Table.ColumnHeader>Quantity (g)</Table.ColumnHeader>
+                              <Table.ColumnHeader px={4} py={2} fontWeight="semibold" bg="bg.subtle">
+                                Select
+                              </Table.ColumnHeader>
+                              <Table.ColumnHeader px={4} py={2} fontWeight="semibold" bg="bg.subtle">
+                                Name
+                              </Table.ColumnHeader>
+                              <Table.ColumnHeader px={4} py={2} fontWeight="semibold" bg="bg.subtle">
+                                Quantity (g)
+                              </Table.ColumnHeader>
                             </Table.Row>
                           </Table.Header>
                           <Table.Body>
                             {ingredients.map((ingredient) => (
-                              <Table.Row key={ingredient.id}>
-                                <Table.Cell>
+                              <Table.Row key={ingredient.id} _hover={{ bg: 'bg.muted' }}>
+                                <Table.Cell px={4} py={2}>
                                   <Checkbox.Root
                                     checked={selectedIngredientIds.has(ingredient.id)}
                                     onCheckedChange={() => handleToggleIngredient(ingredient.id)}
@@ -267,8 +278,8 @@ export function AddRecipeModal({ isOpen, onClose }: AddRecipeModalProps) {
                                     <Checkbox.Control />
                                   </Checkbox.Root>
                                 </Table.Cell>
-                                <Table.Cell>{ingredient.name}</Table.Cell>
-                                <Table.Cell>{ingredient.quantity}</Table.Cell>
+                                <Table.Cell px={4} py={2}>{ingredient.name}</Table.Cell>
+                                <Table.Cell px={4} py={2}>{ingredient.quantity}</Table.Cell>
                               </Table.Row>
                             ))}
                           </Table.Body>
@@ -278,8 +289,8 @@ export function AddRecipeModal({ isOpen, onClose }: AddRecipeModalProps) {
                   </Accordion.Item>
                 </Accordion.Root>
 
-                <Flex gap={2} justify="flex-end">
-                  <Button onClick={handleClose}>Cancel</Button>
+                <Flex gap={3} justify="flex-end" pt={4} borderTopWidth="1px" borderColor="border">
+                  <Button onClick={handleClose} variant="ghost">Cancel</Button>
                   <Button
                     onClick={handleGetSuggestion}
                     loading={isSuggesting}
@@ -292,59 +303,55 @@ export function AddRecipeModal({ isOpen, onClose }: AddRecipeModalProps) {
               </>
             ) : (
               <>
-                <Box mb={4} p={4} bg="bg.muted" borderRadius="md">
-                  <Text fontWeight="semibold" fontSize="lg" mb={2}>
+                <Box mb={6} p={6} bg="bg.muted" borderRadius="md" borderWidth="1px" borderColor="border">
+                  <Text fontWeight="bold" fontSize="xl" mb={4}>
                     {suggestedRecipe.name}
                   </Text>
-                  <Text mb={2}>
-                    <strong>Cuisine:</strong>{' '}
-                    {suggestedRecipe.cuisine_types?.join(', ') || '-'}
-                  </Text>
-                  <Text mb={2}>
-                    <strong>Dietary Requirements:</strong>{' '}
-                    {suggestedRecipe.dietary_requirements?.join(', ') || '-'}
-                  </Text>
-                  <Text mb={2}>
-                    <strong>Mealtime:</strong>{' '}
-                    {suggestedRecipe.meal_types?.join(', ') || '-'}
-                  </Text>
+                  <Box as="dl" display="grid" gridTemplateColumns="auto 1fr" gap={3} mb={4}>
+                    <Text as="dt" fontWeight="semibold" color="fg.muted">Cuisine:</Text>
+                    <Text as="dd">{suggestedRecipe.cuisine_types?.join(', ') || '-'}</Text>
+                    <Text as="dt" fontWeight="semibold" color="fg.muted">Dietary Requirements:</Text>
+                    <Text as="dd">{suggestedRecipe.dietary_requirements?.join(', ') || '-'}</Text>
+                    <Text as="dt" fontWeight="semibold" color="fg.muted">Mealtime:</Text>
+                    <Text as="dd">{suggestedRecipe.meal_types?.join(', ') || '-'}</Text>
+                  </Box>
                   {suggestedRecipe.ingredients && suggestedRecipe.ingredients.length > 0 && (
-                    <Box mb={2}>
-                      <Text fontWeight="semibold" mb={1}>
+                    <Box mb={4}>
+                      <Text fontWeight="semibold" mb={2} fontSize="md">
                         Ingredients:
                       </Text>
-                      {suggestedRecipe.ingredients.map((ing, idx) => (
-                        <Text key={idx}>
-                          - {ing.quantity} {ing.unit} (ingredient ID: {ing.ingredient_id})
-                        </Text>
-                      ))}
+                      <Box as="ul" pl={4}>
+                        {suggestedRecipe.ingredients.map((ing, idx) => (
+                          <Text as="li" key={idx} mb={1}>
+                            {ing.quantity} {ing.unit} (ingredient ID: {ing.ingredient_id})
+                          </Text>
+                        ))}
+                      </Box>
                     </Box>
                   )}
                   {suggestedRecipe.timing && (
-                    <Box mb={2}>
-                      <Text>
-                        <strong>Prep Time:</strong>{' '}
-                        {suggestedRecipe.timing.prep_time_minutes || 0} minutes
-                      </Text>
-                      <Text>
-                        <strong>Cook Time:</strong>{' '}
-                        {suggestedRecipe.timing.cook_time_minutes || 0} minutes
-                      </Text>
+                    <Box mb={4}>
+                      <Box as="dl" display="grid" gridTemplateColumns="auto 1fr" gap={2}>
+                        <Text as="dt" fontWeight="medium" color="fg.muted">Prep Time:</Text>
+                        <Text as="dd">{suggestedRecipe.timing.prep_time_minutes || 0} minutes</Text>
+                        <Text as="dt" fontWeight="medium" color="fg.muted">Cook Time:</Text>
+                        <Text as="dd">{suggestedRecipe.timing.cook_time_minutes || 0} minutes</Text>
+                      </Box>
                     </Box>
                   )}
                   {suggestedRecipe.instructions && (
-                    <Box mt={2}>
-                      <Text fontWeight="semibold" mb={1}>
+                    <Box mt={4} pt={4} borderTopWidth="1px" borderColor="border">
+                      <Text fontWeight="semibold" mb={2} fontSize="md">
                         Instructions:
                       </Text>
-                      <Text whiteSpace="pre-wrap">{suggestedRecipe.instructions}</Text>
+                      <Text whiteSpace="pre-wrap" lineHeight="tall">{suggestedRecipe.instructions}</Text>
                     </Box>
                   )}
                 </Box>
 
-                <Flex gap={2} justify="flex-end">
-                  <Button onClick={() => setSuggestedRecipe(null)}>Back</Button>
-                  <Button onClick={handleClose}>Cancel</Button>
+                <Flex gap={3} justify="flex-end" pt={4} borderTopWidth="1px" borderColor="border">
+                  <Button onClick={() => setSuggestedRecipe(null)} variant="ghost">Back</Button>
+                  <Button onClick={handleClose} variant="ghost">Cancel</Button>
                   <Button
                     onClick={handleSave}
                     loading={createMutation.isPending}

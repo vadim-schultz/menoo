@@ -5,6 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Menoo - Recipe Management</title>
+    <script>
+      // ColorModeScript - prevents flash of unstyled content
+      (function() {
+        const storageKey = 'chakra-ui-color-mode';
+        const stored = localStorage.getItem(storageKey);
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const mode = stored === 'dark' || stored === 'light' ? stored : (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', mode);
+        document.documentElement.classList.add(mode);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -31,7 +31,7 @@ export function IngredientsTable({ ingredients, isLoading, onAddClick }: Ingredi
 
   return (
     <Box>
-      <Flex justify="space-between" align="center" mb={4}>
+      <Flex justify="space-between" align="center" mb={6}>
         <Text fontSize="lg" fontWeight="semibold">
           Ingredients ({ingredients.length})
         </Text>
@@ -39,26 +39,36 @@ export function IngredientsTable({ ingredients, isLoading, onAddClick }: Ingredi
           Add Ingredient
         </Button>
       </Flex>
-      <Table.Root>
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeader>Name</Table.ColumnHeader>
-            <Table.ColumnHeader>Quantity (g)</Table.ColumnHeader>
-            <Table.ColumnHeader>Category</Table.ColumnHeader>
-            <Table.ColumnHeader>Storage Location</Table.ColumnHeader>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {ingredients.map((ingredient) => (
-            <Table.Row key={ingredient.id}>
-              <Table.Cell>{ingredient.name}</Table.Cell>
-              <Table.Cell>{ingredient.quantity}</Table.Cell>
-              <Table.Cell>{ingredient.category || '-'}</Table.Cell>
-              <Table.Cell>{ingredient.storage_location || '-'}</Table.Cell>
+      <Box borderRadius="md" borderWidth="1px" borderColor="border" overflow="hidden">
+        <Table.Root variant="outline" size="md">
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeader px={4} py={3} fontWeight="semibold" bg="bg.subtle">
+                Name
+              </Table.ColumnHeader>
+              <Table.ColumnHeader px={4} py={3} fontWeight="semibold" bg="bg.subtle">
+                Quantity (g)
+              </Table.ColumnHeader>
+              <Table.ColumnHeader px={4} py={3} fontWeight="semibold" bg="bg.subtle">
+                Category
+              </Table.ColumnHeader>
+              <Table.ColumnHeader px={4} py={3} fontWeight="semibold" bg="bg.subtle">
+                Storage Location
+              </Table.ColumnHeader>
             </Table.Row>
-          ))}
-        </Table.Body>
-      </Table.Root>
+          </Table.Header>
+          <Table.Body>
+            {ingredients.map((ingredient) => (
+              <Table.Row key={ingredient.id} _hover={{ bg: 'bg.muted' }}>
+                <Table.Cell px={4} py={3}>{ingredient.name}</Table.Cell>
+                <Table.Cell px={4} py={3}>{ingredient.quantity}</Table.Cell>
+                <Table.Cell px={4} py={3}>{ingredient.category || '-'}</Table.Cell>
+                <Table.Cell px={4} py={3}>{ingredient.storage_location || '-'}</Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table.Root>
+      </Box>
     </Box>
   )
 }
