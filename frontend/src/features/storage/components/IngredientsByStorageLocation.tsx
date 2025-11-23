@@ -2,7 +2,7 @@ import type { IngredientRead } from '../../../shared/types/ingredient';
 import type { LocationToIngredientsMap } from '../types';
 import { StorageLocationGrid } from './StorageLocationGrid';
 import { IngredientModal } from '../../ingredients/components';
-import { Heading, Text, VStack } from '@chakra-ui/react';
+import { Heading, VStack } from '@chakra-ui/react';
 
 interface IngredientsByStorageLocationProps {
   grouped: LocationToIngredientsMap;

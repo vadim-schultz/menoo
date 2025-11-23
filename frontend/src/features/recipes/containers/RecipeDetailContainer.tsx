@@ -23,7 +23,8 @@ export function RecipeDetailContainer() {
     <VStack align="stretch" gap={6}>
       <Button
         icon={ArrowLeft}
-        variant="secondary"
+        variant="outline"
+        colorPalette="gray"
         onClick={() => navigate('/recipes')}
         aria-label="Back to Recipes"
       >

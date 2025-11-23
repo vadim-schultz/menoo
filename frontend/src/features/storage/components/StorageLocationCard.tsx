@@ -1,7 +1,6 @@
 import type { IngredientRead } from '../../../shared/types/ingredient';
 import { useNavigate } from 'react-router-dom';
-import { CircleArrowRight } from 'lucide-react';
-import { IconButton, Box } from '@chakra-ui/react';
+import { Button, Box } from '@chakra-ui/react';
 import { StorageLocationMiniTable } from './StorageLocationMiniTable';
 import { formatLocationName } from '../services';
 import { CardRoot as Card, CardHeader, CardBody, CardFooter, Heading, Text, HStack } from '@chakra-ui/react';
@@ -13,7 +12,7 @@ interface StorageLocationCardProps {
   onDelete: (id: number) => void;
 }
 
-export function StorageLocationCard({ location, ingredients, onEdit, onDelete }: StorageLocationCardProps) {
+export function StorageLocationCard({ location, ingredients, onEdit: _onEdit, onDelete: _onDelete }: StorageLocationCardProps) {
   const navigate = useNavigate();
   const handleViewInIngredients = () => {
     const params = new URLSearchParams({ storage_location: location });
@@ -28,7 +27,7 @@ export function StorageLocationCard({ location, ingredients, onEdit, onDelete }:
             <Heading as="h3" size="md">
               {formatLocationName(location)}
             </Heading>
-            <Text fontSize="sm" color="gray.600" mt={1}>
+            <Text fontSize="sm" color="fg.muted" mt={1}>
               {ingredients.length} items
             </Text>
           </Box>
@@ -38,14 +37,9 @@ export function StorageLocationCard({ location, ingredients, onEdit, onDelete }:
         <StorageLocationMiniTable ingredients={ingredients} />
       </CardBody>
       <CardFooter justifyContent="flex-end" p={6}>
-        <IconButton
-          aria-label="View in ingredients"
-          size="sm"
-          variant="ghost"
-          onClick={handleViewInIngredients}
-        >
-          <CircleArrowRight size={16} />
-        </IconButton>
+        <Button size="sm" variant="ghost" onClick={handleViewInIngredients}>
+          View in Ingredients
+        </Button>
       </CardFooter>
     </Card>
   );

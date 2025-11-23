@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import type { IngredientRead } from '../../../shared/types/ingredient';
 import type {
   CreateIngredientFn,
   RemoveIngredientFn,

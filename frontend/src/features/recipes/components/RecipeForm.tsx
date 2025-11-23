@@ -1,15 +1,14 @@
 import { useState } from 'react';
 import { useForm } from '../../../shared/hooks';
 import type { RecipeCreate, RecipeDetail, RecipeIngredientCreate } from '../../../shared/types';
-import { Button, Input, Select } from '../../../shared/components';
+import { Input, Select } from '../../../shared/components';
 import { Textarea } from '../../../shared/components/Input';
 import { RecipeIngredientInput } from './RecipeIngredientInput';
 // Removed RecipeAIAssistant; field-level generation triggers are used instead
 import { useRecipeFormAI } from '../hooks/useRecipeFormAI';
 import { difficultyOptions } from '../services/recipeOptions';
 import { validateRecipe } from '../services/recipeValidation';
-import { Box, Stack, SimpleGrid, Heading, Flex, IconButton, Text, FieldsetRoot, FieldsetLegend } from '@chakra-ui/react';
-import { Sparkles } from 'lucide-react';
+import { Box, Stack, SimpleGrid, Flex, Button, Text, FieldsetRoot, FieldsetLegend } from '@chakra-ui/react';
 
 interface RecipeFormInitialData {
   ingredientIds?: number[];
@@ -56,9 +55,14 @@ export function RecipeForm({
 
   const handleSubmit = (values: RecipeCreate) => {
     // Include ingredients in the submission
+    const linkedIngredients = ingredients.filter(
+      (ing): ing is RecipeIngredientCreate & { ingredient_id: number } =>
+        typeof ing.ingredient_id === 'number' && ing.ingredient_id > 0
+    );
+
     const data = {
       ...values,
-      ingredients: ingredients.filter((ing) => ing.ingredient_id > 0),
+      ingredients: linkedIngredients,
     };
     onSubmit(data);
   };
@@ -109,7 +113,7 @@ export function RecipeForm({
     validate: validateRecipe,
   });
 
-  const { handleEnhanceRecipe, generating } = useRecipeFormAI(form, ingredients, setIngredients);
+  const { handleEnhanceRecipe, generating } = useRecipeFormAI(form, setIngredients);
 
   return (
     <form onSubmit={form.handleSubmit}>
@@ -122,18 +126,17 @@ export function RecipeForm({
         <Box>
           <Flex align="center" justify="space-between">
             <Text fontWeight={500}>Recipe Name</Text>
-            <IconButton
+            <Button
               type="button"
               onClick={handleEnhanceRecipe}
-              aria-label="Generate recipe with AI"
               variant="ghost"
               size="sm"
             >
-              <Sparkles size={16} />
-            </IconButton>
+              Enhance with AI
+            </Button>
           </Flex>
           {generating && (
-            <Text color="gray.600" fontSize="sm">
+            <Text color="fg.muted" fontSize="sm">
               loading ...
             </Text>
           )}
@@ -151,15 +154,14 @@ export function RecipeForm({
         <Box>
           <Flex align="center" justify="space-between">
             <Text fontWeight={500}>Description</Text>
-            <IconButton
+            <Button
               type="button"
               onClick={handleEnhanceRecipe}
-              aria-label="Generate description with AI"
               variant="ghost"
               size="sm"
             >
-              <Sparkles size={16} />
-            </IconButton>
+              Enhance with AI
+            </Button>
           </Flex>
           <Textarea
             name="description"
@@ -174,15 +176,14 @@ export function RecipeForm({
         <Box>
           <Flex align="center" justify="space-between">
             <Text fontWeight={500}>Instructions</Text>
-            <IconButton
+            <Button
               type="button"
               onClick={handleEnhanceRecipe}
-              aria-label="Generate instructions with AI"
               variant="ghost"
               size="sm"
             >
-              <Sparkles size={16} />
-            </IconButton>
+              Enhance with AI
+            </Button>
           </Flex>
           <Textarea
             name="instructions"
@@ -389,7 +390,7 @@ export function RecipeForm({
         {/* Removed RecipeAIAssistant; generation is triggered via ✨ buttons above */}
 
         <Flex justify="flex-end" gap={2}>
-          <Button variant="secondary" onClick={onCancel} disabled={loading} type="button">
+          <Button variant="outline" colorPalette="gray" onClick={onCancel} disabled={loading} type="button">
             Cancel
           </Button>
           <Button type="submit" disabled={loading}>
@@ -432,7 +433,7 @@ function EquipmentEditor({
         </Button>
       </Flex>
       {(items || []).length === 0 ? (
-        <Text color="gray.600">No equipment listed.</Text>
+        <Text color="fg.muted">No equipment listed.</Text>
       ) : (
         <Stack>
           {(items || []).map((it, idx) => (
@@ -462,7 +463,7 @@ function EquipmentEditor({
                 placeholder="Optional notes"
               />
               <Box>
-                <Button type="button" variant="secondary" onClick={() => removeItem(idx)}>
+                <Button type="button" variant="ghost" colorPalette="gray" onClick={() => removeItem(idx)}>
                   Remove
                 </Button>
               </Box>

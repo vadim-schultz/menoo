@@ -1,6 +1,5 @@
 import type { RecipeDetail } from '../../../shared/types';
-import { Pencil, Trash2 } from 'lucide-react';
-import { IconButton, Text } from '@chakra-ui/react';
+import { Button, Text, HStack } from '@chakra-ui/react';
 import { formatDifficulty } from '../services/recipeFormatting';
 import { TableRoot as Table, TableHeader as Thead, TableBody as Tbody, TableRow as Tr, TableColumnHeader as Th, TableCell as Td, Box } from '@chakra-ui/react';
 
@@ -27,54 +26,57 @@ export function RecipeTableContent({ recipes, onEdit, onDelete }: RecipeTableCon
   };
 
   return (
-    <Box overflowX="auto">
+    <Box overflowX="auto" bg="bg.surface" borderRadius="lg" borderWidth="1px" borderColor="border.subtle">
       <Table>
         <Thead>
           <Tr>
-            <Th scope="col">
-              <Text>Name</Text>
+            <Th>
+              <Text fontWeight="600" fontSize="sm" color="fg.muted">Name</Text>
             </Th>
-            <Th scope="col">
-              <Text>Meal Type</Text>
+            <Th>
+              <Text fontWeight="600" fontSize="sm" color="fg.muted">Meal Type</Text>
             </Th>
-            <Th scope="col">
-              <Text>Dietary Preference</Text>
+            <Th>
+              <Text fontWeight="600" fontSize="sm" color="fg.muted">Dietary Preference</Text>
             </Th>
-            <Th scope="col">
-              <Text>Cuisine</Text>
+            <Th>
+              <Text fontWeight="600" fontSize="sm" color="fg.muted">Cuisine</Text>
             </Th>
-            <Th scope="col">
-              <Text>Difficulty</Text>
+            <Th>
+              <Text fontWeight="600" fontSize="sm" color="fg.muted">Difficulty</Text>
             </Th>
-            <Th scope="col">Actions</Th>
+            <Th>
+              <Text fontWeight="600" fontSize="sm" color="fg.muted">Actions</Text>
+            </Th>
           </Tr>
         </Thead>
         <Tbody>
           {recipes.map((recipe) => (
-            <Tr key={recipe.id}>
-              <Td>{recipe.name}</Td>
-              <Td>{formatMealTypes(recipe.meal_types)}</Td>
-              <Td>{formatDietaryRequirements(recipe.dietary_requirements)}</Td>
-              <Td>{formatCuisine(recipe.cuisine_types)}</Td>
-              <Td>{formatDifficulty(recipe.difficulty)}</Td>
+            <Tr key={recipe.id} _hover={{ bg: 'bg.subtle' }}>
               <Td>
-                <IconButton
-                  aria-label="Edit recipe"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => onEdit(recipe)}
-                >
-                  <Pencil size={16} />
-                </IconButton>
-                <IconButton
-                  aria-label="Delete recipe"
-                  size="sm"
-                  variant="ghost"
-                  colorScheme="red"
-                  onClick={() => onDelete(recipe.id)}
-                >
-                  <Trash2 size={16} />
-                </IconButton>
+                <Text>{recipe.name}</Text>
+              </Td>
+              <Td>
+                <Text>{formatMealTypes(recipe.meal_types)}</Text>
+              </Td>
+              <Td>
+                <Text>{formatDietaryRequirements(recipe.dietary_requirements)}</Text>
+              </Td>
+              <Td>
+                <Text>{formatCuisine(recipe.cuisine_types)}</Text>
+              </Td>
+              <Td>
+                <Text>{formatDifficulty(recipe.difficulty)}</Text>
+              </Td>
+              <Td>
+                <HStack gap={2}>
+                  <Button size="sm" variant="ghost" onClick={() => onEdit(recipe)}>
+                    Edit
+                  </Button>
+                  <Button size="sm" variant="ghost" colorPalette="red" onClick={() => onDelete(recipe.id)}>
+                    Delete
+                  </Button>
+                </HStack>
               </Td>
             </Tr>
           ))}

@@ -1,5 +1,7 @@
 // Backend-aligned ingredient types (kept minimal for UI compatibility)
 
+export type StorageLocation = string;
+
 export type IngredientCategory =
   | 'protein'
   | 'vegetable'
@@ -49,8 +51,8 @@ export interface IngredientRead extends IngredientBase {
 
 export interface IngredientFilters {
   category?: IngredientCategory;
-  storage_location?: string;
-  expiring_before?: string;
+  storage_location?: string | null;
+  expiring_before?: string | null;
   name_contains?: string;
   page?: number;
   page_size?: number;

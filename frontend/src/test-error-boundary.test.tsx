@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
+import type { ReactElement } from 'react';
 import { ErrorBoundary } from './test-error-boundary';
 
 // Component that throws an error
@@ -68,7 +69,7 @@ describe('ErrorBoundary', () => {
     );
 
     // Component stack section should be present (may or may not have content)
-    const componentStack = screen.queryByText(/Component Stack/i);
+    screen.queryByText(/Component Stack/i);
     // Component stack might not always be available in test environment
     // but the section should be rendered if errorInfo is available
     expect(screen.getByText(/Application Error/i)).toBeInTheDocument();
@@ -115,8 +116,9 @@ describe('ErrorBoundary', () => {
   });
 
   it('handles errors with no message gracefully', () => {
-    function ThrowErrorNoMessage() {
+    function ThrowErrorNoMessage(): ReactElement {
       throw new Error('');
+      return <div />;
     }
 
     render(

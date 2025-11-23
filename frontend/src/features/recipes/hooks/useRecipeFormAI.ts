@@ -8,7 +8,6 @@ import { ingredientService } from '../../ingredients/services/ingredientService'
 
 export function useRecipeFormAI(
   form: UseFormReturn<RecipeCreate>,
-  ingredients: RecipeIngredientCreate[],
   setIngredients: (ings: RecipeIngredientCreate[]) => void
 ) {
   const { generateRecipe, convertGeneratedToCreate, generating } = useRecipeAI();

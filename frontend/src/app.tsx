@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Container, Box } from '@chakra-ui/react';
+import { Box, Container } from '@chakra-ui/react';
 import { Navigation } from './shared/components/Navigation';
 
 // Feature pages
@@ -11,9 +11,9 @@ import { StorageContainer } from './features/storage/containers/StorageContainer
 export function App() {
   return (
     <BrowserRouter>
-      <Box px={6} py={8} width="100%">
-        <Container maxW="container.lg" margin="0 auto">
-          <Navigation />
+      <Box minH="100vh" bg="bg.canvas">
+        <Navigation />
+        <Container maxW="7xl" py={8} px={4}>
           <Routes>
             <Route path="/" element={<StorageContainer />} />
             <Route path="/ingredients" element={<IngredientsContainer />} />

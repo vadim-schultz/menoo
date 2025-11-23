@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useRecipeAI } from './useRecipeAI';
-import type { RecipeCreate } from '../../../shared/types';
+import type { RecipeCreate, RecipeIngredientCreate } from '../../../shared/types';
 import type { SuggestionRequest } from '../../../shared/types';
+import { ingredientService } from '../../ingredients/services/ingredientService';
 
 interface CreationPayload {
   ingredientIds: number[];
@@ -39,6 +40,43 @@ export function useRecipeCreation() {
       // Also include cuisine and dietary requirements in the result
       recipeCreate.cuisine_types = payload.cuisine ? [payload.cuisine] : [];
       recipeCreate.dietary_requirements = payload.dietaryRequirements;
+      
+      // Hydrate ingredient names
+      if (recipeCreate.ingredients && recipeCreate.ingredients.length > 0) {
+        const uniqueIngredientIds = [...new Set(
+          recipeCreate.ingredients
+            .map(ing => ing.ingredient_id)
+            .filter((id): id is number => id !== undefined && id > 0)
+        )];
+        
+        if (uniqueIngredientIds.length > 0) {
+          try {
+            const ingredientMap = new Map<number, string>();
+            await Promise.all(
+              uniqueIngredientIds.map(async (id) => {
+                try {
+                  const ingredient = await ingredientService.get(id);
+                  ingredientMap.set(id, ingredient.name);
+                } catch (err) {
+                  console.warn(`Failed to fetch ingredient ${id}:`, err);
+                }
+              })
+            );
+            
+            // Inject ingredient_name into each ingredient
+            recipeCreate.ingredients = recipeCreate.ingredients.map((ing) => ({
+              ...ing,
+              ingredient_name: ing.ingredient_id && ingredientMap.has(ing.ingredient_id)
+                ? ingredientMap.get(ing.ingredient_id)!
+                : ing.ingredient_name,
+            })) as RecipeIngredientCreate[];
+          } catch (err) {
+            console.warn('Failed to hydrate ingredient names:', err);
+            // Continue with fallback names
+          }
+        }
+      }
+      
       setSuggestion(recipeCreate);
       return recipeCreate;
     } catch (error) {

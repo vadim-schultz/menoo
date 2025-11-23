@@ -58,7 +58,6 @@ describe('Main Entry Point', () => {
 
     // The main.tsx should handle this case and show error message
     // We can't directly test the main.tsx execution, but we verify the logic
-    const bodyContent = document.body.innerHTML;
     // If root element is missing, main.tsx should set body.innerHTML with error message
     // This is tested indirectly through the error handling logic
   });
@@ -134,7 +133,7 @@ describe('Main Entry Point - Error Handling Logic', () => {
   });
 
   it('should handle non-Error objects in catch blocks', () => {
-    const nonError = 'String error';
+    const nonError: unknown = 'String error';
     const errorMessage = nonError instanceof Error ? nonError.message : String(nonError);
     expect(errorMessage).toBe('String error');
   });

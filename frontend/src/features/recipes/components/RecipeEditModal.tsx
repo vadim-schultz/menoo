@@ -5,9 +5,9 @@ import {
   DialogHeader,
   DialogBody,
   DialogTitle,
-  IconButton,
+  Button,
+  Flex,
 } from '@chakra-ui/react';
-import { CircleX } from 'lucide-react';
 import type { RecipeDetail, RecipeCreate } from '../../../shared/types';
 import { RecipeForm } from './RecipeForm';
 
@@ -51,21 +51,13 @@ export function RecipeEditModal({
         maxH="90vh"
       >
         <DialogHeader p={6}>
-          <DialogTitle>Edit Recipe</DialogTitle>
+          <Flex justify="space-between" align="center">
+            <DialogTitle>Edit Recipe</DialogTitle>
+            <Button variant="ghost" size="sm" onClick={onCancel} disabled={loading}>
+              Close
+            </Button>
+          </Flex>
         </DialogHeader>
-        <IconButton
-          aria-label="Close"
-          variant="ghost"
-          size="sm"
-          onClick={onCancel}
-          position="absolute"
-          top={3}
-          right={3}
-          zIndex={1}
-          disabled={loading}
-        >
-          <CircleX size={16} />
-        </IconButton>
         <DialogBody p={6} maxH="80vh" overflowY="auto">
           <RecipeForm
             recipe={recipe}

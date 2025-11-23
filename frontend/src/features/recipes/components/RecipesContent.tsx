@@ -46,16 +46,13 @@ export function RecipesContent({
   updating,
 }: RecipesContentProps) {
   const { generateFromPayload, suggestion, generating, clearSuggestion } = useRecipeCreation();
-  const [showCreationDialog, setShowCreationDialog] = useState(false);
   const [showSuggestionModal, setShowSuggestionModal] = useState(false);
 
   const handleOpenCreate = () => {
-    setShowCreationDialog(true);
     onOpenCreate();
   };
 
   const handleCloseCreationDialog = () => {
-    setShowCreationDialog(false);
     onCloseModal();
     clearSuggestion();
   };
@@ -67,7 +64,7 @@ export function RecipesContent({
   }) => {
     const result = await generateFromPayload(payload);
     if (result) {
-      setShowCreationDialog(false);
+      onCloseModal();
       setShowSuggestionModal(true);
     }
   };
@@ -97,9 +94,9 @@ export function RecipesContent({
       <RecipeList recipes={recipes} onEdit={onEdit} onDelete={onDelete} />
 
       {/* Show creation dialog when creating (not editing) */}
-      {showCreationDialog && !editingRecipe && (
+      {isModalOpen && !editingRecipe && (
         <RecipeCreationDialog
-          isOpen={showCreationDialog}
+          isOpen={isModalOpen && !editingRecipe}
           onClose={handleCloseCreationDialog}
           onGenerate={handleGenerate}
           loading={generating}

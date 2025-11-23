@@ -7,11 +7,11 @@ import {
   DialogHeader,
   DialogBody,
   DialogTitle,
-  IconButton,
-  Box,
+  Button,
   VStack,
+  Flex,
 } from '@chakra-ui/react';
-import { CircleCheckBig, CircleX } from 'lucide-react';
+import type { IngredientRead } from '../../../shared/types/ingredient';
 
 interface IngredientDraft {
   name: string;
@@ -23,21 +23,34 @@ interface Props {
   onClose: () => void;
   onSubmit: (data: IngredientDraft) => Promise<void>;
   loading: boolean;
+  ingredient?: IngredientRead | null;
 }
 
-export const IngredientModal = ({ isOpen, onClose, onSubmit, loading }: Props) => {
+export const IngredientModal = ({ isOpen, onClose, onSubmit, loading, ingredient }: Props) => {
   const [name, setName] = React.useState('');
   const [quantity, setQuantity] = React.useState<number | ''>('');
   const [errors, setErrors] = React.useState<{ name?: string; quantity?: string }>({});
 
   React.useEffect(() => {
     if (!isOpen) {
-      // Reset form when modal closes
       setName('');
       setQuantity('');
       setErrors({});
+      return;
     }
-  }, [isOpen]);
+
+    if (ingredient) {
+      setName(ingredient.name || '');
+      setQuantity(
+        typeof ingredient.quantity === 'number' && !Number.isNaN(ingredient.quantity)
+          ? ingredient.quantity
+          : ''
+      );
+    } else {
+      setName('');
+      setQuantity('');
+    }
+  }, [isOpen, ingredient]);
 
   const validate = (): boolean => {
     const newErrors: { name?: string; quantity?: string } = {};
@@ -90,21 +103,13 @@ export const IngredientModal = ({ isOpen, onClose, onSubmit, loading }: Props) =
         maxH="90vh"
       >
         <DialogHeader p={6}>
-          <DialogTitle>Add Ingredient</DialogTitle>
+          <Flex justify="space-between" align="center">
+            <DialogTitle>{ingredient ? 'Edit Ingredient' : 'Add Ingredient'}</DialogTitle>
+            <Button variant="ghost" size="sm" onClick={onClose} disabled={loading}>
+              Close
+            </Button>
+          </Flex>
         </DialogHeader>
-        <IconButton
-          aria-label="Close"
-          variant="ghost"
-          size="sm"
-          onClick={onClose}
-          position="absolute"
-          top={3}
-          right={3}
-          zIndex={1}
-          disabled={loading}
-        >
-          <CircleX size={16} />
-        </IconButton>
         <DialogBody p={6}>
           <form onSubmit={handleSubmit}>
             <VStack align="stretch" gap={4}>
@@ -129,28 +134,14 @@ export const IngredientModal = ({ isOpen, onClose, onSubmit, loading }: Props) =
                 placeholder="e.g., 100"
               />
 
-              <Box
-                display="flex"
-                justifyContent="flex-end"
-                gap={2}
-              >
-                <IconButton
-                  aria-label="Cancel"
-                  variant="ghost"
-                  onClick={onClose}
-                  disabled={loading}
-                >
-                  <CircleX size={16} />
-                </IconButton>
-                <IconButton
-                  aria-label={loading ? 'Adding...' : 'Add Ingredient'}
-                  variant="ghost"
-                  type="submit"
-                  disabled={loading}
-                >
-                  <CircleCheckBig size={16} />
-                </IconButton>
-              </Box>
+              <Flex justify="flex-end" gap={2}>
+                <Button variant="ghost" onClick={onClose} disabled={loading}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={loading}>
+                  {loading ? 'Saving...' : ingredient ? 'Update Ingredient' : 'Add Ingredient'}
+                </Button>
+              </Flex>
             </VStack>
           </form>
         </DialogBody>

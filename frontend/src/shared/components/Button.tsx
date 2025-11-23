@@ -1,49 +1,22 @@
-import { Button as ChakraButton, type ButtonProps as ChakraButtonProps } from '@chakra-ui/react';
-import type { ReactNode, MouseEvent } from 'react';
+import { Button as ChakraButton, type ButtonProps } from '@chakra-ui/react';
+import type { ReactNode } from 'react';
 
-type Variant = 'primary' | 'secondary' | 'danger';
-
-interface ButtonProps {
+interface ButtonPropsExtended extends Omit<ButtonProps, 'children'> {
 	children?: ReactNode;
-	onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
-	type?: 'button' | 'submit' | 'reset';
-	variant?: Variant;
-	disabled?: boolean;
-	className?: string;
 	icon?: React.ComponentType<{ size?: number }>;
 	iconPosition?: 'left' | 'right';
-	'aria-label'?: string;
-}
-
-function mapVariant(variant: Variant | undefined): Pick<ChakraButtonProps, 'variant' | 'colorScheme'> {
-	if (variant === 'secondary') return { variant: 'outline', colorScheme: 'gray' };
-	if (variant === 'danger') return { variant: 'solid', colorScheme: 'red' };
-	return { variant: 'solid', colorScheme: 'teal' };
 }
 
 export function Button({
 	children,
-	onClick,
-	type = 'button',
-	variant = 'primary',
-	disabled = false,
-	className = '',
 	icon: Icon,
 	iconPosition = 'left',
-	'aria-label': ariaLabel,
-}: ButtonProps) {
-	const mapped = mapVariant(variant);
+	...props
+}: ButtonPropsExtended) {
 	const iconElement = Icon ? <Icon size={16} /> : null;
 	
 	return (
-		<ChakraButton
-			type={type}
-			onClick={onClick}
-			disabled={disabled}
-			className={className}
-			aria-label={ariaLabel}
-			{...mapped}
-		>
+		<ChakraButton {...props}>
 			{iconPosition === 'left' && iconElement}
 			{children}
 			{iconPosition === 'right' && iconElement}

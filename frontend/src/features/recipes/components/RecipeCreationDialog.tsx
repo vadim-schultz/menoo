@@ -6,13 +6,12 @@ import {
   DialogHeader,
   DialogBody,
   DialogTitle,
-  IconButton,
+  Button,
   AccordionRoot,
   AccordionItem,
   AccordionItemTrigger,
   AccordionItemContent,
   Flex,
-  HStack,
   Text,
   Box,
   VStack,
@@ -22,11 +21,15 @@ import {
   TableRow as Tr,
   TableColumnHeader as Th,
   TableCell as Td,
+  Spinner,
+  Checkbox,
+  Field,
+  chakra,
 } from '@chakra-ui/react';
 import { ingredientService } from '../../ingredients/services/ingredientService';
 import type { IngredientRead } from '../../../shared/types/ingredient';
-import { Sparkles, CircleX, Leaf, Fish, WheatOff, Milk, Nut, Bean, Egg, Beef, Apple } from 'lucide-react';
-import { Select } from '../../../shared/components';
+
+const NativeSelect = chakra('select');
 
 interface RecipeCreationDialogProps {
   isOpen: boolean;
@@ -39,50 +42,51 @@ interface RecipeCreationDialogProps {
   loading: boolean;
 }
 
-// Cuisine options with flag emojis
+// Cuisine options
 const cuisineOptions = [
   { value: '', label: 'Select Cuisine' },
-  { value: 'italian', label: '🇮🇹 Italian' },
-  { value: 'indian', label: '🇮🇳 Indian' },
-  { value: 'japanese', label: '🇯🇵 Japanese' },
-  { value: 'chinese', label: '🇨🇳 Chinese' },
-  { value: 'french', label: '🇫🇷 French' },
-  { value: 'mexican', label: '🇲🇽 Mexican' },
-  { value: 'thai', label: '🇹🇭 Thai' },
-  { value: 'mediterranean', label: '🇬🇷 Mediterranean' },
-  { value: 'american', label: '🇺🇸 American' },
-  { value: 'middle_eastern', label: '🇱🇧 Middle Eastern' },
-  { value: 'korean', label: '🇰🇷 Korean' },
-  { value: 'vietnamese', label: '🇻🇳 Vietnamese' },
-  { value: 'greek', label: '🇬🇷 Greek' },
-  { value: 'spanish', label: '🇪🇸 Spanish' },
-  { value: 'turkish', label: '🇹🇷 Turkish' },
-  { value: 'moroccan', label: '🇲🇦 Moroccan' },
-  { value: 'ethiopian', label: '🇪🇹 Ethiopian' },
-  { value: 'fusion', label: '🌍 Fusion' },
-  { value: 'other', label: '🌐 Other' },
+  { value: 'italian', label: 'Italian' },
+  { value: 'indian', label: 'Indian' },
+  { value: 'japanese', label: 'Japanese' },
+  { value: 'chinese', label: 'Chinese' },
+  { value: 'french', label: 'French' },
+  { value: 'mexican', label: 'Mexican' },
+  { value: 'thai', label: 'Thai' },
+  { value: 'mediterranean', label: 'Mediterranean' },
+  { value: 'american', label: 'American' },
+  { value: 'middle_eastern', label: 'Middle Eastern' },
+  { value: 'korean', label: 'Korean' },
+  { value: 'vietnamese', label: 'Vietnamese' },
+  { value: 'greek', label: 'Greek' },
+  { value: 'spanish', label: 'Spanish' },
+  { value: 'turkish', label: 'Turkish' },
+  { value: 'moroccan', label: 'Moroccan' },
+  { value: 'ethiopian', label: 'Ethiopian' },
+  { value: 'fusion', label: 'Fusion' },
+  { value: 'other', label: 'Other' },
 ];
 
-// Dietary preference options with icons
+// Dietary preference options with descriptions
 const dietaryOptions = [
-  { value: 'vegetarian', label: 'Vegetarian', icon: Leaf },
-  { value: 'vegan', label: 'Vegan', icon: Leaf },
-  { value: 'pescatarian', label: 'Pescatarian', icon: Fish },
-  { value: 'gluten_free', label: 'Gluten Free', icon: WheatOff },
-  { value: 'dairy_free', label: 'Dairy Free', icon: Milk },
-  { value: 'nut_free', label: 'Nut Free', icon: Nut },
-  { value: 'soy_free', label: 'Soy Free', icon: Bean },
-  { value: 'egg_free', label: 'Egg Free', icon: Egg },
-  { value: 'low_carb', label: 'Low Carb', icon: Apple },
-  { value: 'keto', label: 'Keto', icon: Beef },
-  { value: 'paleo', label: 'Paleo', icon: Apple },
+  { value: '', label: 'Select Dietary Preference' },
+  { value: 'vegetarian', label: 'Vegetarian - No meat or fish' },
+  { value: 'vegan', label: 'Vegan - No animal products' },
+  { value: 'pescatarian', label: 'Pescatarian - Fish but no meat' },
+  { value: 'gluten_free', label: 'Gluten Free - No wheat or gluten-containing grains' },
+  { value: 'dairy_free', label: 'Dairy Free - No milk or dairy products' },
+  { value: 'nut_free', label: 'Nut Free - No tree nuts' },
+  { value: 'soy_free', label: 'Soy Free - No soy products' },
+  { value: 'egg_free', label: 'Egg Free - No eggs' },
+  { value: 'low_carb', label: 'Low Carb - Minimal carbohydrates' },
+  { value: 'keto', label: 'Keto - Very low carb, high fat' },
+  { value: 'paleo', label: 'Paleo - Whole foods, no processed ingredients' },
 ];
 
 export function RecipeCreationDialog({ isOpen, onClose, onGenerate, loading }: RecipeCreationDialogProps) {
   const [ingredients, setIngredients] = useState<IngredientRead[]>([]);
   const [selectedIngredientIds, setSelectedIngredientIds] = useState<Set<number>>(new Set());
   const [cuisine, setCuisine] = useState<string>('');
-  const [dietaryRequirements, setDietaryRequirements] = useState<Set<string>>(new Set());
+  const [dietaryPreference, setDietaryPreference] = useState<string>('');
   const [loadingIngredients, setLoadingIngredients] = useState(false);
 
   // Fetch ingredients when dialog opens
@@ -106,29 +110,22 @@ export function RecipeCreationDialog({ isOpen, onClose, onGenerate, loading }: R
       // Reset state when dialog closes
       setSelectedIngredientIds(new Set());
       setCuisine('');
-      setDietaryRequirements(new Set());
+      setDietaryPreference('');
     }
   }, [isOpen]);
 
-  const handleIngredientToggle = (id: number) => {
-    const newSet = new Set(selectedIngredientIds);
-    if (newSet.has(id)) {
-      newSet.delete(id);
-    } else {
-      newSet.add(id);
-    }
-    setSelectedIngredientIds(newSet);
+  const handleIngredientToggle = (id: number, isChecked: boolean) => {
+    setSelectedIngredientIds((prev) => {
+      const next = new Set(prev);
+      if (isChecked) {
+        next.add(id);
+      } else {
+        next.delete(id);
+      }
+      return next;
+    });
   };
 
-  const handleDietaryToggle = (value: string) => {
-    const newSet = new Set(dietaryRequirements);
-    if (newSet.has(value)) {
-      newSet.delete(value);
-    } else {
-      newSet.add(value);
-    }
-    setDietaryRequirements(newSet);
-  };
 
   const handleGenerate = async () => {
     const ingredientIds = Array.from(selectedIngredientIds);
@@ -139,7 +136,7 @@ export function RecipeCreationDialog({ isOpen, onClose, onGenerate, loading }: R
     await onGenerate({
       ingredientIds,
       cuisine: cuisine || undefined,
-      dietaryRequirements: Array.from(dietaryRequirements),
+      dietaryRequirements: dietaryPreference ? [dietaryPreference] : [],
     });
   };
 
@@ -164,57 +161,75 @@ export function RecipeCreationDialog({ isOpen, onClose, onGenerate, loading }: R
         maxH="90vh"
       >
         <DialogHeader p={6}>
-          <DialogTitle>Create Recipe</DialogTitle>
+          <Flex justify="space-between" align="center">
+            <DialogTitle>Create Recipe</DialogTitle>
+            <Button variant="ghost" size="sm" onClick={onClose} disabled={loading}>
+              Close
+            </Button>
+          </Flex>
         </DialogHeader>
-        <IconButton
-          aria-label="Close"
-          variant="ghost"
-          size="sm"
-          onClick={onClose}
-          position="absolute"
-          top={3}
-          right={3}
-          zIndex={1}
-          disabled={loading}
-        >
-          <CircleX size={16} />
-        </IconButton>
         <DialogBody p={6}>
           <VStack align="stretch" gap={4}>
         {/* Cuisine Selection */}
         <Box>
-          <Select
-            label="Cuisine"
-            name="cuisine"
-            value={cuisine}
-            onChange={setCuisine}
-            options={cuisineOptions}
-            placeholder="Select Cuisine"
-          />
+          <Field.Root>
+            <Field.Label htmlFor="cuisine">Cuisine</Field.Label>
+            <NativeSelect
+              id="cuisine"
+              name="cuisine"
+              value={cuisine}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCuisine(e.target.value)}
+              w="100%"
+              p={2}
+              borderRadius="md"
+              borderWidth="1px"
+              borderColor="border.emphasized"
+              bg="bg.surface"
+              fontSize="md"
+              _focus={{
+                borderColor: 'blue.500',
+                boxShadow: '0 0 0 1px {colors.blue.500}',
+                outline: 'none',
+              }}
+            >
+              {cuisineOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field.Root>
         </Box>
 
         {/* Dietary Preferences */}
         <Box>
-          <Text fontWeight={500} mb={2}>
-            Dietary Preferences
-          </Text>
-          <HStack wrap="wrap" gap={2}>
-            {dietaryOptions.map((option) => {
-              const Icon = option.icon;
-              const isSelected = dietaryRequirements.has(option.value);
-              return (
-                <IconButton
-                  key={option.value}
-                  aria-label={option.label}
-                  variant={isSelected ? 'solid' : 'outline'}
-                  onClick={() => handleDietaryToggle(option.value)}
-                  size="sm"
-                >
-                  <Icon size={16} />
-                </IconButton>
-              );
-            })}
-          </HStack>
+          <Field.Root>
+            <Field.Label htmlFor="dietaryPreference">Dietary Preferences</Field.Label>
+            <NativeSelect
+              id="dietaryPreference"
+              name="dietaryPreference"
+              value={dietaryPreference}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDietaryPreference(e.target.value)}
+              w="100%"
+              p={2}
+              borderRadius="md"
+              borderWidth="1px"
+              borderColor="border.emphasized"
+              bg="bg.surface"
+              fontSize="md"
+              _focus={{
+                borderColor: 'blue.500',
+                boxShadow: '0 0 0 1px {colors.blue.500}',
+                outline: 'none',
+              }}
+            >
+              {dietaryOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field.Root>
         </Box>
 
         {/* Ingredients Accordion */}
@@ -227,9 +242,9 @@ export function RecipeCreationDialog({ isOpen, onClose, onGenerate, loading }: R
             </AccordionItemTrigger>
             <AccordionItemContent>
               {loadingIngredients ? (
-                <Text color="gray.600">Loading ingredients...</Text>
+                <Text color="fg.muted">Loading ingredients...</Text>
               ) : ingredients.length === 0 ? (
-                <Text color="gray.600">No ingredients available.</Text>
+                <Text color="fg.muted">No ingredients available.</Text>
               ) : (
                 <Box overflowX="auto">
                   <Table>
@@ -249,11 +264,17 @@ export function RecipeCreationDialog({ isOpen, onClose, onGenerate, loading }: R
                             {ingredient.unit ? ` ${ingredient.unit}` : ''}
                           </Td>
                           <Td>
-                            <input
-                              type="checkbox"
+                            <Checkbox.Root
                               checked={selectedIngredientIds.has(ingredient.id)}
-                              onChange={() => handleIngredientToggle(ingredient.id)}
-                            />
+                              onCheckedChange={(details) => {
+                                handleIngredientToggle(ingredient.id, details.checked === true);
+                              }}
+                            >
+                              <Checkbox.HiddenInput />
+                              <Checkbox.Control>
+                                <Checkbox.Indicator />
+                              </Checkbox.Control>
+                            </Checkbox.Root>
                           </Td>
                         </Tr>
                       ))}
@@ -267,22 +288,19 @@ export function RecipeCreationDialog({ isOpen, onClose, onGenerate, loading }: R
 
         {/* Action Buttons */}
         <Flex justify="flex-end" gap={2}>
-          <IconButton
-            aria-label="Cancel"
-            variant="ghost"
-            onClick={onClose}
-            disabled={loading}
-          >
-            <CircleX size={16} />
-          </IconButton>
-          <IconButton
-            aria-label="Generate Recipe"
-            variant="ghost"
-            onClick={handleGenerate}
-            disabled={loading || selectedIngredientIds.size === 0}
-          >
-            <Sparkles size={16} />
-          </IconButton>
+          <Button variant="ghost" onClick={onClose} disabled={loading}>
+            Cancel
+          </Button>
+          {loading ? (
+            <Button disabled>
+              <Spinner size="sm" mr={2} />
+              Generating...
+            </Button>
+          ) : (
+            <Button onClick={handleGenerate} disabled={selectedIngredientIds.size === 0}>
+              Generate Recipe
+            </Button>
+          )}
         </Flex>
           </VStack>
         </DialogBody>

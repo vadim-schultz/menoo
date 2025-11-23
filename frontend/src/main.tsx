@@ -1,4 +1,5 @@
-import './styles/main.css';
+// Styles are now handled by Chakra UI theme system
+// import './styles/main.css';
 import { createRoot } from 'react-dom/client';
 import { App } from './app';
 import { ChakraProvider } from '@chakra-ui/react';

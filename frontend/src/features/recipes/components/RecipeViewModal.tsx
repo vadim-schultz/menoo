@@ -3,9 +3,11 @@ import {
   DialogBackdrop,
   DialogContent,
   DialogBody,
-  IconButton,
+  DialogHeader,
+  DialogTitle,
+  Button,
+  Flex,
 } from '@chakra-ui/react';
-import { CircleX } from 'lucide-react';
 import { RecipeView } from './RecipeView';
 import type { RecipeCreate, RecipeDetail } from '../../../shared/types';
 
@@ -60,19 +62,14 @@ export function RecipeViewModal({
         w="90%"
         maxH="90vh"
       >
-        <IconButton
-          aria-label="Close"
-          variant="ghost"
-          size="sm"
-          onClick={handleCancel}
-          position="absolute"
-          top={3}
-          right={3}
-          zIndex={1}
-          disabled={loading}
-        >
-          <CircleX size={16} />
-        </IconButton>
+        <DialogHeader p={6}>
+          <Flex justify="space-between" align="center">
+            <DialogTitle>Recipe</DialogTitle>
+            <Button variant="ghost" size="sm" onClick={handleCancel} disabled={loading}>
+              Close
+            </Button>
+          </Flex>
+        </DialogHeader>
         <DialogBody p={8} maxH="90vh" overflowY="auto">
           <RecipeView
             recipe={recipe}

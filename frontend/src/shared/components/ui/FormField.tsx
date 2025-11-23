@@ -1,8 +1,7 @@
-import {
-	Box,
-	Text,
-} from '@chakra-ui/react';
+import { Box, Text, chakra } from '@chakra-ui/react';
 import type { ReactNode } from 'react';
+
+const Label = chakra('label');
 
 export interface FormFieldProps {
 	label?: string;
@@ -17,10 +16,10 @@ export function FormField({ label, error, children, htmlFor, required, className
 	return (
 		<Box className={className}>
 			{label ? (
-				<Text as="label" htmlFor={htmlFor} display="block" fontWeight="medium">
+				<Label htmlFor={htmlFor} display="block" fontWeight="medium">
 					{label}
 					{required && <Text as="span" color="red.500">*</Text>}
-				</Text>
+				</Label>
 			) : null}
 			{children}
 			{error ? (

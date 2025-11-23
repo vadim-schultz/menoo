@@ -35,14 +35,16 @@ export function StorageLocationTableContent({ ingredients, onEdit, onDelete }: S
                 <HStack gap={2}>
                   <Button
                     icon={Pencil}
-                    variant="secondary"
+                    variant="outline"
+                    colorPalette="gray"
                     onClick={() => onEdit(ingredient)}
                     type="button"
                     aria-label="Edit ingredient"
                   />
                   <Button
                     icon={Trash2}
-                    variant="danger"
+                    variant="solid"
+                    colorPalette="red"
                     onClick={() => onDelete(ingredient.id)}
                     type="button"
                     aria-label="Delete ingredient"

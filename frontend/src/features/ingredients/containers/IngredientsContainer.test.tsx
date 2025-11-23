@@ -5,7 +5,7 @@ import { IngredientsContainer } from './IngredientsContainer';
 import { ingredientService } from '../services/ingredientService';
 import { renderComponent } from '../../../test/utils';
 
-vi.mock('../services/ingredientService', async (orig) => {
+vi.mock('../services/ingredientService', async () => {
   const mod = await import('../services/ingredientService');
   return {
     ...mod,
@@ -91,9 +91,7 @@ describe('IngredientsContainer error handling', () => {
 
     // Should show loading state
     await waitFor(() => {
-      // Check for loading indicator (might be text or component)
-      const loadingIndicator = screen.queryByText(/loading/i) || screen.queryByRole('status');
-      // Loading state might be shown via component, so we check if error/content is not shown
+      expect(screen.queryByText(/loading/i) || screen.queryByRole('status')).toBeTruthy();
       expect(screen.queryByText(/Error:/i)).not.toBeInTheDocument();
     });
 

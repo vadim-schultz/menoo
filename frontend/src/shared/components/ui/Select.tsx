@@ -2,7 +2,6 @@ import {
 	NativeSelectRoot,
 	NativeSelectField,
 	NativeSelectIndicator,
-	type NativeSelectRootProps,
 } from '@chakra-ui/react';
 import type { ReactNode } from 'react';
 

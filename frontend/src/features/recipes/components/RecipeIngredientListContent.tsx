@@ -42,7 +42,8 @@ export function RecipeIngredientListContent({ ingredients, ingredientOptions, on
             <Box>
               <Button
                 icon={Trash2}
-                variant="danger"
+                variant="ghost"
+                colorPalette="red"
                 onClick={() => onRemove(index)}
                 type="button"
                 aria-label="Remove ingredient"

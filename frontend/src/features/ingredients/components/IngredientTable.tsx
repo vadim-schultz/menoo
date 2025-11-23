@@ -1,10 +1,10 @@
 import type { IngredientRead } from '../../../shared/types/ingredient';
-import { Trash, ChevronUp, ChevronDown } from 'lucide-react';
-import { IconButton, Flex, Text } from '@chakra-ui/react';
+import { ChevronUp, ChevronDown } from 'lucide-react';
+import { Button, Flex, Text, Box } from '@chakra-ui/react';
 import { EmptyState } from './EmptyState';
 import { formatDate, formatStorageLocation } from '../services/formatting';
 import { useTableSort } from '../hooks/useTableSort';
-import { TableRoot as Table, TableHeader as Thead, TableBody as Tbody, TableRow as Tr, TableColumnHeader as Th, TableCell as Td, Box } from '@chakra-ui/react';
+import { TableRoot as Table, TableHeader as Thead, TableBody as Tbody, TableRow as Tr, TableColumnHeader as Th, TableCell as Td } from '@chakra-ui/react';
 
 interface IngredientTableProps {
   ingredients: IngredientRead[];
@@ -30,15 +30,14 @@ export const IngredientTable = ({
     const isDesc = isActive && sortDirection === 'desc';
 
     return (
-      <IconButton
+      <Button
         type="button"
         onClick={() => handleSort(column)}
-        aria-label={`Sort by ${column}`}
         variant="ghost"
         size="xs"
       >
-        {isDesc ? <ChevronDown size={14} /> : isAsc ? <ChevronUp size={14} /> : <ChevronUp size={14} style={{ opacity: 0.3 }} />}
-      </IconButton>
+        {isDesc ? <ChevronDown size={14} /> : isAsc ? <ChevronUp size={14} /> : <Box opacity={0.3}><ChevronUp size={14} /></Box>}
+      </Button>
     );
   };
 
@@ -47,57 +46,66 @@ export const IngredientTable = ({
   }
 
   return (
-    <Box overflowX="auto">
+    <Box overflowX="auto" bg="bg.surface" borderRadius="lg" borderWidth="1px" borderColor="border.subtle">
       <Table>
         <Thead>
           <Tr>
-            <Th scope="col">
+            <Th>
               <Flex align="center" justify="space-between">
-                <Text>Name</Text>
+                <Text fontWeight="600" fontSize="sm" color="fg.muted">Name</Text>
                 <SortButton column="name" />
               </Flex>
             </Th>
-            <Th scope="col">
+            <Th>
               <Flex align="center" justify="space-between">
-                <Text>Quantity</Text>
+                <Text fontWeight="600" fontSize="sm" color="fg.muted">Quantity</Text>
                 <SortButton column="quantity" />
               </Flex>
             </Th>
-            <Th scope="col">
+            <Th>
               <Flex align="center" justify="space-between">
-                <Text>Storage Location</Text>
+                <Text fontWeight="600" fontSize="sm" color="fg.muted">Storage Location</Text>
                 <SortButton column="storage_location" />
               </Flex>
             </Th>
-            <Th scope="col">
+            <Th>
               <Flex align="center" justify="space-between">
-                <Text>Expiry Date</Text>
+                <Text fontWeight="600" fontSize="sm" color="fg.muted">Expiry Date</Text>
                 <SortButton column="expiry_date" />
               </Flex>
             </Th>
-            <Th scope="col">Actions</Th>
+            <Th>
+              <Text fontWeight="600" fontSize="sm" color="fg.muted">Actions</Text>
+            </Th>
           </Tr>
         </Thead>
         <Tbody>
           {ingredients.map((ingredient) => (
-            <Tr key={ingredient.id}>
-              <Td>{ingredient.name}</Td>
+            <Tr key={ingredient.id} _hover={{ bg: 'bg.subtle' }}>
               <Td>
-                {ingredient.quantity ?? '-'}
-                {ingredient.unit ? ` ${ingredient.unit}` : ''}
+                <Text>{ingredient.name}</Text>
               </Td>
-              <Td>{formatStorageLocation(ingredient.storage_location)}</Td>
-              <Td>{formatDate(ingredient.expiry_date)}</Td>
               <Td>
-                <IconButton
-                  aria-label="Delete ingredient"
+                <Text>
+                  {ingredient.quantity ?? '-'}
+                  {ingredient.unit ? ` ${ingredient.unit}` : ''}
+                </Text>
+              </Td>
+              <Td>
+                <Text>{formatStorageLocation(ingredient.storage_location)}</Text>
+              </Td>
+              <Td>
+                <Text>{formatDate(ingredient.expiry_date)}</Text>
+              </Td>
+              <Td>
+                <Button
                   size="sm"
                   variant="ghost"
-                  colorScheme="red"
+                  colorPalette="red"
                   onClick={() => onDelete(ingredient.id)}
                 >
-                  <Trash size={16} />
-                </IconButton>
+                  Delete
+                </Button>
               </Td>
             </Tr>
           ))}

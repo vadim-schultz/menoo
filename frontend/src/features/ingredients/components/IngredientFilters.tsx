@@ -1,5 +1,6 @@
 import type { StorageLocation } from '../../../shared/types/ingredient';
 import { Button, Input, Select } from '../../../shared/components';
+import { Box, Heading, SimpleGrid, HStack } from '@chakra-ui/react';
 
 export interface IngredientFilterPanelProps {
   nameContains: string;
@@ -23,9 +24,11 @@ export const IngredientFilterPanel = ({
   onReset,
 }: IngredientFilterPanelProps) => {
   return (
-    <div className="card" style={{ marginBottom: '1rem' }}>
-      <h3 style={{ marginBottom: '0.75rem' }}>Filters</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.75rem' }}>
+    <Box bg="bg.surface" borderRadius="lg" borderWidth="1px" borderColor="border.subtle" p={6} mb={4}>
+      <Heading as="h3" size="md" mb={4}>
+        Filters
+      </Heading>
+      <SimpleGrid columns={{ base: 1, md: 4 }} gap={4}>
         <Input
           label="Name contains"
           name="name_contains"
@@ -53,16 +56,16 @@ export const IngredientFilterPanel = ({
           value={expiringBefore}
           onChange={onExpiringBeforeChange}
         />
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'end' }}>
+        <HStack align="flex-end" gap={2}>
           <Button onClick={onApply} type="button">
             Apply
           </Button>
-          <Button onClick={onReset} type="button" variant="secondary">
+          <Button onClick={onReset} type="button" variant="outline" colorPalette="gray">
             Reset
           </Button>
-        </div>
-      </div>
-    </div>
+        </HStack>
+      </SimpleGrid>
+    </Box>
   );
 };
 

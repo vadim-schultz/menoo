@@ -1,12 +1,8 @@
 import { Input } from '../../../shared/components';
-import { CirclePlus } from 'lucide-react';
-import type { IngredientRead } from '../../../shared/types/ingredient';
-
-type StorageLocation = string;
+import type { IngredientRead, StorageLocation } from '../../../shared/types/ingredient';
 import { IngredientTable, IngredientPagination, IngredientModal } from '.';
 import type { SortColumn, SortDirection } from '../hooks/useIngredientFilters';
-import { Box, Heading, HStack, Stack, VStack } from '@chakra-ui/react';
-import { IconButton } from '@chakra-ui/react';
+import { Box, Heading, HStack, Stack, VStack, Button } from '@chakra-ui/react';
 
 interface IngredientDraft {
   name: string;
@@ -65,27 +61,22 @@ export function IngredientsContent({
         <Heading as="h1" size="lg">
           {title}
         </Heading>
-        <IconButton
-          aria-label="Add ingredient"
-          size="sm"
-          variant="ghost"
-          onClick={onAdd}
-        >
-          <CirclePlus size={18} />
-        </IconButton>
+        <Button onClick={onAdd}>
+          Add Ingredient
+        </Button>
       </HStack>
 
       {/* Action Bar - visible filters above the table */}
       <Box
-        bg="gray.50"
-        borderRadius="md"
+        bg="bg.surface"
+        borderRadius="lg"
         borderWidth="1px"
-        borderColor="gray.200"
+        borderColor="border.subtle"
         p={6}
       >
         <Stack
-          direction={{ base: 'column', md: 'row' } as any}
-          align={{ base: 'stretch', md: 'flex-end' } as any}
+          direction={{ base: 'column', md: 'row' }}
+          align={{ base: 'stretch', md: 'flex-end' }}
           gap={4}
         >
           <Input
@@ -120,7 +111,13 @@ export function IngredientsContent({
         onSortChange={onSortChange}
       />
 
-      <IngredientPagination page={page} pageSize={100} onPageChange={onPageChange} onPageSizeChange={() => {}} />
+      <IngredientPagination 
+        page={page} 
+        pageSize={100} 
+        totalCount={ingredients.length}
+        onPageChange={onPageChange} 
+        onPageSizeChange={() => {}} 
+      />
 
       <IngredientModal
         isOpen={isModalOpen}

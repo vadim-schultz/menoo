@@ -75,7 +75,7 @@ export const createMockIngredient = (overrides?: Partial<IngredientRead>): Ingre
 // MSW Request Handlers
 export const handlers = [
   // GET /suggestions/recipes - Get recipe suggestions
-  http.post(`${API_BASE}/suggestions/recipes`, async ({ request }) => {
+  http.post(`${API_BASE}/suggestions/recipes`, async () => {
     return HttpResponse.json<SuggestionResponse>(
       {
         recipes: [createMockGeneratedRecipe()],
@@ -85,7 +85,7 @@ export const handlers = [
   }),
 
   // Relative URL handlers matching client
-  http.post(`/api/v1/suggestions/recipes`, async ({ request }) => {
+  http.post(`/api/v1/suggestions/recipes`, async () => {
     return HttpResponse.json<SuggestionResponse>(
       {
         recipes: [createMockGeneratedRecipe()],

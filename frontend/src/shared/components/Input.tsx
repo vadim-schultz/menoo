@@ -1,6 +1,12 @@
-import { FormField } from './ui/FormField';
-import { Input as ChakraInput, Textarea as ChakraTextarea, NativeSelectRoot, NativeSelectField } from '@chakra-ui/react';
+import {
+  Field,
+  Input as ChakraInput,
+  Textarea as ChakraTextarea,
+  chakra,
+} from '@chakra-ui/react';
 import type { ChangeEvent } from 'react';
+
+const NativeSelect = chakra('select');
 
 interface BaseFieldProps {
 	name: string;
@@ -33,7 +39,8 @@ export function Input({
 	className = '',
 }: InputProps) {
 	return (
-		<FormField label={label} error={error} htmlFor={name} required={required} className={className}>
+		<Field.Root invalid={!!error} required={required} className={className}>
+			{label && <Field.Label htmlFor={name}>{label}</Field.Label>}
 			<ChakraInput
 				id={name}
 				name={name}
@@ -44,7 +51,8 @@ export function Input({
 				placeholder={placeholder}
 				disabled={disabled}
 			/>
-		</FormField>
+			{error && <Field.ErrorText>{error}</Field.ErrorText>}
+		</Field.Root>
 	);
 }
 
@@ -68,7 +76,8 @@ export function Textarea({
 	className = '',
 }: TextareaProps) {
 	return (
-		<FormField label={label} error={error} htmlFor={name} required={required} className={className}>
+		<Field.Root invalid={!!error} required={required} className={className}>
+			{label && <Field.Label htmlFor={name}>{label}</Field.Label>}
 			<ChakraTextarea
 				id={name}
 				name={name}
@@ -79,7 +88,8 @@ export function Textarea({
 				disabled={disabled}
 				rows={rows}
 			/>
-		</FormField>
+			{error && <Field.ErrorText>{error}</Field.ErrorText>}
+		</Field.Root>
 	);
 }
 
@@ -103,25 +113,28 @@ export function Select({
 	className = '',
 }: SelectProps) {
 	return (
-		<FormField label={label} error={error} htmlFor={name} required={required} className={className}>
-			<NativeSelectRoot>
-				<NativeSelectField
-					id={name}
-					name={name}
-					value={value}
-					onChange={(e: ChangeEvent<HTMLSelectElement>) => onChange(e.target.value)}
-					onBlur={onBlur}
-					disabled={disabled}
-					placeholder={placeholder}
-				>
-					{placeholder && <option value="">{placeholder}</option>}
-					{options.map((option) => (
-						<option key={option.value} value={option.value}>
-							{option.label}
-						</option>
-					))}
-				</NativeSelectField>
-			</NativeSelectRoot>
-		</FormField>
+		<Field.Root invalid={!!error} required={required} className={className}>
+			{label && <Field.Label htmlFor={name}>{label}</Field.Label>}
+			<NativeSelect
+				id={name}
+				name={name}
+				value={value}
+				onChange={(e: ChangeEvent<HTMLSelectElement>) => onChange(e.target.value)}
+				onBlur={onBlur}
+				disabled={disabled}
+			>
+				{placeholder && (
+					<option value="">
+						{placeholder}
+					</option>
+				)}
+				{options.map((option) => (
+					<option key={option.value} value={option.value}>
+						{option.label}
+					</option>
+				))}
+			</NativeSelect>
+			{error && <Field.ErrorText>{error}</Field.ErrorText>}
+		</Field.Root>
 	);
 }
