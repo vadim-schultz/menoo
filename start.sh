@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Menoo Quick Start Script
-# Starts both backend and frontend servers
+# Builds frontend and starts backend server that serves both API and static frontend files
 
 set -e
 
@@ -34,7 +34,19 @@ if [ ! -d "node_modules" ]; then
     echo "Installing frontend dependencies..."
     npm install > /dev/null 2>&1
 fi
+
+# Build frontend for production
+echo "🔨 Building frontend..."
+npm run build
+
+# Create static directory in backend if it doesn't exist
 cd ..
+mkdir -p backend/app/static
+
+# Copy built frontend files to backend static directory
+echo "📋 Copying frontend build to backend..."
+rm -rf backend/app/static/*
+cp -r frontend/dist/* backend/app/static/
 
 # Initialize database
 echo "🗄️  Initializing database..."
@@ -54,34 +66,18 @@ asyncio.run(init_db())
 print('Database initialized')
 " || echo "Note: Database initialization can also be done via alembic migrations"
 fi
-cd ..
 
 echo ""
 echo "✅ Setup complete!"
 echo ""
-echo "Starting servers..."
-echo "  - Backend: http://localhost:8000"
-echo "  - Frontend: http://localhost:5173"
+echo "Starting backend server..."
+echo "  - Full Stack App: http://localhost:8000"
 echo "  - API Docs: http://localhost:8000/schema"
+echo "  - API Endpoints: http://localhost:8000/api/v1"
 echo ""
-echo "Press Ctrl+C to stop both servers"
+echo "Press Ctrl+C to stop the server"
 echo ""
 
-# Start backend in background
-cd backend
+# Start backend (serves both API and frontend)
 source .venv/bin/activate
-litestar --app app.main:app run --host 0.0.0.0 --port 8000 --reload &
-BACKEND_PID=$!
-cd ..
-
-# Give backend time to start
-sleep 2
-
-# Start frontend
-cd frontend
-npm run dev &
-FRONTEND_PID=$!
-cd ..
-
-# Wait for both processes
-wait $BACKEND_PID $FRONTEND_PID
+litestar --app app.main:app run --host 0.0.0.0 --port 8000 --reload
