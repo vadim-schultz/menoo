@@ -1,120 +1,146 @@
-// UI-friendly recipe types expanded to align with backend core Recipe model.
-// We keep simple fields for the UI and map to backend structures in services.
+export type CuisineType =
+  | 'italian'
+  | 'indian'
+  | 'japanese'
+  | 'chinese'
+  | 'french'
+  | 'mexican'
+  | 'thai'
+  | 'mediterranean'
+  | 'american'
+  | 'middle_eastern'
+  | 'korean'
+  | 'vietnamese'
+  | 'greek'
+  | 'spanish'
+  | 'turkish'
+  | 'moroccan'
+  | 'ethiopian'
+  | 'fusion'
+  | 'other'
 
-export type DifficultyLevel = 'easy' | 'medium' | 'hard';
+export type MealType =
+  | 'breakfast'
+  | 'brunch'
+  | 'lunch'
+  | 'dinner'
+  | 'snack'
+  | 'appetizer'
+  | 'side_dish'
+  | 'main_course'
+  | 'dessert'
+  | 'beverage'
 
-// Timing (UI helpers + room for full backend timing if needed)
-export interface RecipeTimingUI {
-  prep_time_minutes?: number | null;
-  cook_time_minutes?: number | null;
-  marinating_time_minutes?: number | null;
-  resting_time_minutes?: number | null;
-  inactive_time_minutes?: number | null;
-  total_active_time_minutes?: number | null;
+export type DietaryRequirement =
+  | 'vegetarian'
+  | 'vegan'
+  | 'pescatarian'
+  | 'gluten_free'
+  | 'dairy_free'
+  | 'nut_free'
+  | 'soy_free'
+  | 'egg_free'
+  | 'kosher'
+  | 'halal'
+  | 'low_carb'
+  | 'keto'
+  | 'paleo'
+  | 'whole30'
+  | 'low_sodium'
+  | 'low_fat'
+  | 'low_calorie'
+
+export interface RecipeTiming {
+  prep_time_minutes?: number | null
+  cook_time_minutes?: number | null
+  total_time_minutes?: number | null
+  resting_time_minutes?: number | null
+  marination_time_minutes?: number | null
 }
 
-// Allow free-form ingredient name for manual entry (will be created if missing)
-export interface RecipeIngredientBase {
-  ingredient_id?: number; // optional in UI; resolved before save
-  ingredient_name?: string; // free-form; used to create missing ingredient
-  quantity: number;
-  unit: string;
-  is_optional?: boolean;
-  note?: string | null; // UI field; maps to backend 'notes'
+export interface IngredientPreparation {
+  ingredient_id: number
+  quantity: number
+  unit: string
+  is_optional?: boolean
+  mechanical_treatments?: string[]
+  size_specification?: string | null
+  thermal_treatments?: any[]
+  marination?: any | null
+  brining?: any | null
+  seasoning?: any | null
+  preparation_steps?: string[]
+  resting_time_minutes?: number | null
+  temperature_before_use?: 'room_temperature' | 'chilled' | 'warm' | null
+  notes?: string | null
+  order_in_recipe?: number | null
 }
 
-export interface RecipeIngredientCreate extends RecipeIngredientBase {}
-
-export interface RecipeIngredientRead {
-  id: number;
-  ingredient_id: number;
-  ingredient_name: string;
-  quantity: number;
-  unit: string;
-  is_optional?: boolean;
-  note?: string | null;
+export interface Recipe {
+  name?: string | null
+  description?: string | null
+  instructions?: string | null
+  author?: string | null
+  source?: string | null
+  cuisine_types?: CuisineType[]
+  meal_types?: MealType[]
+  cooking_method?: string | null
+  dietary_requirements?: DietaryRequirement[]
+  contains_allergens?: string[]
+  allergen_warnings?: string | null
+  timing?: RecipeTiming
+  difficulty_metrics?: any | null
+  servings?: number
+  yield_description?: string | null
+  equipment_requirements?: any[]
+  oven_temperature_celsius?: number | null
+  oven_settings?: string | null
+  nutrition_info?: any | null
+  storage_instructions?: any | null
+  tags?: string[]
+  notes?: string | null
+  variations?: string | null
+  estimated_cost_per_serving?: number | null
+  seasonality?: string[] | null
+  ingredients?: IngredientPreparation[]
 }
 
-export interface RecipeBase {
-  name: string;
-  description?: string | null;
-  instructions: string;
-  // Simple UI timing fields; mapped into timing.*
-  prep_time?: number | null;
-  cook_time?: number | null;
-  servings?: number;
-  difficulty?: DifficultyLevel | null;
-  // Extended fields (optional in UI)
-  author?: string | null;
-  source?: string | null;
-  cuisine_types?: string[];
-  meal_types?: string[];
-  cooking_method?: string | null;
-  dietary_requirements?: string[];
-  contains_allergens?: string[];
-  allergen_warnings?: string | null;
-  timing_full?: RecipeTimingUI; // optional direct mapping to backend timing
-  yield_description?: string | null;
-  equipment_requirements?: { name: string; is_essential?: boolean; notes?: string | null }[];
-  oven_temperature_celsius?: number | null;
-  oven_settings?: string | null;
-  nutrition_info?: {
-    calories?: number | null;
-    protein_grams?: number | null;
-    carbohydrates_grams?: number | null;
-    fat_grams?: number | null;
-    saturated_fat_grams?: number | null;
-    fiber_grams?: number | null;
-    sugar_grams?: number | null;
-    sodium_mg?: number | null;
-  } | null;
-  storage_instructions?: {
-    storage_type?: string | null;
-    shelf_life_days?: number | null;
-    reheating_instructions?: string | null;
-    freezing_instructions?: string | null;
-  } | null;
-  tags?: string[];
-  notes?: string | null;
-  variations?: string | null;
-  estimated_cost_per_serving?: number | null;
-  seasonality?: string[] | null;
+export interface RecipeResponse extends Recipe {
+  id: number
+  created_at: string
+  updated_at: string
+  is_deleted: boolean
 }
 
-export interface RecipeCreate extends RecipeBase {
-  ingredients?: RecipeIngredientCreate[];
+export interface RecipeIngredientRead extends IngredientPreparation {
+  id: number
+  ingredient_name: string
 }
 
-export interface RecipeUpdate extends Partial<RecipeCreate> {}
-
-export interface RecipeRead extends RecipeBase {
-  id: number;
-  created_at: string;
-  updated_at: string;
-  is_deleted: boolean;
-  // Derived UI fields
-  total_time?: number | null;
-}
-
-export interface RecipeDetail extends RecipeRead {
-  ingredients: RecipeIngredientRead[];
-  missing_ingredients: string[];
+export interface RecipeDetail extends RecipeResponse {
+  ingredients: RecipeIngredientRead[]
+  missing_ingredients: string[]
 }
 
 export interface RecipeListResponse {
-  items: RecipeRead[];
-  total: number;
-  page: number;
-  page_size: number;
-  has_next: boolean;
+  items: RecipeResponse[]
+  total: number
+  page: number
+  page_size: number
+  has_next: boolean
 }
 
-export interface RecipeFilters {
-  // Backend filter names
-  cuisine?: string;
-  max_prep_time_minutes?: number;
-  max_cook_time_minutes?: number;
-  name_contains?: string;
-  page?: number;
-  page_size?: number;
+export interface RecipeCreateRequest {
+  recipe: Recipe
 }
+
+export interface SuggestionRequest {
+  recipe: Recipe
+  prompt?: string | null
+  n_completions?: number
+}
+
+export interface SuggestionResponse {
+  recipes: RecipeResponse[]
+}
+
