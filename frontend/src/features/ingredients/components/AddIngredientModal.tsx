@@ -6,6 +6,7 @@ import {
   Flex,
   Input,
   NumberInput,
+  SimpleGrid,
   Text,
 } from '@chakra-ui/react'
 import { useState } from 'react'
@@ -125,7 +126,7 @@ export function AddIngredientModal({ isOpen, onClose }: AddIngredientModalProps)
                 <Text fontWeight="semibold" mb={3} fontSize="md">
                   Suggested Details:
                 </Text>
-                <Box as="dl" display="grid" gridTemplateColumns="auto 1fr" gap={2}>
+                <SimpleGrid as="dl" columns={2} gap={2} templateColumns="auto 1fr">
                   <Text as="dt" fontWeight="medium" color="fg.muted">Category:</Text>
                   <Text as="dd">{suggestedIngredient.category || '-'}</Text>
                   <Text as="dt" fontWeight="medium" color="fg.muted">Storage:</Text>
@@ -142,7 +143,7 @@ export function AddIngredientModal({ isOpen, onClose }: AddIngredientModalProps)
                       <Text as="dd">{suggestedIngredient.notes}</Text>
                     </>
                   )}
-                </Box>
+                </SimpleGrid>
               </Box>
             )}
 

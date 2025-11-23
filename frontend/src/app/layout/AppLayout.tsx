@@ -9,15 +9,15 @@ export function AppLayout() {
         <Container maxW="container.xl" py={4}>
           <Flex justify="space-between" align="center">
             <Heading size="lg" fontWeight="bold">
-              <ChakraLink asChild _hover={{ opacity: 0.8 }}>
+              <ChakraLink asChild colorPalette="gray">
                 <RouterLink to="/">Menoo</RouterLink>
               </ChakraLink>
             </Heading>
             <Flex gap={6} align="center">
-              <ChakraLink asChild fontWeight="medium" _hover={{ color: 'blue.600' }}>
+              <ChakraLink asChild fontWeight="medium" colorPalette="blue">
                 <RouterLink to="/ingredients">Ingredients</RouterLink>
               </ChakraLink>
-              <ChakraLink asChild fontWeight="medium" _hover={{ color: 'blue.600' }}>
+              <ChakraLink asChild fontWeight="medium" colorPalette="blue">
                 <RouterLink to="/recipes">Recipes</RouterLink>
               </ChakraLink>
               <ColorModeButton />

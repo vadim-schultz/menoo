@@ -76,8 +76,8 @@ export function RecipeDetailAccordion({ recipe }: RecipeDetailAccordionProps) {
                 <Box>
                   {value.map((ing: any, idx: number) => (
                     <Box key={idx} mb={2} p={2} bg="bg.muted" borderRadius="md">
-                      <Text>
-                        <strong>{ing.ingredient_name || `Ingredient ${ing.ingredient_id}`}</strong>
+                      <Text fontWeight="bold">
+                        {ing.ingredient_name || `Ingredient ${ing.ingredient_id}`}
                       </Text>
                       <Text>Quantity: {ing.quantity} {ing.unit}</Text>
                       {ing.is_optional && <Text color="fg.muted">(Optional)</Text>}

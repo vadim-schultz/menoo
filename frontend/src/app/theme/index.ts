@@ -112,4 +112,3 @@ const customConfig = defineConfig({
 // Use defaultConfig which includes Chakra's default theme (colors, typography, spacing, etc.)
 // This gives us all the default tokens, colors, typography, spacing, etc.
 export const system = createSystem(defaultConfig, customConfig)
-

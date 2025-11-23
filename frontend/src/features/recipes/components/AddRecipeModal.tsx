@@ -9,6 +9,8 @@ import {
   Checkbox,
   Table,
   Flex,
+  SimpleGrid,
+  Stack,
   createListCollection,
 } from '@chakra-ui/react'
 import { useState } from 'react'
@@ -307,36 +309,36 @@ export function AddRecipeModal({ isOpen, onClose }: AddRecipeModalProps) {
                   <Text fontWeight="bold" fontSize="xl" mb={4}>
                     {suggestedRecipe.name}
                   </Text>
-                  <Box as="dl" display="grid" gridTemplateColumns="auto 1fr" gap={3} mb={4}>
+                  <SimpleGrid as="dl" columns={2} gap={3} mb={4} templateColumns="auto 1fr">
                     <Text as="dt" fontWeight="semibold" color="fg.muted">Cuisine:</Text>
                     <Text as="dd">{suggestedRecipe.cuisine_types?.join(', ') || '-'}</Text>
                     <Text as="dt" fontWeight="semibold" color="fg.muted">Dietary Requirements:</Text>
                     <Text as="dd">{suggestedRecipe.dietary_requirements?.join(', ') || '-'}</Text>
                     <Text as="dt" fontWeight="semibold" color="fg.muted">Mealtime:</Text>
                     <Text as="dd">{suggestedRecipe.meal_types?.join(', ') || '-'}</Text>
-                  </Box>
+                  </SimpleGrid>
                   {suggestedRecipe.ingredients && suggestedRecipe.ingredients.length > 0 && (
                     <Box mb={4}>
                       <Text fontWeight="semibold" mb={2} fontSize="md">
                         Ingredients:
                       </Text>
-                      <Box as="ul" pl={4}>
+                      <Stack as="ul" pl={4} gap={1}>
                         {suggestedRecipe.ingredients.map((ing, idx) => (
-                          <Text as="li" key={idx} mb={1}>
+                          <Text as="li" key={idx}>
                             {ing.quantity} {ing.unit} (ingredient ID: {ing.ingredient_id})
                           </Text>
                         ))}
-                      </Box>
+                      </Stack>
                     </Box>
                   )}
                   {suggestedRecipe.timing && (
                     <Box mb={4}>
-                      <Box as="dl" display="grid" gridTemplateColumns="auto 1fr" gap={2}>
+                      <SimpleGrid as="dl" columns={2} gap={2} templateColumns="auto 1fr">
                         <Text as="dt" fontWeight="medium" color="fg.muted">Prep Time:</Text>
                         <Text as="dd">{suggestedRecipe.timing.prep_time_minutes || 0} minutes</Text>
                         <Text as="dt" fontWeight="medium" color="fg.muted">Cook Time:</Text>
                         <Text as="dd">{suggestedRecipe.timing.cook_time_minutes || 0} minutes</Text>
-                      </Box>
+                      </SimpleGrid>
                     </Box>
                   )}
                   {suggestedRecipe.instructions && (
